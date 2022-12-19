@@ -1,0 +1,6 @@
+part of 'chatroom_bloc.dart';
+
+@immutable
+abstract class ChatroomState {}
+
+class ChatroomInitial extends ChatroomState {}
