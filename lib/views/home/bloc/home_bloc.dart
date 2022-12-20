@@ -36,8 +36,19 @@ List<ChatItem> getChats() {
           "Lorem ipsum message $i dolor sit amet, consectetur adipiscing elit.",
       time: "11:1$i",
       avatarUrl: "https://picsum.photos/200/300",
+      onTap: () => print("Tapped $i"),
     ));
   }
 
   return chats;
 }
+
+// Route route = MaterialPageRoute(
+//                         builder: (BuildContext context) =>
+//                             BlocProvider<VerificationBloc>(
+//                           create: (BuildContext context) =>
+//                               VerificationBloc()..add(VerificationInitEvent()),
+//                           child: const VerificationPage(),
+//                         ),
+//                       );
+//                       Navigator.pushReplacement(context, route);
