@@ -7,8 +7,23 @@ part 'chatroom_state.dart';
 
 class ChatroomBloc extends Bloc<ChatroomEvent, ChatroomState> {
   ChatroomBloc() : super(ChatroomInitial()) {
-    on<ChatroomEvent>((event, emit) {
-      // TODO: implement event handler
+    on<ChatroomEvent>((event, emit) async {
+      if (event is InitChatroomEvent) {
+        emit(ChatroomLoading());
+        //Perform logic
+        List<ChatBubble> chats = getChats();
+        await Future.delayed(
+          const Duration(seconds: 1),
+          (() => emit(ChatroomLoaded(
+                chats: chats,
+                chatroomId: event.chatroomId,
+              ))),
+        );
+      }
+
+      if (event is ReloadChatroomEvent) {
+        emit(ChatroomLoading());
+      }
     });
   }
 }

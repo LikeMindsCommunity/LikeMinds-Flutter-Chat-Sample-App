@@ -1,4 +1,8 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:group_chat_example/views/chatroom/bloc/chatroom_bloc.dart';
+import 'package:group_chat_example/views/chatroom/chatroom_page.dart';
 import 'package:meta/meta.dart';
 
 import '../home_components/chat_item.dart';
@@ -13,10 +17,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (event is InitHomeEvent) {
         emit(HomeLoading());
         //Perform logic
-        List<ChatItem> chats = getChats();
+        // List<ChatItem> chats = getChats();
         await Future.delayed(
-            Duration(seconds: 1), (() => emit(HomeLoaded(chats))));
-        // emit(HomeLoaded(chats));
+          const Duration(seconds: 1),
+          (() => emit(HomeLoaded())),
+        );
       }
 
       if (event is ReloadHomeEvent) {
@@ -25,30 +30,3 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
   }
 }
-
-List<ChatItem> getChats() {
-  List<ChatItem> chats = [];
-
-  for (int i = 0; i < 10; i++) {
-    chats.add(ChatItem(
-      name: "Testy $i",
-      message:
-          "Lorem ipsum message $i dolor sit amet, consectetur adipiscing elit.",
-      time: "11:1$i",
-      avatarUrl: "https://picsum.photos/200/300",
-      onTap: () => print("Tapped $i"),
-    ));
-  }
-
-  return chats;
-}
-
-// Route route = MaterialPageRoute(
-//                         builder: (BuildContext context) =>
-//                             BlocProvider<VerificationBloc>(
-//                           create: (BuildContext context) =>
-//                               VerificationBloc()..add(VerificationInitEvent()),
-//                           child: const VerificationPage(),
-//                         ),
-//                       );
-//                       Navigator.pushReplacement(context, route);

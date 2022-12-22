@@ -8,9 +8,10 @@ class ChatroomInitial extends ChatroomState {}
 class ChatroomLoading extends ChatroomState {}
 
 class ChatroomLoaded extends ChatroomState {
+  final int chatroomId;
   final List<ChatBubble> chats;
 
-  ChatroomLoaded(this.chats);
+  ChatroomLoaded({required this.chats, required this.chatroomId});
 }
 
 class ChatroomError extends ChatroomState {

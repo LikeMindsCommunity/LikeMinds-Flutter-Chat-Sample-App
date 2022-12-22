@@ -60,13 +60,11 @@ class _ChatBubbleState extends State<ChatBubble> {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: 42,
-                  maxWidth: getWidth(context) * 0.7,
+                  maxWidth: getWidth(context) * 0.6,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: _isSent
-                        ? Colors.grey.withOpacity(0.7)
-                        : Colors.green.withOpacity(0.7),
+                    color: Colors.white.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Padding(
@@ -78,6 +76,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                       children: [
                         Text(
                           _message,
+                          textAlign: _isSent ? TextAlign.end : TextAlign.start,
                           style: GoogleFonts.roboto(),
                         ),
                         const SizedBox(height: 6),

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:group_chat_example/constants.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
+import 'package:group_chat_example/views/chatroom/bloc/chatroom_bloc.dart';
 
+import '../chatroom/chatroom_page.dart';
 import 'bloc/home_bloc.dart';
 import 'home_components/chat_item.dart';
 import '../../widgets/spinner.dart';
@@ -73,10 +76,11 @@ class _HomePageState extends State<HomePage> {
               }
 
               if (state is HomeLoaded) {
+                List<ChatItem> chatItems = getChats(context);
                 return Expanded(
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
-                    itemCount: state.chats.length,
+                    itemCount: chatItems.length,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return SizedBox(
@@ -90,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                                   height: 32,
                                   width: 32,
                                   decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 10, 24, 103),
+                                    color: primaryColor,
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: const Center(
@@ -114,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                                   height: 28,
                                   width: 64,
                                   decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 10, 24, 103),
+                                    color: primaryColor,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Center(
@@ -131,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         );
                       }
-                      return state.chats[index];
+                      return chatItems[index];
                     },
                   ),
                 );
@@ -147,4 +151,30 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+List<ChatItem> getChats(BuildContext context) {
+  List<ChatItem> chats = [];
+
+  for (int i = 0; i < 10; i++) {
+    chats.add(ChatItem(
+      name: "Testy $i",
+      message:
+          "Lorem ipsum message $i dolor sit amet, consectetur adipiscing elit.",
+      time: "11:1$i",
+      avatarUrl: "https://www.picsum.photos/200/300",
+      onTap: () {
+        Route route = MaterialPageRoute(
+          builder: (BuildContext context) => BlocProvider<ChatroomBloc>(
+            create: (BuildContext context) =>
+                ChatroomBloc()..add(InitChatroomEvent(i)),
+            child: const ChatroomPage(),
+          ),
+        );
+        Navigator.push(context, route);
+      },
+    ));
+  }
+
+  return chats;
 }

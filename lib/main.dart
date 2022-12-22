@@ -18,28 +18,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // home: BlocProvider(
-      //   create: (context) => HomeBloc()..add(InitHomeEvent()),
-      //   child: HomePage(),
-      // ),
-      home: Scaffold(
-        body: Center(
-          widthFactor: 1,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ChatBubble(
-                isSent: false,
-                message: "Rom rom bhai!",
-                time: "12:00",
-              ),
-              ChatBubble(
-                isSent: true,
-                message: "Rom rom mere bhai..",
-              ),
-            ],
-          ),
-        ),
+      home: BlocProvider(
+        create: (context) => HomeBloc()..add(InitHomeEvent()),
+        child: const HomePage(),
       ),
     );
   }
