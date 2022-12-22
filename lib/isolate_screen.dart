@@ -18,6 +18,7 @@ class _IsolatePageState extends State<IsolatePage> {
           key: UniqueKey(),
           message: "Hello",
           isSent: false,
+          makeBlur: (() {}),
         ),
       ),
     );

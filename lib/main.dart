@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:group_chat_example/views/chatroom/chatroom_components/chat_bubble.dart';
+import 'package:group_chat_example/isolate_screen.dart';
 import 'package:group_chat_example/views/home/bloc/home_bloc.dart';
 import 'views/home/home_page.dart';
 
@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      // home: const IsolatePage(),
       home: BlocProvider(
         create: (context) => HomeBloc()..add(InitHomeEvent()),
         child: const HomePage(),

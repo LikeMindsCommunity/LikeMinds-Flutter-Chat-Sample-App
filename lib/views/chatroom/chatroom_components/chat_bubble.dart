@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
+
+import './reaction_enum.dart';
+import 'reaction_bar.dart';
+import 'reaction_chip.dart';
 
 class ChatBubble extends StatefulWidget {
   final bool? isSent;
   final String? message;
   final String? time;
   final String? profileImageUrl;
+  final bool showReactions;
+  final Function() makeBlur;
 
   const ChatBubble({
     super.key,
@@ -14,6 +21,8 @@ class ChatBubble extends StatefulWidget {
     this.message,
     this.time,
     this.profileImageUrl,
+    this.showReactions = false,
+    required this.makeBlur,
   });
 
   @override
@@ -21,6 +30,12 @@ class ChatBubble extends StatefulWidget {
 }
 
 class _ChatBubbleState extends State<ChatBubble> {
+  bool _showReactions = false;
+  List reactions = [];
+
+  printReactions() =>
+      print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
+
   @override
   Widget build(BuildContext context) {
     bool _isSent = widget.isSent!;
@@ -30,11 +45,15 @@ class _ChatBubbleState extends State<ChatBubble> {
         widget.profileImageUrl ?? "https://picsum.photos/200/300";
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment:
+          _isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 8,
+          ),
           child: Row(
             mainAxisAlignment:
                 _isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -57,37 +76,50 @@ class _ChatBubbleState extends State<ChatBubble> {
                     )
                   : const SizedBox(),
               const SizedBox(width: 6),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: 42,
-                  maxWidth: getWidth(context) * 0.6,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(6),
+              GestureDetector(
+                onLongPress: () {
+                  widget.makeBlur();
+                  Fluttertoast.showToast(msg: "Long presssssed ${widget.key}");
+                  setState(() {
+                    _showReactions = !_showReactions;
+                  });
+                },
+                onTap: () {
+                  Fluttertoast.showToast(msg: "Tapped");
+                },
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 42,
+                    maxWidth: getWidth(context) * 0.6,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: _isSent
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _message,
-                          textAlign: _isSent ? TextAlign.end : TextAlign.start,
-                          style: GoogleFonts.roboto(),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _time,
-                          style: GoogleFonts.roboto(
-                            fontSize: 12,
-                            color: Colors.black.withOpacity(0.6),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: _isSent
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _message,
+                            textAlign:
+                                _isSent ? TextAlign.end : TextAlign.start,
+                            style: GoogleFonts.roboto(),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          Text(
+                            _time,
+                            style: GoogleFonts.roboto(
+                              fontSize: 12,
+                              color: Colors.black.withOpacity(0.6),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -112,7 +144,62 @@ class _ChatBubbleState extends State<ChatBubble> {
             ],
           ),
         ),
+        if (reactions.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 64.0),
+            child: Row(
+              mainAxisAlignment:
+                  _isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: reactions.map((e) {
+                switch (e) {
+                  case Reactions.like:
+                    return const ReactionChip(
+                      text: "1",
+                      iconWidget: Icon(
+                        Icons.thumb_up,
+                        size: 18,
+                      ),
+                    );
+                  case Reactions.dislike:
+                    return const ReactionChip(
+                      text: "1",
+                      iconWidget: Icon(Icons.thumb_down),
+                    );
+                  case Reactions.love:
+                    return const ReactionChip(
+                      text: "1",
+                      iconWidget: Icon(Icons.favorite),
+                    );
+                  case Reactions.happy:
+                    return const ReactionChip(
+                      text: "1",
+                      iconWidget: Icon(Icons.sentiment_satisfied),
+                    );
+                  case Reactions.sad:
+                    return const ReactionChip(
+                      text: "1",
+                      iconWidget: Icon(Icons.sentiment_dissatisfied),
+                    );
+                  default:
+                    return const SizedBox();
+                }
+              }).toList(),
+            ),
+          ),
+        if (_showReactions)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 64.0),
+            child: ReactionBar(
+              refresh: refresh,
+              reactions: reactions,
+            ),
+          ),
+        const SizedBox(height: 8),
       ],
     );
+  }
+
+  void refresh() {
+    setState(() {});
   }
 }
