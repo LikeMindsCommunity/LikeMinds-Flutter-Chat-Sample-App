@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'constants/ui_constants.dart';
+
 //Generic method for getting height
 double getHeight(BuildContext context) {
   return MediaQuery.of(context).size.height;
@@ -26,4 +28,15 @@ String getInitials(String? name) {
       .reduce((_, e) => _ + e) // Reduce into single string
       .toUpperCase(); // Capitalize
   return initials;
+}
+
+extension StringColor on String {
+  Color? toColor() {
+    // if (primaryColor != null) {
+    if (int.tryParse(this) != null) {
+      return Color(int.tryParse(this)!);
+    } else {
+      return kPrimaryColor;
+    }
+  }
 }
