@@ -41,6 +41,7 @@ dependencies:
   fluttertoast: 
   sizer: 
   google_fonts: 
+  flutter_emoji: ^2.4.0
 
 dev_dependencies:
   flutter_test:

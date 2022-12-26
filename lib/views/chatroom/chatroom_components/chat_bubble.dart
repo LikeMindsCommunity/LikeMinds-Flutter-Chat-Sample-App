@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
@@ -32,6 +33,7 @@ class ChatBubble extends StatefulWidget {
 class _ChatBubbleState extends State<ChatBubble> {
   bool _showReactions = false;
   List reactions = [];
+  final EmojiParser emojiParser = EmojiParser();
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
@@ -52,7 +54,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 18,
-            vertical: 8,
+            vertical: 4,
           ),
           child: Row(
             mainAxisAlignment:
@@ -153,32 +155,29 @@ class _ChatBubbleState extends State<ChatBubble> {
               children: reactions.map((e) {
                 switch (e) {
                   case Reactions.like:
-                    return const ReactionChip(
+                    return ReactionChip(
                       text: "1",
-                      iconWidget: Icon(
-                        Icons.thumb_up,
-                        size: 18,
-                      ),
+                      icon: emojiParser.emojify(":thumbsup:"),
                     );
                   case Reactions.dislike:
-                    return const ReactionChip(
+                    return ReactionChip(
                       text: "1",
-                      iconWidget: Icon(Icons.thumb_down),
+                      icon: emojiParser.emojify(":thumbsdown:"),
                     );
                   case Reactions.love:
-                    return const ReactionChip(
+                    return ReactionChip(
                       text: "1",
-                      iconWidget: Icon(Icons.favorite),
+                      icon: emojiParser.emojify(":heart:"),
                     );
                   case Reactions.happy:
-                    return const ReactionChip(
+                    return ReactionChip(
                       text: "1",
-                      iconWidget: Icon(Icons.sentiment_satisfied),
+                      icon: emojiParser.emojify(":joy:"),
                     );
                   case Reactions.sad:
-                    return const ReactionChip(
+                    return ReactionChip(
                       text: "1",
-                      iconWidget: Icon(Icons.sentiment_dissatisfied),
+                      icon: emojiParser.emojify(":cry:"),
                     );
                   default:
                     return const SizedBox();

@@ -83,6 +83,15 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               fontSize: 18,
                             ),
                           ),
+                          Spacer(),
+                          IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.menu,
+                              size: 24,
+                              color: primaryColor,
+                            ),
+                          )
                         ],
                       ),
                     ),

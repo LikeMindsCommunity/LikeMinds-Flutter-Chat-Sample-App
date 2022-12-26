@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ReactionButton extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final VoidCallback onTap;
 
   const ReactionButton({
@@ -23,10 +23,14 @@ class ReactionButton extends StatelessWidget {
             color: Colors.white.withOpacity(0.9),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            size: 18,
-            color: Colors.black.withOpacity(0.6),
+          child: Center(
+            child: Text(
+              icon,
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.black.withOpacity(0.6),
+              ),
+            ),
           ),
         ),
       ),

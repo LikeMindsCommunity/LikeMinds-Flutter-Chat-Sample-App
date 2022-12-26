@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
 
 import 'reaction_enum.dart';
@@ -7,8 +8,9 @@ import 'reaction_button.dart';
 class ReactionBar extends StatelessWidget {
   final List reactions;
   final Function() refresh;
+  final EmojiParser emojiParser = EmojiParser();
 
-  const ReactionBar({
+  ReactionBar({
     super.key,
     required this.refresh,
     required this.reactions,
@@ -17,7 +19,7 @@ class ReactionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 64,
+      height: 48,
       width: getWidth(context) * 0.48,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.4),
@@ -27,7 +29,7 @@ class ReactionBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           ReactionButton(
-            icon: Icons.thumb_up,
+            icon: emojiParser.emojify(":thumbsup:"),
             onTap: () {
               if (!reactions.contains(Reactions.like)) {
                 reactions.add(Reactions.like);
@@ -39,7 +41,7 @@ class ReactionBar extends StatelessWidget {
             },
           ),
           ReactionButton(
-            icon: Icons.thumb_down,
+            icon: emojiParser.emojify(":thumbsdown:"),
             onTap: () {
               if (!reactions.contains(Reactions.dislike)) {
                 reactions.add(Reactions.dislike);
@@ -51,7 +53,7 @@ class ReactionBar extends StatelessWidget {
             },
           ),
           ReactionButton(
-            icon: Icons.favorite,
+            icon: emojiParser.emojify(":heart:"),
             onTap: () {
               if (!reactions.contains(Reactions.love)) {
                 reactions.add(Reactions.love);
@@ -63,7 +65,7 @@ class ReactionBar extends StatelessWidget {
             },
           ),
           ReactionButton(
-            icon: Icons.mood,
+            icon: emojiParser.emojify(":joy:"),
             onTap: () {
               if (!reactions.contains(Reactions.happy)) {
                 reactions.add(Reactions.happy);
@@ -75,7 +77,7 @@ class ReactionBar extends StatelessWidget {
             },
           ),
           ReactionButton(
-            icon: Icons.mood_bad,
+            icon: emojiParser.emojify(":cry:"),
             onTap: () {
               if (!reactions.contains(Reactions.sad)) {
                 reactions.add(Reactions.sad);
