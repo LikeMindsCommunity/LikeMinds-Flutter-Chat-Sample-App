@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
+import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 
-import './reaction_enum.dart';
+import '../enums/reaction_enum.dart';
+import '../enums/content_enum.dart';
 import 'reaction_bar.dart';
 import 'reaction_chip.dart';
 
@@ -14,7 +19,7 @@ class ChatBubble extends StatefulWidget {
   final String? time;
   final String? profileImageUrl;
   final bool showReactions;
-  final Function() makeBlur;
+  final ContentType contentType;
 
   const ChatBubble({
     super.key,
@@ -23,7 +28,7 @@ class ChatBubble extends StatefulWidget {
     this.time,
     this.profileImageUrl,
     this.showReactions = false,
-    required this.makeBlur,
+    this.contentType = ContentType.text,
   });
 
   @override
@@ -34,6 +39,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   bool _showReactions = false;
   List reactions = [];
   final EmojiParser emojiParser = EmojiParser();
+  final CustomPopupMenuController _controller = CustomPopupMenuController();
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
@@ -41,6 +47,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   Widget build(BuildContext context) {
     bool _isSent = widget.isSent!;
+    ContentType _contentType = widget.contentType;
     String _message = widget.message ?? "Test message";
     String _time = widget.time ?? "12:00";
     String _profileImageUrl =
@@ -51,6 +58,15 @@ class _ChatBubbleState extends State<ChatBubble> {
           _isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (_showReactions)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 64.0),
+            child: ReactionBar(
+              refresh: refresh,
+              reactions: reactions,
+            ),
+          ),
+        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 18,
@@ -78,49 +94,132 @@ class _ChatBubbleState extends State<ChatBubble> {
                     )
                   : const SizedBox(),
               const SizedBox(width: 6),
-              GestureDetector(
-                onLongPress: () {
-                  widget.makeBlur();
-                  Fluttertoast.showToast(msg: "Long presssssed ${widget.key}");
-                  setState(() {
-                    _showReactions = !_showReactions;
-                  });
-                },
-                onTap: () {
-                  Fluttertoast.showToast(msg: "Tapped");
-                },
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: 42,
-                    maxWidth: getWidth(context) * 0.6,
-                  ),
+              CustomPopupMenu(
+                controller: _controller,
+                pressType: PressType.longPress,
+                showArrow: false,
+                verticalMargin: 12,
+                menuBuilder: () => ClipRRect(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
+                    width: getWidth(context) * 0.4,
+                    color: Colors.white,
+                    child: IntrinsicWidth(
                       child: Column(
-                        crossAxisAlignment: _isSent
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            _message,
-                            textAlign:
-                                _isSent ? TextAlign.end : TextAlign.start,
-                            style: GoogleFonts.roboto(),
+                          ListTile(
+                            onTap: () {
+                              Fluttertoast.showToast(msg: "Reply to message");
+                              // Clipboard.setData(ClipboardData(text: _message))
+                              //     .then((value) {
+                              //   Fluttertoast.showToast(
+                              //       msg: "Copied to clipboard");
+                              // });
+                            },
+                            leading: const Icon(
+                              Icons.reply_outlined,
+                              size: 18,
+                            ),
+                            title: Text(
+                              "Reply",
+                              style: GoogleFonts.roboto(
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            _time,
-                            style: GoogleFonts.roboto(
-                              fontSize: 12,
-                              color: Colors.black.withOpacity(0.6),
+                          ListTile(
+                            onTap: () {
+                              Clipboard.setData(ClipboardData(text: _message))
+                                  .then((value) {
+                                Fluttertoast.showToast(
+                                    msg: "Copied to clipboard");
+                              });
+                            },
+                            leading: const Icon(
+                              Icons.copy,
+                              size: 18,
+                            ),
+                            title: Text(
+                              "Copy text",
+                              style: GoogleFonts.roboto(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            onTap: () {
+                              Fluttertoast.showToast(msg: "Add report screen");
+                            },
+                            leading: const Icon(
+                              Icons.report_outlined,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            title: Text(
+                              "Report",
+                              style: GoogleFonts.roboto(
+                                  fontSize: 16, color: Colors.red),
+                            ),
+                          ),
+                          ListTile(
+                            onTap: () {
+                              Fluttertoast.showToast(
+                                  msg: "Add select all functionality");
+                            },
+                            leading: const Icon(
+                              Icons.select_all,
+                              size: 18,
+                            ),
+                            title: Text(
+                              "Logout",
+                              style: GoogleFonts.roboto(
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+                ),
+                child: GestureDetector(
+                  onLongPress: () {
+                    _controller.showMenu();
+                  },
+                  onTap: () {
+                    Fluttertoast.showToast(msg: "Tapped");
+                    setState(() {
+                      _showReactions = !_showReactions;
+                    });
+                  },
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 42,
+                      maxWidth: getWidth(context) * 0.6,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        // borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: _isSent
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            getContent(_contentType, _message, _isSent),
+                            const SizedBox(height: 8),
+                            Text(
+                              _time,
+                              style: GoogleFonts.roboto(
+                                fontSize: 12,
+                                color: Colors.black.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -185,20 +284,30 @@ class _ChatBubbleState extends State<ChatBubble> {
               }).toList(),
             ),
           ),
-        if (_showReactions)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 64.0),
-            child: ReactionBar(
-              refresh: refresh,
-              reactions: reactions,
-            ),
-          ),
-        const SizedBox(height: 8),
       ],
     );
   }
 
   void refresh() {
     setState(() {});
+  }
+
+  void selectMessage(String messageId) {}
+
+  Widget getContent(ContentType contentType, String message, bool isSent) {
+    switch (contentType) {
+      case ContentType.text:
+        return Text(
+          message,
+          textAlign: isSent ? TextAlign.end : TextAlign.start,
+          style: GoogleFonts.roboto(),
+        );
+      case ContentType.image:
+        return Image.network(message);
+      case ContentType.video:
+      //
+      default:
+        return Text(message);
+    }
   }
 }
