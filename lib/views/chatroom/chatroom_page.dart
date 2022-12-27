@@ -6,9 +6,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/constants.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
+import 'package:group_chat_example/views/chatroom/chatroom_components/chat_bar.dart';
 import 'package:group_chat_example/widgets/spinner.dart';
 import 'package:group_chat_example/widgets/back_button.dart' as BB;
-import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 
 import 'bloc/chatroom_bloc.dart';
 import 'chatroom_components/chat_bubble.dart';
@@ -26,6 +26,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
   ScrollController listScrollController = ScrollController();
 
   @override
+  void dispose() {
+    listScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -41,10 +47,20 @@ class _ChatroomPageState extends State<ChatroomPage> {
           }
 
           if (state is ChatroomLoaded) {
-            List<Widget> chatBubbles = [];
-            chatBubbles = getChats(
-              context,
+            List<Widget> chatBubbles = getChats(context);
+
+            var listView = ListView.builder(
+              controller: listScrollController,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: chatBubbles.length,
+              itemBuilder: (context, index) {
+                return chatBubbles[index];
+              },
             );
+            if (listScrollController.hasClients) {
+              listScrollController
+                  .jumpTo(listScrollController.position.maxScrollExtent);
+            }
 
             return Column(
               children: [
@@ -56,24 +72,19 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     children: [
                       const BB.BackButton(),
                       const SizedBox(width: 18),
-                      GestureDetector(
-                        onTap: () {
-                          Fluttertoast.showToast(msg: "Add profile screen");
-                        },
-                        child: Container(
-                          height: 42,
-                          width: 42,
-                          decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(21),
-                          ),
-                          child: Center(
-                            child: Text(
-                              "Pa",
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
+                      Container(
+                        height: 42,
+                        width: 42,
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(21),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "C${state.chatroomId}",
+                            style: GoogleFonts.montserrat(
+                              fontSize: 16,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -83,6 +94,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         "Chatroom ${state.chatroomId}",
                         style: GoogleFonts.montserrat(
                           fontSize: 18,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const Spacer(),
@@ -90,94 +102,14 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 Expanded(
                   child: Container(
                     color: Colors.blue.withOpacity(0.2),
-                    child: ListView.builder(
-                      controller: listScrollController,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: chatBubbles.length,
-                      itemBuilder: (context, index) {
-                        return chatBubbles[index];
-                      },
-                    ),
+                    child: listView,
                   ),
                 ),
-                Container(
-                  color: Colors.grey.withOpacity(0.2),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    padding: const EdgeInsets.all(4),
-                                    onPressed: () {},
-                                    icon: Icon(Icons.emoji_emotions_outlined),
-                                  ),
-                                  Expanded(
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: "Type a message",
-                                        hintStyle: GoogleFonts.montserrat(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                          vertical: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    padding: const EdgeInsets.all(4),
-                                    onPressed: () {},
-                                    icon: const Icon(Icons.attach_file),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          GestureDetector(
-                            onTap: () {
-                              Fluttertoast.showToast(msg: "Send message");
-                            },
-                            child: Container(
-                              height: 48,
-                              width: 48,
-                              decoration: BoxDecoration(
-                                color: primaryColor,
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.send,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
+                const ChatBar(),
               ],
             );
           }
@@ -216,6 +148,20 @@ List<Widget> getChats(BuildContext context) {
       profileImageUrl: "https://picsum.photos/600/600",
       showReactions: false,
       contentType: ContentType.image,
+      // onTap: () => print("Tapped $i"),
+    ),
+  );
+
+  chats.add(
+    ChatBubble(
+      key: UniqueKey(),
+      isSent: true,
+      message:
+          "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+      time: "12:34",
+      profileImageUrl: "https://picsum.photos/600/600",
+      showReactions: false,
+      contentType: ContentType.video,
       // onTap: () => print("Tapped $i"),
     ),
   );

@@ -7,7 +7,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
+import 'package:group_chat_example/widgets/spinner.dart';
+import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:path_provider/path_provider.dart';
 
+import '../../video_player_screen.dart';
 import '../enums/reaction_enum.dart';
 import '../enums/content_enum.dart';
 import 'reaction_bar.dart';
@@ -43,6 +48,11 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,11 +120,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ListTile(
                             onTap: () {
                               Fluttertoast.showToast(msg: "Reply to message");
-                              // Clipboard.setData(ClipboardData(text: _message))
-                              //     .then((value) {
-                              //   Fluttertoast.showToast(
-                              //       msg: "Copied to clipboard");
-                              // });
+                              _controller.hideMenu();
                             },
                             leading: const Icon(
                               Icons.reply_outlined,
@@ -129,6 +135,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ),
                           ListTile(
                             onTap: () {
+                              _controller.hideMenu();
                               Clipboard.setData(ClipboardData(text: _message))
                                   .then((value) {
                                 Fluttertoast.showToast(
@@ -148,6 +155,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ),
                           ListTile(
                             onTap: () {
+                              _controller.hideMenu();
                               Fluttertoast.showToast(msg: "Add report screen");
                             },
                             leading: const Icon(
@@ -158,11 +166,14 @@ class _ChatBubbleState extends State<ChatBubble> {
                             title: Text(
                               "Report",
                               style: GoogleFonts.roboto(
-                                  fontSize: 16, color: Colors.red),
+                                fontSize: 16,
+                                color: Colors.red,
+                              ),
                             ),
                           ),
                           ListTile(
                             onTap: () {
+                              _controller.hideMenu();
                               Fluttertoast.showToast(
                                   msg: "Add select all functionality");
                             },
@@ -200,7 +211,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.9),
-                        // borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -209,7 +220,16 @@ class _ChatBubbleState extends State<ChatBubble> {
                               ? CrossAxisAlignment.end
                               : CrossAxisAlignment.start,
                           children: [
-                            getContent(_contentType, _message, _isSent),
+                            FutureBuilder(
+                                builder: ((context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return snapshot.data!;
+                                  } else {
+                                    return const Spinner();
+                                  }
+                                }),
+                                future: getContent(
+                                    _contentType, _message, _isSent)),
                             const SizedBox(height: 8),
                             Text(
                               _time,
@@ -294,7 +314,11 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   void selectMessage(String messageId) {}
 
-  Widget getContent(ContentType contentType, String message, bool isSent) {
+  Future<Widget> getContent(
+    ContentType contentType,
+    String message,
+    bool isSent,
+  ) async {
     switch (contentType) {
       case ContentType.text:
         return Text(
@@ -305,7 +329,36 @@ class _ChatBubbleState extends State<ChatBubble> {
       case ContentType.image:
         return Image.network(message);
       case ContentType.video:
-      //
+        final uint8list = await VideoThumbnail.thumbnailData(
+          video: message,
+          imageFormat: ImageFormat.JPEG,
+          maxWidth: 600,
+          quality: 25,
+        );
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.memory(uint8list!),
+            GestureDetector(
+              onTap: (() {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => VideoPlayerScreen(
+                      videoUrl: message,
+                    ),
+                  ),
+                );
+              }),
+              child: const Icon(
+                Icons.play_circle_outline,
+                size: 48,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        );
       default:
         return Text(message);
     }

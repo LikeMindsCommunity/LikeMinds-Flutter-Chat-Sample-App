@@ -43,6 +43,9 @@ dependencies:
   google_fonts: 
   flutter_emoji: ^2.4.0
   custom_pop_up_menu: ^1.2.4
+  video_player: ^2.4.10
+  video_thumbnail: ^0.5.3
+  flutter_polls: ^0.1.1
 
 dev_dependencies:
   flutter_test:

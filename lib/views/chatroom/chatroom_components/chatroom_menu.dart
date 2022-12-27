@@ -21,6 +21,7 @@ class ChatroomMenu extends StatelessWidget {
       pressType: PressType.singleClick,
       showArrow: false,
       controller: _controller,
+      enablePassEvent: false,
       menuBuilder: () => ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Container(
@@ -31,11 +32,12 @@ class ChatroomMenu extends StatelessWidget {
             children: [
               ListTile(
                 onTap: () {
+                  _controller.hideMenu();
                   Route route = MaterialPageRoute(
                     builder: (context) => const ChatroomParticipantsPage(),
                   );
                   Navigator.push(context, route);
-                  _controller.hideMenu();
+                  // // _controller.hideMenu();
                 },
                 title: Text(
                   "View Participants",
