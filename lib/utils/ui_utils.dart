@@ -1,6 +1,5 @@
+import 'package:group_chat_example/utils/constants/ui_constants.dart';
 import 'package:flutter/material.dart';
-
-import 'constants/ui_constants.dart';
 
 //Generic method for getting height
 double getHeight(BuildContext context) {

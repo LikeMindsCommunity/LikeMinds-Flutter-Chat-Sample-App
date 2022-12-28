@@ -3,8 +3,7 @@ import 'dart:ui';
 
 import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
-
-import '../../../utils/ui_utils.dart';
+import 'package:group_chat_example/utils/ui_utils.dart';
 
 part 'branding_advanced.g.dart';
 

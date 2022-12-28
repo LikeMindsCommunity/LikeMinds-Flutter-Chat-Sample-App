@@ -1,10 +1,8 @@
-import 'local_db.dart';
-
-import '../models/branding/branding_advanced.dart';
-import '../models/branding/branding_basic.dart';
-import '../models/branding/branding.dart';
-
+import 'package:group_chat_example/data/models/branding/branding.dart';
+import 'package:group_chat_example/data/models/branding/branding_advanced.dart';
+import 'package:group_chat_example/data/models/branding/branding_basic.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'local_db.dart';
 
 class LocalDBImpl extends LocalDB {
   static const getItInstanceName = "local_db_service";

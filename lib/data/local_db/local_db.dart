@@ -1,4 +1,4 @@
-import '../models/branding/branding.dart';
+import 'package:group_chat_example/data/models/branding/branding.dart';
 
 abstract class LocalDB {
   Future<BrandingEntity?> getSavedBranding();

@@ -1,7 +1,6 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import '../../../services/branding_service.dart';
-import '../../local_db/local_db.dart';
-import '../../models/branding/branding.dart';
+import 'package:group_chat_example/data/local_db/local_db.dart';
+import 'package:group_chat_example/data/models/branding/branding.dart';
+import 'package:group_chat_example/services/branding_service.dart';
 
 class BrandingRepository {
   final BrandingSDK _mockSDK;

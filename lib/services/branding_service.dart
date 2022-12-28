@@ -1,4 +1,4 @@
-import '../data/models/branding/branding.dart';
+import 'package:group_chat_example/data/models/branding/branding.dart';
 
 class BrandingSDK {
   Future<Branding> getBrandingData() async {
