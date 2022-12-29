@@ -41,6 +41,12 @@ dependencies:
   fluttertoast: 
   sizer: 
   google_fonts: 
+  flutter_emoji: ^2.4.0
+  custom_pop_up_menu: ^1.2.4
+  video_player: ^2.4.10
+  video_thumbnail: ^0.5.3
+  flutter_polls: ^0.1.1
+  cached_network_image: ^3.2.3
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   json_annotation: ^4.7.0

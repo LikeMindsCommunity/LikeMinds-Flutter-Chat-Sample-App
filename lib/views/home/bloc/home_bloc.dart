@@ -1,6 +1,6 @@
-import 'package:group_chat_example/views/home/home_components/chat_item.dart';
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -8,11 +8,15 @@ part 'home_state.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitial()) {
     on<HomeEvent>((event, emit) async {
+      // TODO: implement event handler
       if (event is InitHomeEvent) {
         emit(HomeLoading());
-        List<ChatItem> chats = getChats();
+        //Perform logic
+        // List<ChatItem> chats = getChats();
         await Future.delayed(
-            Duration(seconds: 1), (() => emit(HomeLoaded(chats))));
+          const Duration(seconds: 1),
+          (() => emit(HomeLoaded())),
+        );
       }
 
       if (event is ReloadHomeEvent) {
@@ -20,20 +24,4 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     });
   }
-}
-
-List<ChatItem> getChats() {
-  List<ChatItem> chats = [];
-
-  for (int i = 0; i < 10; i++) {
-    chats.add(ChatItem(
-      name: "Testy $i",
-      message:
-          "Lorem ipsum message $i dolor sit amet, consectetur adipiscing elit.",
-      time: "11:1$i",
-      avatarUrl: "https://picsum.photos/200/300",
-    ));
-  }
-
-  return chats;
 }
