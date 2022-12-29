@@ -54,64 +54,69 @@ class _ChatroomPollsPageState extends State<ChatroomPollsPage> {
                     ))
                     .inDays;
 
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  child: FlutterPolls(
-                    pollId: poll['id'].toString(),
-                    // hasVoted: hasVoted.value,
-                    // userVotedOptionId: userVotedOptionId.value,
-                    onVoted: (PollOption pollOption, int newTotalVotes) async {
-                      await Future.delayed(const Duration(seconds: 1));
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: FlutterPolls(
+                      pollId: poll['id'].toString(),
+                      // hasVoted: hasVoted.value,
+                      // userVotedOptionId: userVotedOptionId.value,
+                      onVoted:
+                          (PollOption pollOption, int newTotalVotes) async {
+                        await Future.delayed(const Duration(seconds: 1));
+                        pollOption.votes++;
 
-                      /// If HTTP status is success, return true else false
-                      return true;
-                    },
-                    pollEnded: days < 0,
-                    pollTitle: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        poll['question'],
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        /// If HTTP status is success, return true else false
+                        return true;
+                      },
+                      pollEnded: false,
+                      pollTitle: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          poll['question'],
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    pollOptions: List<PollOption>.from(
-                      poll['options'].map(
-                        (option) {
-                          var a = PollOption(
-                            id: option['id'],
-                            title: Text(
-                              option['title'],
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                      pollOptions: List<PollOption>.from(
+                        poll['options'].map(
+                          (option) {
+                            var a = PollOption(
+                              id: option['id'],
+                              title: Text(
+                                option['title'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            votes: option['votes'],
-                          );
-                          return a;
-                        },
+                              votes: option['votes'],
+                            );
+                            return a;
+                          },
+                        ),
                       ),
-                    ),
-                    votedPercentageTextStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    metaWidget: Row(
-                      children: [
-                        const SizedBox(width: 6),
-                        const Text(
-                          '•',
-                        ),
-                        const SizedBox(
-                          width: 6,
-                        ),
-                        Text(
-                          days < 0 ? "ended" : "ends $days days",
-                        ),
-                      ],
+                      votedPercentageTextStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      metaWidget: Row(
+                        children: [
+                          const SizedBox(width: 6),
+                          const Text(
+                            '•',
+                          ),
+                          const SizedBox(
+                            width: 6,
+                          ),
+                          Text(
+                            days < 0 ? "ended" : "ends $days days",
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -129,7 +134,7 @@ List polls() => [
         'id': 1,
         'question':
             'Is Flutter the best framework for building cross-platform applications?',
-        'end_date': DateTime(2022, 5, 21),
+        'end_date': DateTime(2023, 12, 31),
         'options': [
           {
             'id': 1,
@@ -151,7 +156,7 @@ List polls() => [
       {
         'id': 2,
         'question': 'Do you think Oranguntans have the ability speak?',
-        'end_date': DateTime(2022, 12, 25),
+        'end_date': DateTime(2022, 12, 31),
         'options': [
           {
             'id': 1,
@@ -179,7 +184,7 @@ List polls() => [
         'id': 3,
         'question':
             'How do you know that your experience of consciousness is the same as other people’s experience of consciousness?',
-        'end_date': DateTime(2022, 04, 30),
+        'end_date': DateTime(2022, 12, 31),
         'options': [
           {
             'id': 2,

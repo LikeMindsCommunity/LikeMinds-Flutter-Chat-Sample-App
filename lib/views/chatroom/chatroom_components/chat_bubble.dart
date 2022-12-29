@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
@@ -182,7 +183,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                               size: 18,
                             ),
                             title: Text(
-                              "Logout",
+                              "Select",
                               style: GoogleFonts.roboto(
                                 fontSize: 16,
                               ),
@@ -327,7 +328,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           style: GoogleFonts.roboto(),
         );
       case ContentType.image:
-        return Image.network(message);
+        return CachedNetworkImage(imageUrl: message);
       case ContentType.video:
         final uint8list = await VideoThumbnail.thumbnailData(
           video: message,
