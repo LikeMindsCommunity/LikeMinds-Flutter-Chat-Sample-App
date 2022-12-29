@@ -1,7 +1,6 @@
+import 'package:group_chat_example/views/home/home_components/chat_item.dart';
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
-
-import '../home_components/chat_item.dart';
+import 'package:flutter/foundation.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -9,14 +8,11 @@ part 'home_state.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitial()) {
     on<HomeEvent>((event, emit) async {
-      // TODO: implement event handler
       if (event is InitHomeEvent) {
         emit(HomeLoading());
-        //Perform logic
         List<ChatItem> chats = getChats();
         await Future.delayed(
             Duration(seconds: 1), (() => emit(HomeLoaded(chats))));
-        // emit(HomeLoaded(chats));
       }
 
       if (event is ReloadHomeEvent) {

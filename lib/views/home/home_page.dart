@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
-
-import 'bloc/home_bloc.dart';
-import 'home_components/chat_item.dart';
-import '../../widgets/spinner.dart';
+import 'package:group_chat_example/views/home/bloc/home_bloc.dart';
+import 'package:group_chat_example/widgets/spinner.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
