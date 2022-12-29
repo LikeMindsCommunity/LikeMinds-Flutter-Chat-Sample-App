@@ -1,11 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:group_chat_example/views/chatroom/bloc/chatroom_bloc.dart';
-import 'package:group_chat_example/views/chatroom/chatroom_page.dart';
-import 'package:meta/meta.dart';
-
-import '../home_components/chat_item.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';

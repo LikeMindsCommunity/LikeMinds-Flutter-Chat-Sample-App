@@ -35,6 +35,14 @@ class _ChatBarState extends State<ChatBar> {
   }
 
   @override
+  void dispose() {
+    _popupMenuController.dispose();
+    _textEditingController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.grey.withOpacity(0.2),

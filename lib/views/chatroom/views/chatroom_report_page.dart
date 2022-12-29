@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../widgets/back_button.dart' as BB;
+
+import 'package:group_chat_example/widgets/back_button.dart' as BB;
 
 class ChatroomReportPage extends StatefulWidget {
   const ChatroomReportPage({super.key});

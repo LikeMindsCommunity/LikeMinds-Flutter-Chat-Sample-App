@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:group_chat_example/views/chatroom/views/chatroom_participants_page.dart';
 
-import '../../../constants.dart';
-import '../../../utils/ui_utils.dart';
-import '../views/chatroom_report_page.dart';
+import 'package:group_chat_example/constants.dart';
+import 'package:group_chat_example/utils/ui_utils.dart';
+import 'package:group_chat_example/views/chatroom/views/chatroom_participants_page.dart';
+import 'package:group_chat_example/views/chatroom/views/chatroom_report_page.dart';
 
 class ChatroomMenu extends StatelessWidget {
-  final CustomPopupMenuController _controller = CustomPopupMenuController();
+  late final CustomPopupMenuController _controller;
 
   ChatroomMenu({
     Key? key,
@@ -17,6 +17,8 @@ class ChatroomMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _controller = CustomPopupMenuController();
+
     return CustomPopupMenu(
       pressType: PressType.singleClick,
       showArrow: false,

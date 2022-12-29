@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
 
-import '../enums/reaction_enum.dart';
-import 'reaction_button.dart';
+import 'package:group_chat_example/views/chatroom/chatroom_components/reaction_button.dart';
+import 'package:group_chat_example/views/chatroom/enums/reaction_enum.dart';
 
 class ReactionBar extends StatelessWidget {
   final List reactions;
   final Function() refresh;
-  final EmojiParser emojiParser = EmojiParser();
+  late final EmojiParser emojiParser;
 
   ReactionBar({
     super.key,
@@ -18,6 +18,8 @@ class ReactionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    emojiParser = EmojiParser();
+
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(

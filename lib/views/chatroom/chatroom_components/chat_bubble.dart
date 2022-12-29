@@ -8,16 +8,16 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
+import 'package:group_chat_example/views/video_player_screen.dart';
 import 'package:group_chat_example/widgets/spinner.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../video_player_screen.dart';
-import '../enums/reaction_enum.dart';
-import '../enums/content_enum.dart';
-import 'reaction_bar.dart';
-import 'reaction_chip.dart';
+import 'package:group_chat_example/views/chatroom/chatroom_components/reaction_chip.dart';
+import 'package:group_chat_example/views/chatroom/chatroom_components/reaction_bar.dart';
+import 'package:group_chat_example/views/chatroom/enums/reaction_enum.dart';
+import 'package:group_chat_example/views/chatroom/enums/content_enum.dart';
 
 class ChatBubble extends StatefulWidget {
   final bool? isSent;
@@ -44,15 +44,23 @@ class ChatBubble extends StatefulWidget {
 class _ChatBubbleState extends State<ChatBubble> {
   bool _showReactions = false;
   List reactions = [];
-  final EmojiParser emojiParser = EmojiParser();
-  final CustomPopupMenuController _controller = CustomPopupMenuController();
+  late final EmojiParser emojiParser;
+  late final CustomPopupMenuController _controller;
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
 
   @override
   void initState() {
+    emojiParser = EmojiParser();
+    _controller = CustomPopupMenuController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
