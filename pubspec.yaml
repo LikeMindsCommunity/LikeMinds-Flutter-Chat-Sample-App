@@ -47,6 +47,11 @@ dependencies:
   video_thumbnail: ^0.5.3
   flutter_polls: ^0.1.1
   cached_network_image: ^3.2.3
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  json_annotation: ^4.7.0
+  hive_generator: ^2.0.0
+  json_serializable: ^6.5.4
 
 dev_dependencies:
   flutter_test:

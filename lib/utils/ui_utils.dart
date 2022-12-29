@@ -1,3 +1,4 @@
+import 'package:group_chat_example/utils/constants/ui_constants.dart';
 import 'package:flutter/material.dart';
 
 //Generic method for getting height
@@ -26,4 +27,15 @@ String getInitials(String? name) {
       .reduce((_, e) => _ + e) // Reduce into single string
       .toUpperCase(); // Capitalize
   return initials;
+}
+
+extension StringColor on String {
+  Color? toColor() {
+    // if (primaryColor != null) {
+    if (int.tryParse(this) != null) {
+      return Color(int.tryParse(this)!);
+    } else {
+      return kPrimaryColor;
+    }
+  }
 }
