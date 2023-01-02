@@ -9,6 +9,8 @@ import 'package:group_chat_example/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:group_chat_example/views/chatroom/chatroom_page.dart';
 import 'package:group_chat_example/views/home/bloc/home_bloc.dart';
 import 'package:group_chat_example/views/home/home_components/chat_item.dart';
+import 'package:group_chat_example/views/profile/bloc/profile_bloc.dart';
+import 'package:group_chat_example/views/profile/profile_page.dart';
 import 'package:group_chat_example/widgets/spinner.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,7 +41,17 @@ class _HomePageState extends State<HomePage> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Fluttertoast.showToast(msg: "Add profile screen");
+                    Route route = MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          BlocProvider<ProfileBloc>(
+                        create: (BuildContext context) =>
+                            ProfileBloc()..add(InitProfileEvent()),
+                        child: const ProfilePage(
+                          isSelf: true,
+                        ),
+                      ),
+                    );
+                    Navigator.push(context, route);
                   },
                   child: Container(
                     height: 42,
@@ -79,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                 List<ChatItem> chatItems = getChats(context);
                 return Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.zero,
+                    padding: EdgeInsets.symmetric(horizontal: 18),
                     itemCount: chatItems.length,
                     itemBuilder: (context, index) {
                       if (index == 0) {
