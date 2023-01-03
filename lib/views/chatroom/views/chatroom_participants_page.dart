@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_chat_example/utils/ui_utils.dart';
+import 'package:group_chat_example/views/profile/bloc/profile_bloc.dart';
+import 'package:group_chat_example/views/profile/profile_page.dart';
 
 import 'package:group_chat_example/widgets/back_button.dart' as BB;
 
@@ -79,67 +82,55 @@ class ParticipantItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: getWidth(context),
-      height: 72,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                image: NetworkImage(profilePic),
-                fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Route route = MaterialPageRoute(
+          builder: (BuildContext context) => BlocProvider<ProfileBloc>(
+            create: (BuildContext context) =>
+                ProfileBloc()..add(InitProfileEvent()),
+            child: const ProfilePage(
+              isSelf: false,
+            ),
+          ),
+        );
+        Navigator.push(context, route);
+      },
+      child: Container(
+        width: getWidth(context),
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: NetworkImage(profilePic),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Text(
-            name,
-            style: GoogleFonts.montserrat(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+            const SizedBox(width: 16),
+            Text(
+              name,
+              style: GoogleFonts.montserrat(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const Spacer(),
-          Text(
-            role,
-            style: GoogleFonts.montserrat(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+            const Spacer(),
+            Text(
+              role,
+              style: GoogleFonts.montserrat(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          // GestureDetector(
-          //   onTap: () {
-          //     Fluttertoast.showToast(
-          //       msg: "You can't remove yourself",
-          //       toastLength: Toast.LENGTH_SHORT,
-          //       gravity: ToastGravity.BOTTOM,
-          //       timeInSecForIosWeb: 1,
-          //       backgroundColor: Colors.grey[800],
-          //       textColor: Colors.white,
-          //       fontSize: 16.0,
-          //     );
-          //   },
-          //   child: Container(
-          //     width: 24,
-          //     height: 24,
-          //     decoration: BoxDecoration(
-          //       shape: BoxShape.circle,
-          //       color: Colors.red,
-          //     ),
-          //     child: const Icon(
-          //       Icons.close,
-          //       color: Colors.white,
-          //       size: 16,
-          //     ),
-          //   ),
-          // ),
-        ],
+            const SizedBox(width: 16),
+          ],
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:group_chat_example/isolate_screen.dart';
 import 'package:group_chat_example/views/home/bloc/home_bloc.dart';
 import 'package:group_chat_example/views/home/home_page.dart';
+import 'package:group_chat_example/views/profile/profile_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // home: const IsolatePage(),
+      // home: const ProfilePage(),
       home: BlocProvider(
         create: (context) => HomeBloc()..add(InitHomeEvent()),
         child: const HomePage(),

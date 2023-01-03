@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:group_chat_example/constants.dart';
 
 class Spinner extends StatelessWidget {
-  const Spinner({super.key});
+  final Color? color;
+
+  const Spinner({super.key, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: CircularProgressIndicator(
-        color: Colors.blue,
+        color: color ?? primaryColor,
       ),
     );
   }
