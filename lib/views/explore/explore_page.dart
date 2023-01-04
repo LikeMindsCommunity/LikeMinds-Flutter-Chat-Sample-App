@@ -39,6 +39,55 @@ class _ExplorePageState extends State<ExplorePage> {
     }
   }
 
+  Future onChoosingModal(context) => showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return SizedBox(
+            height: getHeight(context) * 0.3,
+            child: Column(
+              children: [
+                ListTile(
+                  title: const Text("Newest"),
+                  onTap: () {
+                    setState(() {
+                      _spaces = Spaces.newest;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: const Text("Recently Active"),
+                  onTap: () {
+                    setState(() {
+                      _spaces = Spaces.active;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: const Text("Most Participants"),
+                  onTap: () {
+                    setState(() {
+                      _spaces = Spaces.mostParticipants;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: const Text("Most Messages"),
+                  onTap: () {
+                    setState(() {
+                      _spaces = Spaces.mostMessages;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
   @override
   Widget build(BuildContext context) {
     return PageSkeleton(
@@ -59,56 +108,8 @@ class _ExplorePageState extends State<ExplorePage> {
         Row(
           children: [
             GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return SizedBox(
-                      height: getHeight(context) * 0.3,
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: const Text("Newest"),
-                            onTap: () {
-                              setState(() {
-                                _spaces = Spaces.newest;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                          ListTile(
-                            title: const Text("Recently Active"),
-                            onTap: () {
-                              setState(() {
-                                _spaces = Spaces.active;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                          ListTile(
-                            title: const Text("Most Participants"),
-                            onTap: () {
-                              setState(() {
-                                _spaces = Spaces.mostParticipants;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                          ListTile(
-                            title: const Text("Most Messages"),
-                            onTap: () {
-                              setState(() {
-                                _spaces = Spaces.mostMessages;
-                              });
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
+              //TODO: Add popup menu for choosing space
+              onTap: () async => await onChoosingModal(context),
               child: Row(
                 children: [
                   Text(
