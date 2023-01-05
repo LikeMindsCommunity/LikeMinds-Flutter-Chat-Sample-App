@@ -27,6 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return PageSkeleton(
+      isListView: true,
       backgroundColor: primaryColor,
       appBarChildren: [
         const BB.BackButton(),
