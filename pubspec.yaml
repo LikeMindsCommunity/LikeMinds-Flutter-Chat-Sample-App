@@ -52,7 +52,6 @@ dependencies:
   json_annotation: ^4.7.0
   hive_generator: ^2.0.0
   json_serializable: ^6.5.4
-  skeleton_loader: ^2.0.0+4
   shimmer: ^2.0.0
 
 dev_dependencies:
