@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:group_chat_example/views/home/home_components/skeleton_list.dart';
+import 'package:shimmer/shimmer.dart';
 
-import 'package:group_chat_example/constants.dart';
-import 'package:group_chat_example/utils/ui_utils.dart';
 import 'package:group_chat_example/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:group_chat_example/views/chatroom/chatroom_page.dart';
-import 'package:group_chat_example/views/explore/bloc/explore_bloc.dart';
-import 'package:group_chat_example/views/explore/explore_page.dart';
 import 'package:group_chat_example/views/home/bloc/home_bloc.dart';
 import 'package:group_chat_example/views/home/home_components/chat_item.dart';
+import 'package:group_chat_example/views/home/home_components/explore_spaces_bar.dart';
 import 'package:group_chat_example/views/profile/bloc/profile_bloc.dart';
 import 'package:group_chat_example/views/profile/profile_page.dart';
-import 'package:group_chat_example/widgets/spinner.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -86,81 +84,18 @@ class _HomePageState extends State<HomePage> {
             },
             builder: (context, state) {
               if (state is HomeLoading) {
-                return const Spinner();
+                return const SkeletonChatList();
               }
 
               if (state is HomeLoaded) {
                 List<ChatItem> chatItems = getChats(context);
                 return Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 18),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
                     itemCount: chatItems.length,
                     itemBuilder: (context, index) {
                       if (index == 0) {
-                        return SizedBox(
-                          height: 90,
-                          width: getWidth(context),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: GestureDetector(
-                              onTap: () {
-                                Route route = MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      BlocProvider<ExploreBloc>(
-                                    create: (BuildContext context) =>
-                                        ExploreBloc()..add(InitExploreEvent()),
-                                    child: const ExplorePage(),
-                                  ),
-                                );
-                                Navigator.push(context, route);
-                              },
-                              child: Row(
-                                children: [
-                                  Container(
-                                    height: 32,
-                                    width: 32,
-                                    decoration: BoxDecoration(
-                                      color: primaryColor,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.navigation_outlined,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 24),
-                                  Text(
-                                    "Explore Spaces",
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    height: 28,
-                                    width: 64,
-                                    decoration: BoxDecoration(
-                                      color: primaryColor,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        "3 NEW",
-                                        style: GoogleFonts.montserrat(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
+                        return const ExploreSpacesBar();
                       }
                       return chatItems[index];
                     },

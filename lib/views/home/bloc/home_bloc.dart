@@ -14,7 +14,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         //Perform logic
         // List<ChatItem> chats = getChats();
         await Future.delayed(
-          const Duration(seconds: 1),
+          const Duration(seconds: 5),
           (() => emit(HomeLoaded())),
         );
       }
