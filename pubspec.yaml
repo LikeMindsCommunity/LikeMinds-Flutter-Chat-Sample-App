@@ -32,6 +32,11 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Local copy of the LikeMinds Flutter GroupChat SDK
+  # Place in the parent directory of this project, outside root directory
+  likeminds_groupchat:
+    path: ../LikeMinds-Flutter-GroupChat-SDK
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -53,6 +58,7 @@ dependencies:
   hive_generator: ^2.0.0
   json_serializable: ^6.5.4
   shimmer: ^2.0.0
+  get_it: ^7.2.0
 
 dev_dependencies:
   flutter_test:

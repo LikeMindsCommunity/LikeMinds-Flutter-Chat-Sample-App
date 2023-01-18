@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:group_chat_example/isolate_screen.dart';
+import 'package:group_chat_example/service_locator.dart';
 import 'package:group_chat_example/views/home/bloc/home_bloc.dart';
 import 'package:group_chat_example/views/home/home_page.dart';
-import 'package:group_chat_example/views/profile/profile_page.dart';
 
 void main() {
   runApp(const MyApp());
+  setupLocator();
 }
 
 class MyApp extends StatelessWidget {

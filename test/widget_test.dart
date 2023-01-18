@@ -4,27 +4,27 @@
 // utility in the flutter_test package. For example, you can send tap and scroll
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:group_chat_example/main.dart';
+import 'package:group_chat_example/service_locator.dart';
+import 'package:group_chat_example/services/likeminds_service.dart';
+import 'package:likeminds_groupchat/likeminds_groupchat.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+  test(
+    "Test LikeMinds service for initiatiung user with a given InitiateUserRequest",
+    () async {
+      setupLocator();
+      final InitiateUserRequest initiateUserRequest = InitiateUserRequest(
+          userId: "divyansh-test-ui-1",
+          userName: "Divyansh Gandhi Integration",
+          isGuest: false,
+          apiKey: "bad53fff-c85a-4098-b011-ac36703cc98b");
+      final InitiateUserResponse response =
+          await locator<LikeMindsService>().initiateUser(initiateUserRequest);
+      debugPrint(response.toString());
+      expect(response.success, true);
+    },
+  );
 }
