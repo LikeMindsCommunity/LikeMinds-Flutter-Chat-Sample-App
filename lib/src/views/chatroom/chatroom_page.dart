@@ -34,7 +34,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
   @override
   Widget build(BuildContext context) {
-    chatroomBloc = BlocProvider.of<ChatroomBloc>(context);
+    // chatroomBloc = BlocProvider.of<ChatroomBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocConsumer<ChatroomBloc, ChatroomState>(
@@ -115,7 +115,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 Expanded(
                   child: Container(
                     color: Colors.blue.withOpacity(0.2),
-                    child: listView,
+                    child: pagedListView,
                   ),
                 ),
                 const ChatBar(),

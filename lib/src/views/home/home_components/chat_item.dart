@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 
 class ChatItem extends StatefulWidget {
@@ -64,21 +66,17 @@ class _ChatItemState extends State<ChatItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      _name,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text(_name,
+                        style: LMBranding.instance.fonts.medium.copyWith(
+                          fontSize: 12.sp,
+                        )),
                     const SizedBox(height: 8),
                     Text(
                       _message,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        color: Colors.black.withOpacity(0.7),
+                      style: LMBranding.instance.fonts.regular.copyWith(
+                        fontSize: 10.sp,
                       ),
                     ),
                   ],
@@ -88,21 +86,29 @@ class _ChatItemState extends State<ChatItem> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(_time),
-                const SizedBox(height: 6),
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 10, 24, 103),
-                    borderRadius: BorderRadius.circular(12),
+                Text(
+                  _time,
+                  style: LMBranding.instance.fonts.regular.copyWith(
+                    fontSize: 9.sp,
                   ),
-                  child: Center(
-                    child: Text(
-                      _unreadCount.toString(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                ),
+                const SizedBox(height: 6),
+                Visibility(
+                  visible: _unreadCount != 0,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 10, 24, 103),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _unreadCount.toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

@@ -19,7 +19,7 @@ class LMBranding {
   LMBranding._internal();
 
   // Initialize
-  void initialize({
+  LMBranding initialize({
     Color? headerColor,
     Color? buttonColor,
     Color? textLinkColor,
@@ -38,6 +38,8 @@ class LMBranding {
     } else {
       _fonts = LMFonts.instance.initialize();
     }
+
+    return this;
   }
 
   void _setDefaults() {

@@ -6,7 +6,12 @@ import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:sizer/sizer.dart';
+
+export 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
+export 'package:likeminds_chat_mm_fl/src/utils/branding/lm_fonts.dart';
 
 class LMChat extends StatelessWidget {
   final String _userId;
@@ -45,10 +50,6 @@ class LMChat extends StatelessWidget {
     }
   }
 
-  static Future<LMResponse> initiateUser(InitiateUserRequest request) {
-    return locator<LikeMindsService>().initiateUser(request);
-  }
-
   LMChat._internal(
     this._userId,
     this._userName,
@@ -60,10 +61,40 @@ class LMChat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Sizer(
       builder: ((context, orientation, deviceType) {
-        return MaterialApp.router(
-          routerConfig: router,
-          debugShowCheckedModeBanner: true,
-        );
+        return FutureBuilder(
+            future: locator<LikeMindsService>().initiateUser(
+              InitiateUserRequest(
+                userId: _userId,
+                userName: _userName,
+              ),
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return MaterialApp.router(
+                  routerConfig: router,
+                  debugShowCheckedModeBanner: true,
+                );
+              }
+              return Container(
+                color: kWhiteColor,
+                child: Spinner(
+                  color: LMBranding.instance.headerColor,
+                ),
+              );
+              // ? MaterialApp.router(
+              //     routerConfig: router,
+              //     debugShowCheckedModeBanner: true,
+              //   )
+              // : ;
+            }
+            // child: MaterialApp.router(
+            //   routerConfig: router,
+            //   debugShowCheckedModeBanner: true,
+            //   builder: (context, child) {
+            //     return
+            //   },
+            // ),
+            );
       }),
     );
   }

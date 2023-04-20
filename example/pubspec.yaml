@@ -34,6 +34,7 @@ dependencies:
     path: ../
   likeminds_chat_fl:
     path: ../../LikeMinds-Flutter-Groupchat-SDK
+  google_fonts: 
 
 
   # The following adds the Cupertino Icons font to your application.
