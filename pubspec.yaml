@@ -5,7 +5,7 @@ homepage: "https://likeminds.community"
 publish_to: none
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: '>=2.19.6 <3.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
@@ -27,7 +27,6 @@ dependencies:
   infinite_scroll_pagination: ^3.2.0
   open_filex: ^4.3.2
   permission_handler: ^10.2.0
-  device_info_plus: ^8.0.0
   simple_s3: ^0.3.2
   shared_preferences: ^2.1.0
   uni_links: ^0.5.1
@@ -37,6 +36,13 @@ dependencies:
   go_router: ^6.5.7
   google_fonts: ^4.0.3
   custom_pop_up_menu: ^1.2.4
+  device_info_plus: ^8.0.0
+  flutter_emoji: ^2.4.0
+  video_player: ^2.6.1
+  video_thumbnail: ^0.5.3
+  cached_network_image: ^3.2.3
+  flutter_polls: ^0.1.2
+
   
 dev_dependencies:
   flutter_test:
