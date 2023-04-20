@@ -1,6 +1,9 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_participants_page.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_report_page.dart';
 
 class ChatroomMenu extends StatelessWidget {
   late final CustomPopupMenuController _controller;
@@ -39,7 +42,7 @@ class ChatroomMenu extends StatelessWidget {
                   "View Participants",
                   style: GoogleFonts.roboto(
                     fontSize: 16,
-                    color: primaryColor,
+                    color: kPrimaryColor,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -53,7 +56,7 @@ class ChatroomMenu extends StatelessWidget {
                   "Mute notifications",
                   style: GoogleFonts.roboto(
                     fontSize: 16,
-                    color: primaryColor,
+                    color: kPrimaryColor,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -67,7 +70,7 @@ class ChatroomMenu extends StatelessWidget {
                   "Leave chatroom",
                   style: GoogleFonts.roboto(
                     fontSize: 16,
-                    color: primaryColor,
+                    color: kPrimaryColor,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -85,7 +88,7 @@ class ChatroomMenu extends StatelessWidget {
                   "Report chatroom",
                   style: GoogleFonts.roboto(
                     fontSize: 16,
-                    color: primaryColor,
+                    color: kPrimaryColor,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -94,10 +97,10 @@ class ChatroomMenu extends StatelessWidget {
           ),
         ),
       ),
-      child: Icon(
+      child: const Icon(
         Icons.menu,
         size: 24,
-        color: primaryColor,
+        color: kPrimaryColor,
       ),
     );
   }

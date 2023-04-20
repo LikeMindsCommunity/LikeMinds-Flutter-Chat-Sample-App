@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:group_chat_example/utils/ui_utils.dart';
-import 'package:group_chat_example/views/profile/bloc/profile_bloc.dart';
-import 'package:group_chat_example/views/profile/profile_page.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
 
-import 'package:group_chat_example/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
 
 class ChatroomParticipantsPage extends StatefulWidget {
   const ChatroomParticipantsPage({super.key});

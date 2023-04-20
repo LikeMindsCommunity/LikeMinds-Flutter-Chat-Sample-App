@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
-import 'package:group_chat_example/utils/ui_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 
-import 'package:group_chat_example/views/chatroom/chatroom_components/reaction_button.dart';
-import 'package:group_chat_example/views/chatroom/enums/reaction_enum.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/reaction_button.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/enums/reaction_enum.dart';
 
 class ReactionBar extends StatelessWidget {
   final List reactions;

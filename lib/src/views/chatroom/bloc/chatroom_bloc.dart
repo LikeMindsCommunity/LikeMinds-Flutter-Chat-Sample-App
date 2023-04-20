@@ -1,7 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:group_chat_example/views/chatroom/chatroom_components/chat_bubble.dart';
-import 'package:meta/meta.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 
 part 'chatroom_event.dart';
 part 'chatroom_state.dart';
@@ -12,11 +13,17 @@ class ChatroomBloc extends Bloc<ChatroomEvent, ChatroomState> {
       if (event is InitChatroomEvent) {
         emit(ChatroomLoading());
         //Perform logic
+
+        LMResponse<GetChatroomResponse> getChatroomResponse =
+            await locator<LikeMindsService>()
+                .getChatroom(event.chatroomRequest);
         await Future.delayed(
           const Duration(seconds: 1),
-          (() => emit(ChatroomLoaded(
-                chatroomId: event.chatroomId,
-              ))),
+          (() => emit(
+                ChatroomLoaded(
+                  getChatroomResponse: getChatroomResponse.data!,
+                ),
+              )),
         );
       }
 

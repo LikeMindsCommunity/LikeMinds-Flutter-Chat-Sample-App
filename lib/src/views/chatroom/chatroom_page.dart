@@ -1,3 +1,5 @@
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -11,14 +13,18 @@ import 'chatroom_components/chatroom_menu.dart';
 import 'enums/content_enum.dart';
 
 class ChatroomPage extends StatefulWidget {
-  const ChatroomPage({super.key});
+  final String chatroomId;
+  const ChatroomPage({super.key, required this.chatroomId});
 
   @override
   State<ChatroomPage> createState() => _ChatroomPageState();
 }
 
 class _ChatroomPageState extends State<ChatroomPage> {
+  ChatroomBloc? chatroomBloc;
   ScrollController listScrollController = ScrollController();
+  PagingController<int, GetConversationResponse> pagedListController =
+      PagingController<int, GetConversationResponse>(firstPageKey: 1);
 
   @override
   void dispose() {
@@ -28,6 +34,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
   @override
   Widget build(BuildContext context) {
+    chatroomBloc = BlocProvider.of<ChatroomBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocConsumer<ChatroomBloc, ChatroomState>(
@@ -42,16 +49,23 @@ class _ChatroomPageState extends State<ChatroomPage> {
           }
 
           if (state is ChatroomLoaded) {
-            List<Widget> chatBubbles = getChats(context);
+            var pagedListView = PagedListView(
+                pagingController: pagedListController,
+                builderDelegate: PagedChildBuilderDelegate<Conversation>(
+                  itemBuilder: (context, item, index) {
+                    return ChatBubble(
+                      key: Key(item.id.toString()),
 
-            var listView = ListView.builder(
-              controller: listScrollController,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: chatBubbles.length,
-              itemBuilder: (context, index) {
-                return chatBubbles[index];
-              },
-            );
+                      message:
+                          "Lorem ipsum message $index dolor sit amet, consectetur adipiscing elit.",
+                      time: "11:1$index",
+                      profileImageUrl: "https://picsum.photos/200/300",
+                      showReactions: false,
+                      // onTap: () => print("Tapped $i"),
+                    );
+                  },
+                ));
+
             if (listScrollController.hasClients) {
               listScrollController
                   .jumpTo(listScrollController.position.maxScrollExtent);
@@ -76,7 +90,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         ),
                         child: Center(
                           child: Text(
-                            "C${state.chatroomId}",
+                            "C${state.getChatroomResponse.chatroom?.id}",
                             style: GoogleFonts.montserrat(
                               fontSize: 16,
                               color: Colors.white,
@@ -86,7 +100,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        "Chatroom ${state.chatroomId}",
+                        "Chatroom ${state.getChatroomResponse.chatroom?.id}",
                         style: GoogleFonts.montserrat(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,

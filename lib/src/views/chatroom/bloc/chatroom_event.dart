@@ -4,9 +4,9 @@ part of 'chatroom_bloc.dart';
 abstract class ChatroomEvent {}
 
 class InitChatroomEvent extends ChatroomEvent {
-  final int chatroomId;
+  final GetChatroomRequest chatroomRequest;
 
-  InitChatroomEvent(this.chatroomId);
+  InitChatroomEvent(this.chatroomRequest);
 }
 
 class ReloadChatroomEvent extends ChatroomEvent {}

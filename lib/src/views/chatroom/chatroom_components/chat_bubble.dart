@@ -1,23 +1,19 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:group_chat_example/utils/ui_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
-import 'package:group_chat_example/views/video_player_screen.dart';
-import 'package:group_chat_example/widgets/spinner.dart';
-import 'package:video_player/video_player.dart';
+import 'package:likeminds_chat_mm_fl/src/views/video_player_screen.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:path_provider/path_provider.dart';
 
-import 'package:group_chat_example/views/chatroom/chatroom_components/reaction_chip.dart';
-import 'package:group_chat_example/views/chatroom/chatroom_components/reaction_bar.dart';
-import 'package:group_chat_example/views/chatroom/enums/reaction_enum.dart';
-import 'package:group_chat_example/views/chatroom/enums/content_enum.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/reaction_chip.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/reaction_bar.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/enums/reaction_enum.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/enums/content_enum.dart' as content;
 
 class ChatBubble extends StatefulWidget {
   final bool? isSent;
@@ -25,7 +21,7 @@ class ChatBubble extends StatefulWidget {
   final String? time;
   final String? profileImageUrl;
   final bool showReactions;
-  final ContentType contentType;
+  final content.ContentType contentType;
 
   const ChatBubble({
     super.key,
@@ -34,7 +30,7 @@ class ChatBubble extends StatefulWidget {
     this.time,
     this.profileImageUrl,
     this.showReactions = false,
-    this.contentType = ContentType.text,
+    this.contentType = content.ContentType.text,
   });
 
   @override
@@ -66,7 +62,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   Widget build(BuildContext context) {
     bool _isSent = widget.isSent!;
-    ContentType _contentType = widget.contentType;
+    content.ContentType _contentType = widget.contentType;
     String _message = widget.message ?? "Test message";
     String _time = widget.time ?? "12:00";
     String _profileImageUrl =
@@ -324,20 +320,20 @@ class _ChatBubbleState extends State<ChatBubble> {
   void selectMessage(String messageId) {}
 
   Future<Widget> getContent(
-    ContentType contentType,
+      content.ContentType contentType,
     String message,
     bool isSent,
   ) async {
     switch (contentType) {
-      case ContentType.text:
+      case content.ContentType.text:
         return Text(
           message,
           textAlign: isSent ? TextAlign.end : TextAlign.start,
           style: GoogleFonts.roboto(),
         );
-      case ContentType.image:
+      case content.ContentType.image:
         return CachedNetworkImage(imageUrl: message);
-      case ContentType.video:
+      case content.ContentType.video:
         final uint8list = await VideoThumbnail.thumbnailData(
           video: message,
           imageFormat: ImageFormat.JPEG,

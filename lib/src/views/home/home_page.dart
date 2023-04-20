@@ -1,6 +1,9 @@
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 // import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 // import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
@@ -123,14 +126,13 @@ List<ChatItem> getChats(BuildContext context) {
       time: "11:1$i",
       avatarUrl: "https://www.picsum.photos/200/300",
       onTap: () {
-        // Route route = MaterialPageRoute(
-        //   builder: (BuildContext context) => BlocProvider<ChatroomBloc>(
-        //     create: (BuildContext context) =>
-        //         ChatroomBloc()..add(InitChatroomEvent(i)),
-        //     child: const ChatroomPage(),
-        //   ),
-        // );
-        // Navigator.push(context, route);
+        Route route = MaterialPageRoute(
+          builder: (BuildContext context) => BlocProvider<ChatroomBloc>(
+            create: (BuildContext context) => ChatroomBloc()
+              ..add(InitChatroomEvent(GetChatroomRequest(chatroomId: i))),
+          ),
+        );
+        Navigator.push(context, route);
       },
     ));
   }
