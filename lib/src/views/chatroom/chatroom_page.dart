@@ -13,7 +13,8 @@ import 'chatroom_components/chatroom_menu.dart';
 import 'enums/content_enum.dart';
 
 class ChatroomPage extends StatefulWidget {
-  final String chatroomId;
+  final int chatroomId;
+
   const ChatroomPage({super.key, required this.chatroomId});
 
   @override
@@ -27,6 +28,17 @@ class _ChatroomPageState extends State<ChatroomPage> {
       PagingController<int, GetConversationResponse>(firstPageKey: 1);
 
   @override
+  void initState() {
+    super.initState();
+    chatroomBloc = ChatroomBloc();
+    chatroomBloc?.add(
+      InitChatroomEvent(
+        GetChatroomRequest(chatroomId: widget.chatroomId),
+      ),
+    );
+  }
+
+  @override
   void dispose() {
     listScrollController.dispose();
     super.dispose();
@@ -34,10 +46,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
   @override
   Widget build(BuildContext context) {
-    // chatroomBloc = BlocProvider.of<ChatroomBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocConsumer<ChatroomBloc, ChatroomState>(
+        bloc: chatroomBloc,
         listener: (context, state) {
           if (state is ChatroomLoaded) {
             Fluttertoast.showToast(msg: "Chatroom loaded");
@@ -55,7 +67,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
                   itemBuilder: (context, item, index) {
                     return ChatBubble(
                       key: Key(item.id.toString()),
-
                       message:
                           "Lorem ipsum message $index dolor sit amet, consectetur adipiscing elit.",
                       time: "11:1$index",
@@ -90,7 +101,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         ),
                         child: Center(
                           child: Text(
-                            "C${state.getChatroomResponse.chatroom?.id}",
+                            "C${state.getChatroomResponse.chatroom?.title}",
                             style: GoogleFonts.montserrat(
                               fontSize: 16,
                               color: Colors.white,
@@ -100,7 +111,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        "Chatroom ${state.getChatroomResponse.chatroom?.id}",
+                        "${state.getChatroomResponse.chatroom?.communityName}",
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.montserrat(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,

@@ -138,7 +138,10 @@ List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
       avatarUrl: "https://www.picsum.photos/200/300",
       unreadCount: chatrooms[i].unseenConversationCount ?? 0,
       onTap: () {
-        router.goNamed("$chatRoute/:${chatrooms[i].chatRoom!.id}");
+        // router.goNamed("$chatRoute/:${chatrooms[i].chatRoom!.id}");
+        Navigator.of(context).push (MaterialPageRoute(builder: (context) => BlocProvider<ChatroomBloc>(
+            create:(context) => ChatroomBloc(),
+            child: ChatroomPage(chatroomId: chatrooms[i].chatRoom!.id))));
       },
     ));
   }

@@ -39,17 +39,17 @@ final router = GoRouter(
         child: const HomePage(),
       ),
     ),
-    GoRoute(
-      path: chatRoute,
-      builder: (context, state) => BlocProvider(
-        create: (context) => ChatroomBloc()
-          ..add(
-            InitChatroomEvent(
-                GetChatroomRequest(chatroomId: state.params['id'] as int)),
-          ),
-        child: ChatroomPage(chatroomId: state.params['id']!),
-      ),
-    ),
+    // GoRoute(
+    //   path: chatRoute,
+    //   builder: (context, state) => BlocProvider(
+    //     create: (context) => ChatroomBloc()
+    //       ..add(
+    //         InitChatroomEvent(
+    //             GetChatroomRequest(chatroomId: state.params['id'] as int)),
+    //       ),
+    //     child: ChatroomPage(chatroomId: state.params['id']!),
+    //   ),
+    // ),
     GoRoute(
       path: exploreRoute,
       builder: (context, state) => BlocProvider(
