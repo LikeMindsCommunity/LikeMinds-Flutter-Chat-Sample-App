@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -13,7 +15,7 @@ import 'chatroom_components/chatroom_menu.dart';
 import 'enums/content_enum.dart';
 
 class ChatroomPage extends StatefulWidget {
-  final String chatroomId;
+  final int chatroomId;
   const ChatroomPage({super.key, required this.chatroomId});
 
   @override
@@ -49,6 +51,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
           }
 
           if (state is ChatroomLoaded) {
+            final ChatRoom chatroom = state.getChatroomResponse.chatroom!;
             var pagedListView = PagedListView(
                 pagingController: pagedListController,
                 builderDelegate: PagedChildBuilderDelegate<Conversation>(
@@ -56,8 +59,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     return ChatBubble(
                       key: Key(item.id.toString()),
 
-                      message:
-                          "Lorem ipsum message $index dolor sit amet, consectetur adipiscing elit.",
+                      message: item.answer,
                       time: "11:1$index",
                       profileImageUrl: "https://picsum.photos/200/300",
                       showReactions: false,
@@ -89,18 +91,37 @@ class _ChatroomPageState extends State<ChatroomPage> {
                           borderRadius: BorderRadius.circular(21),
                         ),
                         child: Center(
-                          child: Text(
-                            "C${state.getChatroomResponse.chatroom?.id}",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: chatroom.chatroomImageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: chatroom.chatroomImageUrl!,
+                                  imageBuilder: (context, imageProvider) =>
+                                      Container(
+                                    decoration: BoxDecoration(
+                                      color: LMBranding.instance.headerColor,
+                                      borderRadius: BorderRadius.circular(21),
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  placeholder: (context, url) => const Center(
+                                      child: Spinner(color: kWhiteColor)),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                )
+                              : Text(
+                                  "C${state.getChatroomResponse.chatroom?.id}",
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        "Chatroom ${state.getChatroomResponse.chatroom?.id}",
+                        chatroom.header,
                         style: GoogleFonts.montserrat(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -114,7 +135,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 const SizedBox(height: 18),
                 Expanded(
                   child: Container(
-                    color: Colors.blue.withOpacity(0.2),
+                    color: LMBranding.instance.headerColor.withOpacity(0.2),
                     child: pagedListView,
                   ),
                 ),

@@ -42,6 +42,7 @@ dependencies:
   video_thumbnail: ^0.5.3
   cached_network_image: ^3.2.3
   flutter_polls: ^0.1.2
+  intl: ^0.18.1
 
   
 dev_dependencies:

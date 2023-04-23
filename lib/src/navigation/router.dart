@@ -45,9 +45,12 @@ final router = GoRouter(
         create: (context) => ChatroomBloc()
           ..add(
             InitChatroomEvent(
-                GetChatroomRequest(chatroomId: state.params['id'] as int)),
+              GetChatroomRequest(
+                chatroomId: int.parse(state.params['id'] ?? "0"),
+              ),
+            ),
           ),
-        child: ChatroomPage(chatroomId: state.params['id']!),
+        child: ChatroomPage(chatroomId: int.parse(state.params['id'] ?? "0")),
       ),
     ),
     GoRoute(

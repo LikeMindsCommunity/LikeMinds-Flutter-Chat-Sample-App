@@ -22,6 +22,7 @@ String getInitials(String? name) {
     parts.remove(parts.last); // Remove parantheses
   }
   String initials = parts
+      .sublist(0, 2)
       .map((e) => e.characters.first) // Get first char of each name
       .reduce((_, e) => _ + e) // Reduce into single string
       .toUpperCase(); // Capitalize

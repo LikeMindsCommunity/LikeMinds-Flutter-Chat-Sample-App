@@ -22,7 +22,7 @@ void main() {
   runApp(
     LMChat.instance(
       builder: LMChatBuilder()
-        ..userId("userId")
+        ..userId("22b6a64f-66bf-4bca-800e-b40ca66f924d")
         ..userName("userName"),
     ),
   );

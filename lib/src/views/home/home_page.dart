@@ -1,9 +1,11 @@
+import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 // import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
@@ -23,6 +25,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? communityName;
+  String? userName;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,6 +43,9 @@ class _HomePageState extends State<HomePage> {
           }
 
           if (state is HomeLoaded) {
+            final GetHomeFeedResponse response = state.response;
+            communityName = response.communityMeta?.values.first.name;
+            userName = response.userMeta?.values.first.name;
             List<ChatItem> chatItems = getChats(context, state.response);
             return Column(
               children: [
@@ -58,7 +66,7 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Text(
-                            "Chatrooms",
+                            communityName ?? "Chatrooms",
                             style: LMBranding.instance.fonts.bold
                                 .copyWith(fontSize: 20, color: kWhiteColor),
                           ),
@@ -86,7 +94,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: Center(
                               child: Text(
-                                "KA",
+                                getInitials(userName).isEmpty
+                                    ? "..."
+                                    : getInitials(userName),
                                 style: GoogleFonts.montserrat(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -128,17 +138,24 @@ class _HomePageState extends State<HomePage> {
 
 List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
   List<ChatItem> chats = [];
-  final List<MyChatRoom> chatrooms = response.myChatRooms ?? [];
+  final List<ChatRoom> chatrooms = response.chatroomsData ?? [];
+  final Map<String, Conversation> lastConversations =
+      response.conversationMeta ?? {};
 
   for (int i = 0; i < chatrooms.length; i++) {
     chats.add(ChatItem(
-      name: chatrooms[i].chatRoom!.header,
-      message: chatrooms[i].chatRoom!.title,
-      time: chatrooms[i].lastConversationTime ?? "...",
-      avatarUrl: "https://www.picsum.photos/200/300",
-      unreadCount: chatrooms[i].unseenConversationCount ?? 0,
+      name: chatrooms[i].header,
+      message: lastConversations[chatrooms[i].lastConversationId.toString()]
+              ?.answer ??
+          "...",
+      time: lastConversations[chatrooms[i].lastConversationId.toString()]
+              ?.lastUpdated
+              .toString() ??
+          "...",
+      avatarUrl: chatrooms[i].chatroomImageUrl,
+      unreadCount: chatrooms[i].unseenCount ?? 0,
       onTap: () {
-        router.goNamed("$chatRoute/:${chatrooms[i].chatRoom!.id}");
+        context.push("/chatroom/${chatrooms[i].id}");
       },
     ));
   }

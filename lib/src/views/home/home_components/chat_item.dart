@@ -1,10 +1,7 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
-
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
+import 'package:intl/intl.dart';
 
 class ChatItem extends StatefulWidget {
   final String name;
@@ -66,10 +63,14 @@ class _ChatItemState extends State<ChatItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(_name,
-                        style: LMBranding.instance.fonts.medium.copyWith(
-                          fontSize: 12.sp,
-                        )),
+                    Text(
+                      _name,
+                      style: LMBranding.instance.fonts.medium.copyWith(
+                        fontSize: 12.sp,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       _message,
@@ -87,7 +88,9 @@ class _ChatItemState extends State<ChatItem> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  _time,
+                  DateFormat('kk:mm').format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                          int.tryParse(_time) ?? 0)),
                   style: LMBranding.instance.fonts.regular.copyWith(
                     fontSize: 9.sp,
                   ),
