@@ -113,8 +113,8 @@ class _ChatBarState extends State<ChatBar> {
                                               color: LMBranding
                                                   .instance.buttonColor,
                                             ),
-                                            SizedBox(height: 2),
-                                            Text(
+                                            const SizedBox(height: 2),
+                                            const Text(
                                               "Camera",
                                               style: TextStyle(
                                                 fontSize: 16,
@@ -131,8 +131,8 @@ class _ChatBarState extends State<ChatBar> {
                                                 color: LMBranding
                                                     .instance.buttonColor,
                                               ),
-                                              SizedBox(height: 2),
-                                              Text(
+                                              const SizedBox(height: 2),
+                                              const Text(
                                                 "Gallery",
                                                 style: TextStyle(
                                                   fontSize: 16,
@@ -148,8 +148,8 @@ class _ChatBarState extends State<ChatBar> {
                                               color: LMBranding
                                                   .instance.buttonColor,
                                             ),
-                                            SizedBox(height: 2),
-                                            Text(
+                                            const SizedBox(height: 2),
+                                            const Text(
                                               "Document",
                                               style: TextStyle(
                                                 fontSize: 16,
@@ -174,8 +174,8 @@ class _ChatBarState extends State<ChatBar> {
                                               color: LMBranding
                                                   .instance.buttonColor,
                                             ),
-                                            SizedBox(height: 2),
-                                            Text(
+                                            const SizedBox(height: 2),
+                                            const Text(
                                               "Audio",
                                               style: TextStyle(
                                                 fontSize: 16,
@@ -183,7 +183,7 @@ class _ChatBarState extends State<ChatBar> {
                                             ),
                                           ],
                                         ),
-                                        SizedBox(width: 36),
+                                        const SizedBox(width: 36),
                                         GestureDetector(
                                           onTap: () {
                                             // Navigator.push(
@@ -201,8 +201,8 @@ class _ChatBarState extends State<ChatBar> {
                                                 color: LMBranding
                                                     .instance.buttonColor,
                                               ),
-                                              SizedBox(height: 2),
-                                              Text(
+                                              const SizedBox(height: 2),
+                                              const Text(
                                                 "Poll",
                                                 style: TextStyle(
                                                   fontSize: 16,

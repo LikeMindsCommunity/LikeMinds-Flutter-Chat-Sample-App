@@ -6,6 +6,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat_bar.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
 
@@ -23,10 +24,17 @@ class ChatroomPage extends StatefulWidget {
 }
 
 class _ChatroomPageState extends State<ChatroomPage> {
-  ChatroomBloc? chatroomBloc;
+  late final ConversationBloc conversationBloc;
   ScrollController listScrollController = ScrollController();
-  PagingController<int, GetConversationResponse> pagedListController =
-      PagingController<int, GetConversationResponse>(firstPageKey: 1);
+  PagingController<int, Conversation> pagedListController =
+      PagingController<int, Conversation>(firstPageKey: 1);
+
+  int _page = 1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -52,21 +60,34 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
           if (state is ChatroomLoaded) {
             final ChatRoom chatroom = state.getChatroomResponse.chatroom!;
-            var pagedListView = PagedListView(
-                pagingController: pagedListController,
-                builderDelegate: PagedChildBuilderDelegate<Conversation>(
-                  itemBuilder: (context, item, index) {
-                    return ChatBubble(
-                      key: Key(item.id.toString()),
+            var pagedListView = BlocConsumer<ConversationBloc,
+                    ConversationState>(
+                listener: (context, state) {
+                  if (state is ConversationLoaded) {
+                    _page++;
+                    pagedListController.appendPage(
+                        state.getConversationResponse.conversationData!, _page);
+                  }
+                },
+                builder: (context, state) => PagedListView(
+                    pagingController: pagedListController,
+                    scrollDirection: Axis.vertical,
+                    reverse: true,
+                    builderDelegate: PagedChildBuilderDelegate<Conversation>(
+                      noItemsFoundIndicatorBuilder: (context) =>
+                          const SizedBox(),
+                      itemBuilder: (context, item, index) {
+                        return ChatBubble(
+                          key: Key(item.id.toString()),
 
-                      message: item.answer,
-                      time: "11:1$index",
-                      profileImageUrl: "https://picsum.photos/200/300",
-                      showReactions: false,
-                      // onTap: () => print("Tapped $i"),
-                    );
-                  },
-                ));
+                          message: item.answer,
+                          time: "11:1$index",
+                          profileImageUrl: "https://picsum.photos/200/300",
+                          showReactions: false,
+                          // onTap: () => print("Tapped $i"),
+                        );
+                      },
+                    )));
 
             if (listScrollController.hasClients) {
               listScrollController
@@ -108,7 +129,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                   placeholder: (context, url) => const Center(
                                       child: Spinner(color: kWhiteColor)),
                                   errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
+                                      const Icon(Icons.error),
                                 )
                               : Text(
                                   "C${state.getChatroomResponse.chatroom?.id}",
