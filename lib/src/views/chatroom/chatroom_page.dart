@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
@@ -26,10 +29,12 @@ class ChatroomPage extends StatefulWidget {
 }
 
 class _ChatroomPageState extends State<ChatroomPage> {
+  ChatActionBloc? chatActionBloc;
+  int currentTime = DateTime.now().millisecondsSinceEpoch;
+  ValueNotifier rebuildConversationList = ValueNotifier(false);
   ConversationBloc? conversationBloc;
   ChatRoom? chatroom;
   User currentUser = UserLocalPreference.instance.fetchUserData();
-  int? dateTimeInMs;
   ScrollController listScrollController = ScrollController();
 
   PagingController<int, Conversation> pagedListController =
@@ -45,9 +50,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
             getConversationRequest: (GetConversationRequestBuilder()
                   ..chatroomId(widget.chatroomId)
                   ..page(pageKey)
-                  ..pageSize(10)
+                  ..pageSize(500)
                   ..minTimestamp(0)
-                  ..maxTimestamp(DateTime.now().millisecondsSinceEpoch))
+                  ..maxTimestamp(currentTime))
                 .build(),
           ),
         );
@@ -57,12 +62,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
   List<Conversation> addTimeStampInConversationList(
       List<Conversation> conversationList) {
-    Map<String, List<Conversation>> mappedConversations = {};
+    LinkedHashMap<String, List<Conversation>> mappedConversations =
+        LinkedHashMap<String, List<Conversation>>();
+
     for (Conversation conversation in conversationList) {
-      if (mappedConversations.containsKey(conversation.date)) {
-        mappedConversations[conversation.date]!.add(conversation);
-      } else {
-        mappedConversations[conversation.date!] = <Conversation>[conversation];
+      if (conversation.isTimeStamp == null || !conversation.isTimeStamp!) {
+        if (mappedConversations.containsKey(conversation.date)) {
+          mappedConversations[conversation.date]!.add(conversation);
+        } else {
+          mappedConversations[conversation.date!] = <Conversation>[
+            conversation
+          ];
+        }
       }
     }
     List<Conversation> conversationListWithTimeStamp = <Conversation>[];
@@ -82,27 +93,38 @@ class _ChatroomPageState extends State<ChatroomPage> {
         );
       },
     );
-
     return conversationListWithTimeStamp;
+  }
+
+  void addConversationToPagedList(Conversation conversation) {
+    conversation.userId ??= currentUser.id;
+
+    List<Conversation> conversationList =
+        pagedListController.itemList ?? <Conversation>[];
+
+    if (conversationList.isNotEmpty) {
+      if (conversationList.first.date != conversation.date) {
+        conversationList.add(Conversation(
+          isTimeStamp: true,
+          id: 1,
+          answer: conversation.date!,
+          communityId: chatroom!.communityId!,
+          createdAt: conversation.date!,
+          header: conversation.date,
+        ));
+      }
+    }
+    conversationList.insert(0, conversation);
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
   }
 
   @override
   void initState() {
     super.initState();
+    Bloc.observer = SimpleBlocObserver();
     _addPaginationListener();
     conversationBloc = ConversationBloc();
-    conversationBloc!.add(
-      GetConversation(
-        getConversationRequest: (GetConversationRequestBuilder()
-              ..chatroomId(widget.chatroomId)
-              ..page(1)
-              ..pageSize(500)
-              ..minTimestamp(0)
-              ..maxTimestamp(DateTime.now().millisecondsSinceEpoch))
-            .build(),
-      ),
-    );
-    Bloc.observer = SimpleBlocObserver();
   }
 
   @override
@@ -129,6 +151,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
   @override
   Widget build(BuildContext context) {
     // conversationBloc = BlocProvider.of<ConversationBloc>(context);
+    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocConsumer<ChatroomBloc, ChatroomState>(
@@ -148,48 +171,56 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     ConversationState>(
                 bloc: conversationBloc,
                 listener: (context, state) => updatePagingControllers(state),
-                builder: (context, state) => PagedListView(
-                    pagingController: pagedListController,
-                    reverse: true,
-                    scrollDirection: Axis.vertical,
-                    builderDelegate: PagedChildBuilderDelegate<Conversation>(
-                      noItemsFoundIndicatorBuilder: (context) =>
-                          const SizedBox(),
-                      itemBuilder: (context, item, index) {
-                        if (item.isTimeStamp != null && item.isTimeStamp!) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.symmetric(vertical: 5),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: kWhiteColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  item.answer,
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            ],
-                          );
-                        }
-                        return ChatBubble(
-                          key: Key(item.id.toString()),
-                          message: item.answer,
-                          time: item.createdAt,
-                          isSent: item.userId == currentUser.id,
-                          profileImageUrl: "https://picsum.photos/200/300",
-                          showReactions: true,
-                          // onTap: () => print("Tapped $i"),
-                        );
-                      },
-                    )));
+                builder: (context, state) => ValueListenableBuilder(
+                    valueListenable: rebuildConversationList,
+                    builder: (context, _, __) {
+                      return PagedListView(
+                          pagingController: pagedListController,
+                          reverse: true,
+                          scrollDirection: Axis.vertical,
+                          builderDelegate:
+                              PagedChildBuilderDelegate<Conversation>(
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const SizedBox(),
+                            itemBuilder: (context, item, index) {
+                              if (item.isTimeStamp != null &&
+                                  item.isTimeStamp!) {
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: kWhiteColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        item.answer,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    )
+                                  ],
+                                );
+                              }
+                              return ChatBubble(
+                                key: Key(item.id.toString()),
+                                message: item.answer,
+                                time: item.createdAt,
+                                isSent: item.userId == currentUser.userUniqueId,
+                                profileImageUrl:
+                                    "https://picsum.photos/200/300",
+                                showReactions: true,
+                                // onTap: () => print("Tapped $i"),
+                              );
+                            },
+                          ));
+                    }));
 
             if (listScrollController.hasClients) {
               listScrollController
@@ -262,7 +293,17 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     child: pagedListView,
                   ),
                 ),
-                const ChatBar(),
+                BlocConsumer(
+                    bloc: chatActionBloc,
+                    listener: (context, state) {
+                      if (state is ConversationPosted) {
+                        addConversationToPagedList(
+                            state.postConversationResponse.conversation!);
+                      }
+                    },
+                    builder: (context, state) {
+                      return ChatBar(chatroomId: widget.chatroomId);
+                    }),
               ],
             );
           }

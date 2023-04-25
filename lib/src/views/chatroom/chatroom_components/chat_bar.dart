@@ -1,21 +1,28 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 
 class ChatBar extends StatefulWidget {
-  const ChatBar({super.key});
+  final int chatroomId;
+  const ChatBar({super.key, required this.chatroomId});
 
   @override
   State<ChatBar> createState() => _ChatBarState();
 }
 
 class _ChatBarState extends State<ChatBar> {
+  ChatActionBloc? chatActionBloc;
   late CustomPopupMenuController _popupMenuController;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
 
   @override
   void initState() {
+    Bloc.observer = SimpleBlocObserver();
     _popupMenuController = CustomPopupMenuController();
     _textEditingController = TextEditingController();
     _focusNode = FocusNode();
@@ -40,6 +47,7 @@ class _ChatBarState extends State<ChatBar> {
 
   @override
   Widget build(BuildContext context) {
+    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Container(
       color: Colors.grey.withOpacity(0.2),
       padding: const EdgeInsets.symmetric(
@@ -244,7 +252,20 @@ class _ChatBarState extends State<ChatBar> {
               const SizedBox(width: 16),
               GestureDetector(
                 onTap: () {
-                  Fluttertoast.showToast(msg: "Send message");
+                  if (_textEditingController.text.isEmpty) {
+                    Fluttertoast.showToast(msg: "Text can't be empty");
+                  } else {
+                    Fluttertoast.showToast(msg: "Send message");
+                    chatActionBloc!.add(PostConversation(
+                        (PostConversationRequestBuilder()
+                              ..chatroomId(widget.chatroomId)
+                              ..text(_textEditingController.text)
+                              ..temporaryId(DateTime.now()
+                                  .millisecondsSinceEpoch
+                                  .toString()))
+                            .build()));
+                    _textEditingController.clear();
+                  }
                 },
                 child: Container(
                   height: 48,
