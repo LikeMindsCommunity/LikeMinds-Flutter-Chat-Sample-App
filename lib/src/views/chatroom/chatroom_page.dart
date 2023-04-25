@@ -5,6 +5,8 @@ import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
@@ -24,27 +26,109 @@ class ChatroomPage extends StatefulWidget {
 }
 
 class _ChatroomPageState extends State<ChatroomPage> {
-  late final ConversationBloc conversationBloc;
+  ConversationBloc? conversationBloc;
+  ChatRoom? chatroom;
+  User currentUser = UserLocalPreference.instance.fetchUserData();
+  int? dateTimeInMs;
   ScrollController listScrollController = ScrollController();
+
   PagingController<int, Conversation> pagedListController =
       PagingController<int, Conversation>(firstPageKey: 1);
 
   int _page = 1;
 
+  _addPaginationListener() {
+    pagedListController.addPageRequestListener(
+      (pageKey) {
+        conversationBloc!.add(
+          GetConversation(
+            getConversationRequest: (GetConversationRequestBuilder()
+                  ..chatroomId(widget.chatroomId)
+                  ..page(pageKey)
+                  ..pageSize(10)
+                  ..minTimestamp(0)
+                  ..maxTimestamp(DateTime.now().millisecondsSinceEpoch))
+                .build(),
+          ),
+        );
+      },
+    );
+  }
+
+  List<Conversation> addTimeStampInConversationList(
+      List<Conversation> conversationList) {
+    Map<String, List<Conversation>> mappedConversations = {};
+    for (Conversation conversation in conversationList) {
+      if (mappedConversations.containsKey(conversation.date)) {
+        mappedConversations[conversation.date]!.add(conversation);
+      } else {
+        mappedConversations[conversation.date!] = <Conversation>[conversation];
+      }
+    }
+    List<Conversation> conversationListWithTimeStamp = <Conversation>[];
+    mappedConversations.forEach(
+      (key, value) {
+        conversationListWithTimeStamp.addAll(value);
+        conversationListWithTimeStamp.add(
+          Conversation(
+            isTimeStamp: true,
+            answer: key,
+            communityId: chatroom!.communityId!,
+            createdAt: key,
+            header: key,
+            id: 0,
+            pollAnswerText: key,
+          ),
+        );
+      },
+    );
+
+    return conversationListWithTimeStamp;
+  }
+
   @override
   void initState() {
     super.initState();
+    _addPaginationListener();
+    conversationBloc = ConversationBloc();
+    conversationBloc!.add(
+      GetConversation(
+        getConversationRequest: (GetConversationRequestBuilder()
+              ..chatroomId(widget.chatroomId)
+              ..page(1)
+              ..pageSize(500)
+              ..minTimestamp(0)
+              ..maxTimestamp(DateTime.now().millisecondsSinceEpoch))
+            .build(),
+      ),
+    );
+    Bloc.observer = SimpleBlocObserver();
   }
 
   @override
   void dispose() {
     listScrollController.dispose();
+    pagedListController.dispose();
     super.dispose();
+  }
+
+  void updatePagingControllers(Object? state) {
+    if (state is ConversationLoaded) {
+      _page++;
+      List<Conversation> conversationData =
+          state.getConversationResponse.conversationData!;
+      conversationData = addTimeStampInConversationList(conversationData);
+      if (state.getConversationResponse.conversationData!.length < 500) {
+        pagedListController.appendLastPage(conversationData);
+      } else {
+        pagedListController.appendPage(conversationData, _page);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // chatroomBloc = BlocProvider.of<ChatroomBloc>(context);
+    // conversationBloc = BlocProvider.of<ConversationBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocConsumer<ChatroomBloc, ChatroomState>(
@@ -59,31 +143,49 @@ class _ChatroomPageState extends State<ChatroomPage> {
           }
 
           if (state is ChatroomLoaded) {
-            final ChatRoom chatroom = state.getChatroomResponse.chatroom!;
+            chatroom = state.getChatroomResponse.chatroom!;
             var pagedListView = BlocConsumer<ConversationBloc,
                     ConversationState>(
-                listener: (context, state) {
-                  if (state is ConversationLoaded) {
-                    _page++;
-                    pagedListController.appendPage(
-                        state.getConversationResponse.conversationData!, _page);
-                  }
-                },
+                bloc: conversationBloc,
+                listener: (context, state) => updatePagingControllers(state),
                 builder: (context, state) => PagedListView(
                     pagingController: pagedListController,
-                    scrollDirection: Axis.vertical,
                     reverse: true,
+                    scrollDirection: Axis.vertical,
                     builderDelegate: PagedChildBuilderDelegate<Conversation>(
                       noItemsFoundIndicatorBuilder: (context) =>
                           const SizedBox(),
                       itemBuilder: (context, item, index) {
+                        if (item.isTimeStamp != null && item.isTimeStamp!) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(vertical: 5),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: kWhiteColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  item.answer,
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            ],
+                          );
+                        }
                         return ChatBubble(
                           key: Key(item.id.toString()),
-
                           message: item.answer,
-                          time: "11:1$index",
+                          time: item.createdAt,
+                          isSent: item.userId == currentUser.id,
                           profileImageUrl: "https://picsum.photos/200/300",
-                          showReactions: false,
+                          showReactions: true,
                           // onTap: () => print("Tapped $i"),
                         );
                       },
@@ -112,9 +214,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                           borderRadius: BorderRadius.circular(21),
                         ),
                         child: Center(
-                          child: chatroom.chatroomImageUrl != null
+                          child: chatroom!.chatroomImageUrl != null
                               ? CachedNetworkImage(
-                                  imageUrl: chatroom.chatroomImageUrl!,
+                                  imageUrl: chatroom!.chatroomImageUrl!,
                                   imageBuilder: (context, imageProvider) =>
                                       Container(
                                     decoration: BoxDecoration(
@@ -142,7 +244,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        chatroom.header,
+                        chatroom!.header,
                         style: GoogleFonts.montserrat(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -172,50 +274,50 @@ class _ChatroomPageState extends State<ChatroomPage> {
   }
 }
 
-List<Widget> getChats(BuildContext context) {
-  List<Widget> chats = [];
+// List<Widget> getChats(BuildContext context) {
+//   List<Widget> chats = [];
 
-  for (int i = 0; i < 10; i++) {
-    chats.add(
-      ChatBubble(
-        key: Key(i.toString()),
-        isSent: i % 2 == 0,
-        message:
-            "Lorem ipsum message $i dolor sit amet, consectetur adipiscing elit.",
-        time: "11:1$i",
-        profileImageUrl: "https://picsum.photos/200/300",
-        showReactions: false,
-        // onTap: () => print("Tapped $i"),
-      ),
-    );
-  }
+//   for (int i = 0; i < 10; i++) {
+//     chats.add(
+//       ChatBubble(
+//         key: Key(i.toString()),
+//         isSent: i % 2 == 0,
+//         message:
+//             "Lorem ipsum message $i dolor sit amet, consectetur adipiscing elit.",
+//         time: "11:1$i",
+//         profileImageUrl: "https://picsum.photos/200/300",
+//         showReactions: false,
+//         // onTap: () => print("Tapped $i"),
+//       ),
+//     );
+//   }
 
-  chats.add(
-    ChatBubble(
-      key: UniqueKey(),
-      isSent: false,
-      message: "https://picsum.photos/700/600",
-      time: "12:34",
-      profileImageUrl: "https://picsum.photos/600/600",
-      showReactions: false,
-      contentType: ContentType.image,
-      // onTap: () => print("Tapped $i"),
-    ),
-  );
+//   chats.add(
+//     ChatBubble(
+//       key: UniqueKey(),
+//       isSent: false,
+//       message: "https://picsum.photos/700/600",
+//       time: "12:34",
+//       profileImageUrl: "https://picsum.photos/600/600",
+//       showReactions: false,
+//       contentType: ContentType.image,
+//       // onTap: () => print("Tapped $i"),
+//     ),
+//   );
 
-  chats.add(
-    ChatBubble(
-      key: UniqueKey(),
-      isSent: true,
-      message:
-          "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
-      time: "12:34",
-      profileImageUrl: "https://picsum.photos/600/600",
-      showReactions: false,
-      contentType: ContentType.video,
-      // onTap: () => print("Tapped $i"),
-    ),
-  );
+//   chats.add(
+//     ChatBubble(
+//       key: UniqueKey(),
+//       isSent: true,
+//       message:
+//           "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+//       time: "12:34",
+//       profileImageUrl: "https://picsum.photos/600/600",
+//       showReactions: false,
+//       contentType: ContentType.video,
+//       // onTap: () => print("Tapped $i"),
+//     ),
+//   );
 
-  return chats;
-}
+//   return chats;
+// }

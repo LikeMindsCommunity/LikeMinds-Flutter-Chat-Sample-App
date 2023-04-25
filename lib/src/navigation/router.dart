@@ -55,19 +55,7 @@ final router = GoRouter(
               ),
           ),
           BlocProvider<ConversationBloc>(
-            create: (context) => ConversationBloc()
-              ..add(
-                GetConversation(
-                  getConversationRequest: (GetConversationRequestBuilder()
-                        ..chatroomId(
-                          int.parse(state.params['id'] ?? "0"),
-                        )
-                        ..page(1)
-                        ..pageSize(10))
-                      .build(),
-                ),
-              ),
-          ),
+              create: (context) => ConversationBloc()),
         ],
         child: ChatroomPage(
           chatroomId: int.parse(state.params['id'] ?? "0"),
