@@ -1,4 +1,5 @@
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 
 abstract class ILikeMindsService {
   Future<LMResponse<InitiateUserResponse>> initiateUser(
@@ -50,7 +51,9 @@ class LikeMindsService implements ILikeMindsService {
 
   @override
   Future<LMResponse<InitiateUserResponse>> initiateUser(
-      InitiateUserRequest request) {
+      InitiateUserRequest request) async {
+    UserLocalPreference userLocalPreference = UserLocalPreference.instance;
+    await userLocalPreference.initialize();
     return client.initiateUser(request);
   }
 

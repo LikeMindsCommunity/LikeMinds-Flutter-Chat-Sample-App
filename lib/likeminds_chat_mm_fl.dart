@@ -7,6 +7,7 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:sizer/sizer.dart';
 
@@ -70,6 +71,11 @@ class LMChat extends StatelessWidget {
             ),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                LMResponse<InitiateUserResponse> response = snapshot.data!;
+                if (response.success!) {
+                  User user = response.data!.initiateUser!.user;
+                  UserLocalPreference.instance.storeUserData(user);
+                }
                 return MaterialApp.router(
                   routerConfig: router,
                   debugShowCheckedModeBanner: true,
