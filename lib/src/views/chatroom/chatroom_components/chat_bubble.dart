@@ -231,13 +231,15 @@ class _ChatBubbleState extends State<ChatBubble> {
                               ? CrossAxisAlignment.end
                               : CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.user.name,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: lmBranding.headerColor,
-                              ),
-                            ),
+                            isSent
+                                ? const SizedBox()
+                                : Text(
+                                    widget.user.name,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: lmBranding.headerColor,
+                                    ),
+                                  ),
                             FutureBuilder(
                                 builder: ((context, snapshot) {
                                   if (snapshot.hasData) {
