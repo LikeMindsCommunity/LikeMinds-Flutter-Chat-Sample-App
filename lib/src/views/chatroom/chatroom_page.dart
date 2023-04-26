@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -19,7 +17,6 @@ import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
 import 'bloc/chatroom_bloc.dart';
 import 'chatroom_components/chat_bubble.dart';
 import 'chatroom_components/chatroom_menu.dart';
-import 'enums/content_enum.dart';
 
 class ChatroomPage extends StatefulWidget {
   final int chatroomId;
@@ -34,7 +31,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
   ConversationBloc? conversationBloc;
-  Map<int, User> userMeta = Map<int, User>();
+  Map<int, User> userMeta = <int, User>{};
   ChatRoom? chatroom;
   User currentUser = UserLocalPreference.instance.fetchUserData();
   ScrollController listScrollController = ScrollController();
@@ -257,7 +254,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         ),
                       ),
                       const Spacer(),
-                      ChatroomMenu(),
+                      ChatroomMenu(
+                        chatroom: chatroom!,
+                      ),
                     ],
                   ),
                 ),

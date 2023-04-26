@@ -102,7 +102,7 @@ class _ChatItemState extends State<ChatItem> {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 10, 24, 103),
+                      color: const Color.fromARGB(255, 10, 24, 103),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(

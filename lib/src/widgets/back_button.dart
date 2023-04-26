@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 
 class BackButton extends StatelessWidget {
   const BackButton({super.key});

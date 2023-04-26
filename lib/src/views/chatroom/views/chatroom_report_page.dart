@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
@@ -16,7 +15,7 @@ class _ChatroomReportPageState extends State<ChatroomReportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,7 +51,7 @@ class _ChatroomReportPageState extends State<ChatroomReportPage> {
               ),
             ),
             const SizedBox(height: 24),
-            ChoiceChip(
+            const ChoiceChip(
               label: Text("Spam"),
               selected: false,
             ),

@@ -50,9 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ],
       bodyChildren: [
         BlocConsumer<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            // TODO: implement listener
-          },
+          listener: (context, state) {},
           builder: (context, state) {
             if (state is ProfileLoading) {
               return const Spinner(color: kWhiteColor);
