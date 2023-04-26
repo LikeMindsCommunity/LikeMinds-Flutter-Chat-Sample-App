@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,6 +34,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
   ConversationBloc? conversationBloc;
+  Map<int, User> userMeta = Map<int, User>();
   ChatRoom? chatroom;
   User currentUser = UserLocalPreference.instance.fetchUserData();
   ScrollController listScrollController = ScrollController();
@@ -60,42 +62,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
     );
   }
 
-  List<Conversation> addTimeStampInConversationList(
-      List<Conversation> conversationList) {
-    LinkedHashMap<String, List<Conversation>> mappedConversations =
-        LinkedHashMap<String, List<Conversation>>();
-
-    for (Conversation conversation in conversationList) {
-      if (conversation.isTimeStamp == null || !conversation.isTimeStamp!) {
-        if (mappedConversations.containsKey(conversation.date)) {
-          mappedConversations[conversation.date]!.add(conversation);
-        } else {
-          mappedConversations[conversation.date!] = <Conversation>[
-            conversation
-          ];
-        }
-      }
-    }
-    List<Conversation> conversationListWithTimeStamp = <Conversation>[];
-    mappedConversations.forEach(
-      (key, value) {
-        conversationListWithTimeStamp.addAll(value);
-        conversationListWithTimeStamp.add(
-          Conversation(
-            isTimeStamp: true,
-            answer: key,
-            communityId: chatroom!.communityId!,
-            createdAt: key,
-            header: key,
-            id: 0,
-            pollAnswerText: key,
-          ),
-        );
-      },
-    );
-    return conversationListWithTimeStamp;
-  }
-
   void addConversationToPagedList(Conversation conversation) {
     List<Conversation> conversationList =
         pagedListController.itemList ?? <Conversation>[];
@@ -113,8 +79,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
       }
     }
     conversationList.insert(0, conversation);
-    pagedListController.itemList = conversationList;
-    rebuildConversationList.value = !rebuildConversationList.value;
+    if (!userMeta.containsKey(currentUser.id)) {
+      userMeta[currentUser.id] = currentUser;
+    }
+    pagedListController.value = PagingState(
+      nextPageKey: _page,
+      itemList: conversationList,
+    );
   }
 
   @override
@@ -137,7 +108,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
       _page++;
       List<Conversation> conversationData =
           state.getConversationResponse.conversationData!;
-      conversationData = addTimeStampInConversationList(conversationData);
+      userMeta.addAll(state.getConversationResponse.userMeta!);
+      conversationData = addTimeStampInConversationList(
+          conversationData, chatroom!.communityId!);
       if (state.getConversationResponse.conversationData!.length < 500) {
         pagedListController.appendLastPage(conversationData);
       } else {
@@ -165,6 +138,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
           if (state is ChatroomLoaded) {
             chatroom = state.getChatroomResponse.chatroom!;
+            List<ChatRoomMember> chatroomMembers =
+                state.getChatroomResponse.conversationUsers!;
+
             var pagedListView = BlocConsumer<ConversationBloc,
                     ConversationState>(
                 bloc: conversationBloc,
@@ -211,10 +187,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 message: item.answer,
                                 time: item.createdAt,
                                 isSent: item.userId == null
-                                    ? true
+                                    ? item.memberId == currentUser.id
                                     : item.userId == currentUser.id,
-                                profileImageUrl:
-                                    "https://picsum.photos/200/300",
+                                user: userMeta[item.userId ?? item.memberId]!,
                                 showReactions: true,
                                 // onTap: () => print("Tapped $i"),
                               );
