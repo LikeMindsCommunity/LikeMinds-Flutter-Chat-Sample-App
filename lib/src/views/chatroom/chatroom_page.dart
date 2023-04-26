@@ -97,8 +97,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
   }
 
   void addConversationToPagedList(Conversation conversation) {
-    conversation.userId ??= currentUser.id;
-
     List<Conversation> conversationList =
         pagedListController.itemList ?? <Conversation>[];
 
@@ -212,7 +210,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 key: Key(item.id.toString()),
                                 message: item.answer,
                                 time: item.createdAt,
-                                isSent: item.userId == currentUser.userUniqueId,
+                                isSent: item.userId == null
+                                    ? true
+                                    : item.userId == currentUser.id,
                                 profileImageUrl:
                                     "https://picsum.photos/200/300",
                                 showReactions: true,
