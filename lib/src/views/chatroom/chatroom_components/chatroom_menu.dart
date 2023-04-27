@@ -2,6 +2,7 @@ import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
@@ -48,10 +49,10 @@ class ChatroomMenu extends StatelessWidget {
                 },
                 title: Text(
                   "View Participants",
-                  style: GoogleFonts.roboto(
-                    fontSize: 16,
-                    color: kPrimaryColor,
+                  style: LMTheme.regular.copyWith(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
+                    color: LMTheme.buttonColor,
                   ),
                 ),
               ),
@@ -62,10 +63,10 @@ class ChatroomMenu extends StatelessWidget {
                 },
                 title: Text(
                   "Mute notifications",
-                  style: GoogleFonts.roboto(
-                    fontSize: 16,
-                    color: kPrimaryColor,
+                  style: LMTheme.regular.copyWith(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
+                    color: LMTheme.buttonColor,
                   ),
                 ),
               ),
@@ -76,28 +77,28 @@ class ChatroomMenu extends StatelessWidget {
                 },
                 title: Text(
                   "Leave chatroom",
-                  style: GoogleFonts.roboto(
-                    fontSize: 16,
-                    color: kPrimaryColor,
+                  style: LMTheme.regular.copyWith(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
+                    color: LMTheme.buttonColor,
                   ),
                 ),
               ),
               ListTile(
                 onTap: () {
-                  _controller.hideMenu();
-                  Route route = MaterialPageRoute(
-                    builder: (context) => const ChatroomReportPage(),
-                  );
-                  Navigator.push(context, route);
-                  _controller.hideMenu();
+                  // _controller.hideMenu();
+                  // Route route = MaterialPageRoute(
+                  //   builder: (context) => const ChatroomReportPage(),
+                  // );
+                  // Navigator.push(context, route);
+                  // _controller.hideMenu();
                 },
                 title: Text(
                   "Report chatroom",
-                  style: GoogleFonts.roboto(
-                    fontSize: 16,
-                    color: kPrimaryColor,
+                  style: LMTheme.regular.copyWith(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
+                    color: LMTheme.buttonColor,
                   ),
                 ),
               ),
@@ -105,10 +106,10 @@ class ChatroomMenu extends StatelessWidget {
           ),
         ),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.menu,
         size: 24,
-        color: kPrimaryColor,
+        color: LMTheme.buttonColor,
       ),
     );
   }

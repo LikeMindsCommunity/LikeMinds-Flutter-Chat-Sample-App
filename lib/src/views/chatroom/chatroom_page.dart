@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
@@ -11,6 +12,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
 
@@ -90,7 +92,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
     super.initState();
     Bloc.observer = SimpleBlocObserver();
     _addPaginationListener();
-    conversationBloc = ConversationBloc();
+    conversationBloc = ConversationBloc()
+      ..add(
+        MarkReadChatroomEvent(chatroomId: widget.chatroomId),
+      );
   }
 
   @override
@@ -179,6 +184,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                   ],
                                 );
                               }
+                              // item.
                               return ChatBubble(
                                 key: Key(item.id.toString()),
                                 message: item.answer,
@@ -209,48 +215,17 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     children: [
                       const BB.BackButton(),
                       const SizedBox(width: 18),
-                      Container(
-                        height: 42,
-                        width: 42,
-                        decoration: BoxDecoration(
-                          color: LMBranding.instance.headerColor,
-                          borderRadius: BorderRadius.circular(21),
-                        ),
-                        child: Center(
-                          child: chatroom!.chatroomImageUrl != null
-                              ? CachedNetworkImage(
-                                  imageUrl: chatroom!.chatroomImageUrl!,
-                                  imageBuilder: (context, imageProvider) =>
-                                      Container(
-                                    decoration: BoxDecoration(
-                                      color: LMBranding.instance.headerColor,
-                                      borderRadius: BorderRadius.circular(21),
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  placeholder: (context, url) => const Center(
-                                      child: Spinner(color: kWhiteColor)),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                )
-                              : Text(
-                                  "C${state.getChatroomResponse.chatroom?.id}",
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
+                      PictureOrInitial(
+                        fallbackText: chatroom!.header,
+                        imageUrl: chatroom?.chatroomImageUrl,
+                        size: 28.sp,
+                        fontSize: 14.sp,
                       ),
                       const SizedBox(width: 12),
                       Text(
                         chatroom!.header,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
+                        style: LMTheme.medium.copyWith(
+                          fontSize: 14.sp,
                         ),
                       ),
                       const Spacer(),
@@ -272,7 +247,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     listener: (context, state) {
                       if (state is ConversationPosted) {
                         addConversationToPagedList(
-                            state.postConversationResponse.conversation!);
+                          state.postConversationResponse.conversation!,
+                        );
                       }
                     },
                     builder: (context, state) {

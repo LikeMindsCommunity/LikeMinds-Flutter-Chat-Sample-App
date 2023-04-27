@@ -4,6 +4,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 
 class ChatBar extends StatefulWidget {
@@ -19,6 +21,9 @@ class _ChatBarState extends State<ChatBar> {
   late CustomPopupMenuController _popupMenuController;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
+
+  List<UserTag> userTags = [];
+  String? result;
 
   @override
   void initState() {
@@ -74,22 +79,35 @@ class _ChatBarState extends State<ChatBar> {
                         icon: const Icon(Icons.emoji_emotions_outlined),
                       ),
                       Expanded(
-                        child: TextField(
+                        child: TaggingAheadTextField(
+                          isDown: false,
+                          chatroomId: widget.chatroomId,
+                          onTagSelected: (tag) {
+                            print(tag);
+                            userTags.add(tag);
+                          },
+                          onChange: (value) {
+                            print(value);
+                          },
                           controller: _textEditingController,
                           focusNode: _focusNode,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Type a message",
-                            hintStyle: GoogleFonts.montserrat(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                            ),
-                          ),
                         ),
+                        // child: TextField(
+                        //   controller: _textEditingController,
+                        //   focusNode: _focusNode,
+                        //   keyboardType: TextInputType.text,
+                        //   decoration: InputDecoration(
+                        //     border: InputBorder.none,
+                        //     hintText: "Type a message",
+                        //     hintStyle: GoogleFonts.montserrat(
+                        //       fontSize: 14,
+                        //       color: Colors.grey,
+                        //     ),
+                        //     contentPadding: const EdgeInsets.symmetric(
+                        //       vertical: 16,
+                        //     ),
+                        //   ),
+                        // ),
                       ),
                       CustomPopupMenu(
                         controller: _popupMenuController,
@@ -256,10 +274,13 @@ class _ChatBarState extends State<ChatBar> {
                     Fluttertoast.showToast(msg: "Text can't be empty");
                   } else {
                     Fluttertoast.showToast(msg: "Send message");
+                    final string = _textEditingController.text;
+                    userTags = TaggingHelper.matchTags(string, userTags);
+                    result = TaggingHelper.encodeString(string, userTags);
                     chatActionBloc!.add(PostConversation(
                         (PostConversationRequestBuilder()
                               ..chatroomId(widget.chatroomId)
-                              ..text(_textEditingController.text)
+                              ..text(result!)
                               ..temporaryId(DateTime.now()
                                   .millisecondsSinceEpoch
                                   .toString()))

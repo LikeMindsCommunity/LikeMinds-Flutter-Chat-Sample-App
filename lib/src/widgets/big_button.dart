@@ -28,7 +28,8 @@ class BigButton extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: GoogleFonts.montserrat(
+            style: LMBranding.instance.fonts.regular.copyWith(
+              fontSize: 16,
               color: Colors.white,
             ),
           ),

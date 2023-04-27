@@ -28,6 +28,14 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           );
         }
       }
+      if (event is MarkReadChatroomEvent) {
+        LMResponse response =
+            await locator<LikeMindsService>().markReadChatroom(
+          MarkReadChatroomRequest(
+            chatroomId: event.chatroomId,
+          ),
+        );
+      }
     });
   }
 }
