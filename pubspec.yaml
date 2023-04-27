@@ -1,6 +1,6 @@
 name: likeminds_chat_mm_fl
 description: Sample UI package for LikeMinds Chat SDK
-version: 0.0.1
+version: 1.0.0
 homepage: "https://likeminds.community"
 publish_to: none
 
@@ -43,7 +43,13 @@ dependencies:
   cached_network_image: ^3.2.3
   flutter_polls: ^0.1.2
   intl: ^0.18.1
-
+  firebase_core: ^2.4.1
+  firebase_messaging: ^14.2.1
+  overlay_support: 2.1.0
+  envied: ^0.3.0
+  extended_text_field: ^11.0.0
+  flutter_typeahead: 
+    path: lib/packages/flutter_typeahead-4.3.7
   
 dev_dependencies:
   flutter_test:

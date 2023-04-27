@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class BackButton extends StatelessWidget {
   const BackButton({super.key});
@@ -11,15 +9,15 @@ class BackButton extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.pop(),
       child: Container(
-        height: 32,
-        width: 32,
+        height: 24.sp,
+        width: 24.sp,
         decoration: BoxDecoration(
           color: LMBranding.instance.buttonColor,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.arrow_back,
-          size: 24,
+          size: 18.sp,
           color: Colors.white,
         ),
       ),

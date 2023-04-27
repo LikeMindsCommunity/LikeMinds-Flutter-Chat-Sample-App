@@ -1,7 +1,9 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class ChatItem extends StatefulWidget {
   final String name;
@@ -42,19 +44,9 @@ class _ChatItemState extends State<ChatItem> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(32),
-                image: _avatarUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(_avatarUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
+            PictureOrInitial(
+              fallbackText: _name,
+              imageUrl: _avatarUrl,
             ),
             Expanded(
               child: Padding(
@@ -78,6 +70,7 @@ class _ChatItemState extends State<ChatItem> {
                       overflow: TextOverflow.ellipsis,
                       style: LMBranding.instance.fonts.regular.copyWith(
                         fontSize: 10.sp,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ],
@@ -88,11 +81,10 @@ class _ChatItemState extends State<ChatItem> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  DateFormat('kk:mm').format(
-                      DateTime.fromMillisecondsSinceEpoch(
-                          int.tryParse(_time) ?? 0)),
+                  getTime(_time),
                   style: LMBranding.instance.fonts.regular.copyWith(
                     fontSize: 9.sp,
+                    fontWeight: FontWeight.w300,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -122,5 +114,21 @@ class _ChatItemState extends State<ChatItem> {
         ),
       ),
     );
+  }
+}
+
+String getTime(String time) {
+  final int _time = int.tryParse(time) ?? 0;
+  final DateTime now = DateTime.now();
+  final DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(_time);
+  final Duration difference = now.difference(messageTime);
+  if (difference.inDays > 0) {
+    return DateFormat('dd/MM/yyyy').format(messageTime);
+  } else if (difference.inHours > 0) {
+    return DateFormat('kk:mm').format(messageTime);
+  } else if (difference.inMinutes > 0) {
+    return DateFormat('kk:mm').format(messageTime);
+  } else {
+    return DateFormat('dd/MM/yyyy').format(messageTime);
   }
 }

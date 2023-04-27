@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/bloc/explore_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
@@ -41,16 +43,28 @@ final router = GoRouter(
     ),
     GoRoute(
       path: chatRoute,
-      builder: (context, state) => BlocProvider(
-        create: (context) => ChatroomBloc()
-          ..add(
-            InitChatroomEvent(
-              GetChatroomRequest(
-                chatroomId: int.parse(state.params['id'] ?? "0"),
+      builder: (context, state) => MultiBlocProvider(
+        providers: [
+          BlocProvider<ChatroomBloc>(
+            create: (context) => ChatroomBloc()
+              ..add(
+                InitChatroomEvent(
+                  GetChatroomRequest(
+                    chatroomId: int.parse(state.params['id'] ?? "0"),
+                  ),
+                ),
               ),
-            ),
           ),
-        child: ChatroomPage(chatroomId: int.parse(state.params['id'] ?? "0")),
+          BlocProvider<ConversationBloc>(
+            create: (context) => ConversationBloc(),
+          ),
+          BlocProvider<ChatActionBloc>(
+            create: (context) => ChatActionBloc(),
+          ),
+        ],
+        child: ChatroomPage(
+          chatroomId: int.parse(state.params['id'] ?? "0"),
+        ),
       ),
     ),
     GoRoute(
