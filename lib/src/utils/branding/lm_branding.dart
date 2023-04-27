@@ -49,8 +49,8 @@ class LMBranding {
   }
 
   // Getters
-  get headerColor => instance._headerColor;
-  get buttonColor => instance._buttonColor;
-  get textLinkColor => instance._textLinkColor;
+  Color get headerColor => instance._headerColor;
+  Color get buttonColor => instance._buttonColor;
+  Color get textLinkColor => instance._textLinkColor;
   LMFonts get fonts => instance._fonts;
 }

@@ -21,12 +21,14 @@ String getInitials(String? name) {
     // Check if last part is a parantheses
     parts.remove(parts.last); // Remove parantheses
   }
-  String initials = parts
-      .sublist(0, 2)
-      .map((e) => e.characters.first) // Get first char of each name
+  var initials = parts.map((e) => e.characters.first);
+  if (initials.length > 2) {
+    initials = initials.toList().sublist(0, 2);
+  }
+  String initialString = initials
       .reduce((_, e) => _ + e) // Reduce into single string
       .toUpperCase(); // Capitalize
-  return initials;
+  return initialString;
 }
 
 extension StringColor on String {

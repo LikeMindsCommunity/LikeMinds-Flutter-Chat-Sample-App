@@ -1,5 +1,6 @@
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 
 abstract class ILikeMindsService {
   Future<LMResponse<InitiateUserResponse>> initiateUser(
@@ -32,6 +33,7 @@ abstract class ILikeMindsService {
       RegisterDeviceRequest request);
   Future<LMResponse<GetParticipantsResponse>> getParticipants(
       GetParticipantsRequest request);
+  Future<LMResponse<TagResponseModel>> getTaggingList(TagRequestModel request);
 }
 
 class LikeMindsService implements ILikeMindsService {
@@ -47,6 +49,7 @@ class LikeMindsService implements ILikeMindsService {
       apiKey: apiKey,
       sdkCallback: lmCallBack,
     );
+    LMAnalytics.get().initialize();
   }
 
   @override
@@ -143,5 +146,10 @@ class LikeMindsService implements ILikeMindsService {
   Future<LMResponse<GetParticipantsResponse>> getParticipants(
       GetParticipantsRequest request) {
     return client.getParticipants(request);
+  }
+
+  @override
+  Future<LMResponse<TagResponseModel>> getTaggingList(TagRequestModel request) {
+    return client.getTaggingList(request);
   }
 }

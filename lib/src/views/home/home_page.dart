@@ -1,10 +1,12 @@
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
@@ -16,6 +18,7 @@ import 'package:likeminds_chat_mm_fl/src/views/home/home_components/explore_spac
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/skeleton_list.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -43,15 +46,18 @@ class _HomePageState extends State<HomePage> {
           }
 
           if (state is HomeLoaded) {
+            UserLocalPreference userLocalPreference =
+                UserLocalPreference.instance;
+            final user = userLocalPreference.fetchUserData();
             final GetHomeFeedResponse response = state.response;
             communityName = response.communityMeta?.values.first.name;
-            userName = response.userMeta?.values.first.name;
+            userName = response.userMeta?[user.id.toString()]?.name;
             List<ChatItem> chatItems = getChats(context, state.response);
             return Column(
               children: [
                 // const SizedBox(height: 72),
                 Container(
-                  height: 16.h,
+                  height: 14.h,
                   width: 100.w,
                   color: LMBranding.instance.headerColor,
                   child: Padding(
@@ -64,48 +70,33 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
                             communityName ?? "Chatrooms",
                             style: LMBranding.instance.fonts.bold
-                                .copyWith(fontSize: 20, color: kWhiteColor),
+                                .copyWith(fontSize: 16.sp, color: kWhiteColor),
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
-                            Route route = MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  BlocProvider<ProfileBloc>(
-                                create: (BuildContext context) =>
-                                    ProfileBloc()..add(InitProfileEvent()),
-                                child: const ProfilePage(
-                                  isSelf: true,
+                            onTap: () {
+                              Route route = MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    BlocProvider<ProfileBloc>(
+                                  create: (BuildContext context) =>
+                                      ProfileBloc()..add(InitProfileEvent()),
+                                  child: const ProfilePage(
+                                    isSelf: true,
+                                  ),
                                 ),
-                              ),
-                            );
-                            Navigator.push(context, route);
-                          },
-                          child: Container(
-                            height: 42,
-                            width: 42,
-                            decoration: BoxDecoration(
-                              color: LMBranding.instance.textLinkColor,
-                              borderRadius: BorderRadius.circular(21),
-                            ),
-                            child: Center(
-                              child: Text(
-                                getInitials(userName).isEmpty
-                                    ? "..."
-                                    : getInitials(userName),
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                              );
+                              Navigator.push(context, route);
+                            },
+                            child: PictureOrInitial(
+                              fallbackText: userName!,
+                              size: 30.sp,
+                              imageUrl: user.imageUrl,
+                              backgroundColor: LMTheme.buttonColor,
+                            )),
                       ],
                     ),
                   ),
@@ -113,13 +104,16 @@ class _HomePageState extends State<HomePage> {
                 // const SizedBox(height: 18),
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    itemCount: chatItems.length + 1,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 18,
+                    ),
+                    itemCount: chatItems.length,
                     itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return const ExploreSpacesBar();
-                      }
-                      return chatItems[index - 1];
+                      // if (index == 0) {
+                      //   return const ExploreSpacesBar();
+                      // }
+                      return chatItems[index];
                     },
                   ),
                 ),
