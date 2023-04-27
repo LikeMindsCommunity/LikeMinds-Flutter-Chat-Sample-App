@@ -1,21 +1,24 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_participants_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_report_page.dart';
 
 class ChatroomMenu extends StatelessWidget {
-  late final CustomPopupMenuController _controller;
-
-  ChatroomMenu({
+  final ChatRoom chatroom;
+  const ChatroomMenu({
     Key? key,
+    required this.chatroom,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    _controller = CustomPopupMenuController();
+    CustomPopupMenuController _controller = CustomPopupMenuController();
 
     return CustomPopupMenu(
       pressType: PressType.singleClick,
@@ -34,7 +37,12 @@ class ChatroomMenu extends StatelessWidget {
                 onTap: () {
                   _controller.hideMenu();
                   Route route = MaterialPageRoute(
-                    builder: (context) => const ChatroomParticipantsPage(),
+                    builder: (context) => BlocProvider<ParticipantsBloc>(
+                      create: (context) => ParticipantsBloc(),
+                      child: ChatroomParticipantsPage(
+                        chatroom: chatroom,
+                      ),
+                    ),
                   );
                   Navigator.push(context, route);
                   // // _controller.hideMenu();

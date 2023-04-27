@@ -8,7 +8,7 @@ class ChatroomInitial extends ChatroomState {}
 class ChatroomLoading extends ChatroomState {}
 
 class ChatroomLoaded extends ChatroomState {
-  GetChatroomResponse getChatroomResponse;
+  final GetChatroomResponse getChatroomResponse;
 
   ChatroomLoaded({required this.getChatroomResponse});
 }

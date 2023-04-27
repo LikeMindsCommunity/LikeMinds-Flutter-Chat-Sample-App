@@ -70,8 +70,7 @@ class _ChatBubbleState extends State<ChatBubble> {
     content.ContentType contentType = widget.contentType;
     String message = widget.message ?? "Test message";
     String time = widget.time ?? "12:00";
-    String profileImageUrl =
-        widget.user.imageUrl ?? "https://picsum.photos/200/300";
+    String? profileImageUrl = widget.user.imageUrl;
 
     return Column(
       crossAxisAlignment:
@@ -266,14 +265,24 @@ class _ChatBubbleState extends State<ChatBubble> {
                   ? Container(
                       width: 42,
                       height: 42,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(21),
-                        image: DecorationImage(
-                          image: NetworkImage(profileImageUrl),
-                          fit: BoxFit.cover,
-                        ),
                       ),
+                      child: profileImageUrl == null
+                          ? Center(
+                              child: Text(
+                                getInitials(widget.user.name),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                ),
+                              ),
+                            )
+                          : CircleAvatar(
+                              backgroundImage: NetworkImage(profileImageUrl),
+                            ),
                     )
                   : const SizedBox(),
             ],
