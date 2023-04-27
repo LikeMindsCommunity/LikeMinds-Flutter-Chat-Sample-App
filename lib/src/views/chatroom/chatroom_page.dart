@@ -1,9 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -36,7 +35,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
   Map<int, User> userMeta = <int, User>{};
   ChatRoom? chatroom;
   User currentUser = UserLocalPreference.instance.fetchUserData();
-  ScrollController listScrollController = ScrollController();
 
   PagingController<int, Conversation> pagedListController =
       PagingController<int, Conversation>(firstPageKey: 1);
@@ -81,10 +79,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
     if (!userMeta.containsKey(currentUser.id)) {
       userMeta[currentUser.id] = currentUser;
     }
-    pagedListController.value = PagingState(
-      nextPageKey: _page,
-      itemList: conversationList,
-    );
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
   }
 
   @override
@@ -100,7 +96,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
   @override
   void dispose() {
-    listScrollController.dispose();
     pagedListController.dispose();
     super.dispose();
   }
@@ -108,15 +103,20 @@ class _ChatroomPageState extends State<ChatroomPage> {
   void updatePagingControllers(Object? state) {
     if (state is ConversationLoaded) {
       _page++;
-      List<Conversation> conversationData =
-          state.getConversationResponse.conversationData!;
-      userMeta.addAll(state.getConversationResponse.userMeta!);
+
+      if (state.getConversationResponse.userMeta != null) {
+        userMeta.addAll(state.getConversationResponse.userMeta!);
+      }
+      List<Conversation>? conversationData =
+          state.getConversationResponse.conversationData;
       conversationData = addTimeStampInConversationList(
           conversationData, chatroom!.communityId!);
-      if (state.getConversationResponse.conversationData!.length < 500) {
-        pagedListController.appendLastPage(conversationData);
+      if (state.getConversationResponse.conversationData == null ||
+          state.getConversationResponse.conversationData!.isEmpty ||
+          state.getConversationResponse.conversationData!.length < 500) {
+        pagedListController.appendLastPage(conversationData ?? []);
       } else {
-        pagedListController.appendPage(conversationData, _page);
+        pagedListController.appendPage(conversationData!, _page);
       }
     }
   }
@@ -140,70 +140,67 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
           if (state is ChatroomLoaded) {
             chatroom = state.getChatroomResponse.chatroom!;
-            List<ChatRoomMember> chatroomMembers =
-                state.getChatroomResponse.conversationUsers!;
 
-            var pagedListView = BlocConsumer<ConversationBloc,
-                    ConversationState>(
-                bloc: conversationBloc,
-                listener: (context, state) => updatePagingControllers(state),
-                builder: (context, state) => ValueListenableBuilder(
-                    valueListenable: rebuildConversationList,
-                    builder: (context, _, __) {
-                      return PagedListView(
-                          pagingController: pagedListController,
-                          reverse: true,
-                          scrollDirection: Axis.vertical,
-                          builderDelegate:
-                              PagedChildBuilderDelegate<Conversation>(
-                            noItemsFoundIndicatorBuilder: (context) =>
-                                const SizedBox(),
-                            itemBuilder: (context, item, index) {
-                              if (item.isTimeStamp != null &&
-                                  item.isTimeStamp!) {
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 5),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: kWhiteColor,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        item.answer,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    )
-                                  ],
-                                );
-                              }
-                              // item.
-                              return ChatBubble(
-                                key: Key(item.id.toString()),
-                                message: item.answer,
-                                time: item.createdAt,
-                                isSent: item.userId == null
-                                    ? item.memberId == currentUser.id
-                                    : item.userId == currentUser.id,
-                                user: userMeta[item.userId ?? item.memberId]!,
-                                showReactions: true,
-                                // onTap: () => print("Tapped $i"),
-                              );
-                            },
-                          ));
-                    }));
-
-            if (listScrollController.hasClients) {
-              listScrollController
-                  .jumpTo(listScrollController.position.maxScrollExtent);
-            }
+            var pagedListView = ValueListenableBuilder(
+                valueListenable: rebuildConversationList,
+                builder: (context, _, __) {
+                  return BlocConsumer<ConversationBloc, ConversationState>(
+                    bloc: conversationBloc,
+                    listener: (context, state) =>
+                        updatePagingControllers(state),
+                    builder: (context, state) => PagedListView(
+                      pagingController: pagedListController,
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      reverse: true,
+                      scrollDirection: Axis.vertical,
+                      builderDelegate: PagedChildBuilderDelegate<Conversation>(
+                        noItemsFoundIndicatorBuilder: (context) =>
+                            const SizedBox(
+                          height: 10,
+                        ),
+                        itemBuilder: (context, item, index) {
+                          if (item.isTimeStamp != null && item.isTimeStamp!) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: kWhiteColor,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    item.answer,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                              ],
+                            );
+                          }
+                          // item.
+                          return ChatBubble(
+                            key: Key(item.id.toString()),
+                            message: item.answer,
+                            time: item.createdAt,
+                            isSent: item.userId == null
+                                ? item.memberId == currentUser.id
+                                : item.userId == currentUser.id,
+                            user: userMeta[item.userId ?? item.memberId]!,
+                            showReactions: true,
+                            // onTap: () => print("Tapped $i"),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                });
 
             return Column(
               children: [

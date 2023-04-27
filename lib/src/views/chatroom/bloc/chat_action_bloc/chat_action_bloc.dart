@@ -14,7 +14,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
             await locator<LikeMindsService>()
                 .postConversation(event.postConversationRequest);
 
-        if (response.success!) {
+        if (response.success) {
           if (response.data!.success) {
             emit(ConversationPosted(response.data!));
           } else {

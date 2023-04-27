@@ -16,7 +16,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         //Perform logic
         final response =
             await locator<LikeMindsService>().getHomeFeed(GetHomeFeedRequest());
-        if (response.success!) {
+        if (response.success) {
           emit(HomeLoaded(response: response.data!));
         } else {
           HomeError(response.errorMessage!);

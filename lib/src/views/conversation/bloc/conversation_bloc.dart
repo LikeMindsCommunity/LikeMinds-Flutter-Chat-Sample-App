@@ -17,7 +17,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         } //Perform logic
         LMResponse response = await locator<LikeMindsService>()
             .getConversation(event.getConversationRequest);
-        if (response.success!) {
+        if (response.success) {
           GetConversationResponse conversationResponse = response.data;
           emit(
             ConversationLoaded(conversationResponse),
