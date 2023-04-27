@@ -48,6 +48,7 @@ dependencies:
   overlay_support: 2.1.0
   envied: ^0.3.0
   extended_text_field: ^11.0.0
+  equatable: 
   flutter_typeahead: 
     path: lib/packages/flutter_typeahead-4.3.7
   

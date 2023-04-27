@@ -5,12 +5,14 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
 
 import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class ChatroomParticipantsPage extends StatefulWidget {
   final ChatRoom chatroom;
@@ -103,24 +105,20 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         const BB.BackButton(),
-                        kHorizontalPaddingMedium,
+                        kHorizontalPaddingXLarge,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               "Participants",
-                              style: GoogleFonts.montserrat(
-                                fontSize: kFontMedium,
-                                fontWeight: FontWeight.w700,
+                              style: LMFonts.instance.bold.copyWith(
+                                fontSize: 14.sp,
                               ),
                             ),
                             kVerticalPaddingXSmall,
                             Text(
                               "${widget.chatroom.participantCount ?? '--'} participants",
-                              style: GoogleFonts.roboto(
-                                fontSize: kFontSmall,
-                                fontWeight: FontWeight.w300,
-                              ),
+                              style: LMFonts.instance.regular,
                             ),
                           ],
                         ),
@@ -184,24 +182,10 @@ class ParticipantItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: lmBranding.headerColor,
-              ),
-              child: participant.imageUrl == null
-                  ? Text(
-                      getInitials(participant.name),
-                      style: TextStyle(
-                        color: kWhiteColor,
-                        fontSize: 20,
-                      ),
-                    )
-                  : CircleAvatar(
-                      backgroundImage: NetworkImage(participant.imageUrl!),
-                    ),
+            PictureOrInitial(
+              fallbackText: participant.name,
+              imageUrl: participant.imageUrl,
+              size: 32.sp,
             ),
             const SizedBox(width: 16),
             Expanded(
