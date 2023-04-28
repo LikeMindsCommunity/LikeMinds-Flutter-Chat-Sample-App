@@ -159,6 +159,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             const SizedBox(
                           height: 10,
                         ),
+                        firstPageProgressIndicatorBuilder: (context) =>
+                            const Spinner(),
+                        newPageProgressIndicatorBuilder: (context) =>
+                            const Spinner(),
                         itemBuilder: (context, item, index) {
                           if (item.isTimeStamp != null && item.isTimeStamp!) {
                             return Row(

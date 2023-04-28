@@ -5,6 +5,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/flutter_typeahead-4.3.7/lib/flutter_typeahead.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
@@ -35,6 +36,7 @@ class TaggingAheadTextField extends StatefulWidget {
 class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
   late final TextEditingController _controller;
   FocusNode? _focusNode;
+  LMBranding lmBranding = LMBranding.instance;
   final ScrollController _scrollController = ScrollController();
   final SuggestionsBoxController _suggestionsBoxController =
       SuggestionsBoxController();
@@ -109,14 +111,19 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       child: TypeAheadField<UserTag>(
+        tagColor: lmBranding.textLinkColor,
         onTagTap: (p) {
           // print(p);
         },
+
         suggestionsBoxController: _suggestionsBoxController,
         suggestionsBoxDecoration: SuggestionsBoxDecoration(
-          elevation: 4,
+          offsetX: -50,
+          elevation: 0,
+          hasScrollbar: false,
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.22,
+            minWidth: 70.w,
           ),
         ),
         // keepSuggestionsOnLocading: true,
@@ -127,6 +134,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
         textFieldConfiguration: TextFieldConfiguration(
           keyboardType: TextInputType.multiline,
           controller: _controller,
+          style: LMTheme.regular,
           focusNode: _focusNode,
           minLines: 2,
           maxLines: 200,

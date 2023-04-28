@@ -63,208 +63,206 @@ class _ChatBarState extends State<ChatBar> {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        padding: const EdgeInsets.all(4),
-                        onPressed: () {
-                          _focusNode.requestFocus();
+              Container(
+                width: 70.w,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(4),
+                      onPressed: () {
+                        _focusNode.requestFocus();
+                      },
+                      icon: const Icon(Icons.emoji_emotions_outlined),
+                    ),
+                    Expanded(
+                      child: TaggingAheadTextField(
+                        isDown: false,
+                        chatroomId: widget.chatroomId,
+                        onTagSelected: (tag) {
+                          print(tag);
+                          userTags.add(tag);
                         },
-                        icon: const Icon(Icons.emoji_emotions_outlined),
+                        onChange: (value) {
+                          print(value);
+                        },
+                        controller: _textEditingController,
+                        focusNode: _focusNode,
                       ),
-                      Expanded(
-                        child: TaggingAheadTextField(
-                          isDown: false,
-                          chatroomId: widget.chatroomId,
-                          onTagSelected: (tag) {
-                            print(tag);
-                            userTags.add(tag);
-                          },
-                          onChange: (value) {
-                            print(value);
-                          },
-                          controller: _textEditingController,
-                          focusNode: _focusNode,
-                        ),
-                        // child: TextField(
-                        //   controller: _textEditingController,
-                        //   focusNode: _focusNode,
-                        //   keyboardType: TextInputType.text,
-                        //   decoration: InputDecoration(
-                        //     border: InputBorder.none,
-                        //     hintText: "Type a message",
-                        //     hintStyle: GoogleFonts.montserrat(
-                        //       fontSize: 14,
-                        //       color: Colors.grey,
-                        //     ),
-                        //     contentPadding: const EdgeInsets.symmetric(
-                        //       vertical: 16,
-                        //     ),
-                        //   ),
-                        // ),
-                      ),
-                      CustomPopupMenu(
-                        controller: _popupMenuController,
-                        arrowColor: Colors.white,
-                        menuBuilder: () => ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 60.w,
-                            height: 148,
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 16,
-                              ),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          children: [
-                                            Icon(
-                                              Icons.camera_alt_outlined,
-                                              color: LMBranding
-                                                  .instance.buttonColor,
-                                            ),
-                                            const SizedBox(height: 2),
-                                            const Text(
-                                              "Camera",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {},
-                                          child: Column(
-                                            children: [
-                                              Icon(
-                                                Icons.photo_outlined,
-                                                color: LMBranding
-                                                    .instance.buttonColor,
-                                              ),
-                                              const SizedBox(height: 2),
-                                              const Text(
-                                                "Gallery",
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ],
+                      // child: TextField(
+                      //   controller: _textEditingController,
+                      //   focusNode: _focusNode,
+                      //   keyboardType: TextInputType.text,
+                      //   decoration: InputDecoration(
+                      //     border: InputBorder.none,
+                      //     hintText: "Type a message",
+                      //     hintStyle: GoogleFonts.montserrat(
+                      //       fontSize: 14,
+                      //       color: Colors.grey,
+                      //     ),
+                      //     contentPadding: const EdgeInsets.symmetric(
+                      //       vertical: 16,
+                      //     ),
+                      //   ),
+                      // ),
+                    ),
+                    CustomPopupMenu(
+                      controller: _popupMenuController,
+                      arrowColor: Colors.white,
+                      menuBuilder: () => ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 80.w,
+                          height: 148,
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Icon(
+                                            Icons.camera_alt_outlined,
+                                            color:
+                                                LMBranding.instance.buttonColor,
                                           ),
-                                        ),
-                                        Column(
-                                          children: [
-                                            Icon(
-                                              Icons.file_copy_outlined,
-                                              color: LMBranding
-                                                  .instance.buttonColor,
+                                          const SizedBox(height: 2),
+                                          const Text(
+                                            "Camera",
+                                            style: TextStyle(
+                                              fontSize: 16,
                                             ),
-                                            const SizedBox(height: 2),
-                                            const Text(
-                                              "Document",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Column(
-                                          children: [
-                                            Icon(
-                                              Icons.headphones_outlined,
-                                              color: LMBranding
-                                                  .instance.buttonColor,
-                                            ),
-                                            const SizedBox(height: 2),
-                                            const Text(
-                                              "Audio",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 36),
-                                        GestureDetector(
-                                          onTap: () {
-                                            // Navigator.push(
-                                            //   context,
-                                            //   MaterialPageRoute(
-                                            //     builder: (context) =>
-                                            //         ChatroomPollsPage(),
-                                            //   ),
-                                            // );
-                                          },
-                                          child: Column(
-                                            children: [
-                                              Icon(
-                                                Icons.bar_chart_outlined,
-                                                color: LMBranding
-                                                    .instance.buttonColor,
-                                              ),
-                                              const SizedBox(height: 2),
-                                              const Text(
-                                                "Poll",
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ],
                                           ),
+                                        ],
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {},
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.photo_outlined,
+                                              color: LMBranding
+                                                  .instance.buttonColor,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            const Text(
+                                              "Gallery",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        // Column(
-                                        //   children: const [
-                                        //     Icon(Icons.camera_alt),
-                                        //     SizedBox(width: 4),
-                                        //     Text(
-                                        //       "Camera",
-                                        //       style: TextStyle(
-                                        //         fontSize: 16,
-                                        //       ),
-                                        //     ),
-                                        //   ],
-                                        // ),
-                                      ],
-                                    ),
+                                      ),
+                                      Column(
+                                        children: [
+                                          Icon(
+                                            Icons.file_copy_outlined,
+                                            color:
+                                                LMBranding.instance.buttonColor,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          const Text(
+                                            "Document",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Icon(
+                                            Icons.headphones_outlined,
+                                            color:
+                                                LMBranding.instance.buttonColor,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          const Text(
+                                            "Audio",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 36),
+                                      GestureDetector(
+                                        onTap: () {
+                                          // Navigator.push(
+                                          //   context,
+                                          //   MaterialPageRoute(
+                                          //     builder: (context) =>
+                                          //         ChatroomPollsPage(),
+                                          //   ),
+                                          // );
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.bar_chart_outlined,
+                                              color: LMBranding
+                                                  .instance.buttonColor,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            const Text(
+                                              "Poll",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      // Column(
+                                      //   children: const [
+                                      //     Icon(Icons.camera_alt),
+                                      //     SizedBox(width: 4),
+                                      //     Text(
+                                      //       "Camera",
+                                      //       style: TextStyle(
+                                      //         fontSize: 16,
+                                      //       ),
+                                      //     ),
+                                      //   ],
+                                      // ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        pressType: PressType.singleClick,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Icon(Icons.attach_file),
-                        ),
                       ),
-                    ],
-                  ),
+                      pressType: PressType.singleClick,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Icon(Icons.attach_file),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: 16),
@@ -277,6 +275,7 @@ class _ChatBarState extends State<ChatBar> {
                     final string = _textEditingController.text;
                     userTags = TaggingHelper.matchTags(string, userTags);
                     result = TaggingHelper.encodeString(string, userTags);
+                    result = result?.trim();
                     chatActionBloc!.add(PostConversation(
                         (PostConversationRequestBuilder()
                               ..chatroomId(widget.chatroomId)

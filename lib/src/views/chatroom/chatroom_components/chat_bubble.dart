@@ -213,7 +213,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                       decoration: BoxDecoration(
                         color: isSent
                             ? Colors.white.withOpacity(0.8)
-                            : LMBranding.instance.buttonColor.withOpacity(0.4),
+                            : lmBranding.buttonColor.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Padding(
@@ -231,7 +231,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                       fontSize: 10.sp,
                                       color: isSent
                                           ? Colors.black.withOpacity(0.6)
-                                          : LMBranding.instance.headerColor,
+                                          : lmBranding.headerColor,
                                     ),
                                   ),
                             const SizedBox(height: 6),
@@ -347,6 +347,8 @@ class _ChatBubbleState extends State<ChatBubble> {
         return ExpandableText(
           message,
           expandText: "",
+          linkStyle: lmBranding.fonts.regular
+              .copyWith(color: lmBranding.textLinkColor),
           textAlign: TextAlign.start,
           style: LMFonts.instance.regular.copyWith(
             fontSize: 10.sp,
