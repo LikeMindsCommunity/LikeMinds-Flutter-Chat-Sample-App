@@ -61,249 +61,254 @@ class _ChatBarState extends State<ChatBar> {
         horizontal: 3.w,
         vertical: 12,
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 80.w,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TaggingAheadTextField(
-                    isDown: false,
-                    chatroomId: widget.chatroomId,
-                    onTagSelected: (tag) {
-                      print(tag);
-                      userTags.add(tag);
-                    },
-                    onChange: (value) {
-                      print(value);
-                    },
-                    controller: _textEditingController,
-                    focusNode: _focusNode,
+      child: SafeArea(
+        top: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              width: 80.w,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TaggingAheadTextField(
+                      isDown: false,
+                      chatroomId: widget.chatroomId,
+                      onTagSelected: (tag) {
+                        print(tag);
+                        userTags.add(tag);
+                      },
+                      onChange: (value) {
+                        print(value);
+                      },
+                      controller: _textEditingController,
+                      focusNode: _focusNode,
+                    ),
                   ),
-                ),
-                CustomPopupMenu(
-                  controller: _popupMenuController,
-                  arrowColor: Colors.white,
-                  showArrow: false,
-                  menuBuilder: () => Container(
-                    margin: const EdgeInsets.only(bottom: 25),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        width: 100.w,
-                        height: 55.w,
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: SizedBox(
-                                      width: 40.w,
-                                      height: 22.w,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: 38.sp,
-                                            height: 38.sp,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40.w),
-                                              color: LMBranding
-                                                  .instance.buttonColor,
+                  CustomPopupMenu(
+                    controller: _popupMenuController,
+                    arrowColor: Colors.white,
+                    showArrow: false,
+                    menuBuilder: () => Container(
+                      margin: const EdgeInsets.only(bottom: 25),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 100.w,
+                          height: 55.w,
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: SizedBox(
+                                        width: 40.w,
+                                        height: 22.w,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 38.sp,
+                                              height: 38.sp,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(40.w),
+                                                color: LMBranding
+                                                    .instance.buttonColor,
+                                              ),
+                                              child: Icon(
+                                                Icons.camera_alt_outlined,
+                                                color: kWhiteColor,
+                                                size: 24.sp,
+                                              ),
                                             ),
-                                            child: Icon(
-                                              Icons.camera_alt_outlined,
-                                              color: kWhiteColor,
-                                              size: 24.sp,
+                                            kVerticalPaddingMedium,
+                                            Text(
+                                              "Camera",
+                                              style: lmBranding.fonts.medium,
                                             ),
-                                          ),
-                                          kVerticalPaddingMedium,
-                                          Text(
-                                            "Camera",
-                                            style: lmBranding.fonts.medium,
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: SizedBox(
-                                      width: 40.w,
-                                      height: 22.w,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: 38.sp,
-                                            height: 38.sp,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40.w),
-                                              color: LMBranding
-                                                  .instance.buttonColor,
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: SizedBox(
+                                        width: 40.w,
+                                        height: 22.w,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 38.sp,
+                                              height: 38.sp,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(40.w),
+                                                color: LMBranding
+                                                    .instance.buttonColor,
+                                              ),
+                                              child: Icon(
+                                                Icons.photo_outlined,
+                                                color: kWhiteColor,
+                                                size: 24.sp,
+                                              ),
                                             ),
-                                            child: Icon(
-                                              Icons.photo_outlined,
-                                              color: kWhiteColor,
-                                              size: 24.sp,
+                                            kVerticalPaddingMedium,
+                                            Text(
+                                              "Photo",
+                                              style: lmBranding.fonts.medium,
                                             ),
-                                          ),
-                                          kVerticalPaddingMedium,
-                                          Text(
-                                            "Photo",
-                                            style: lmBranding.fonts.medium,
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: SizedBox(
-                                      width: 40.w,
-                                      height: 22.w,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: 38.sp,
-                                            height: 38.sp,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40.w),
-                                              color: LMBranding
-                                                  .instance.buttonColor,
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: SizedBox(
+                                        width: 40.w,
+                                        height: 22.w,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 38.sp,
+                                              height: 38.sp,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(40.w),
+                                                color: LMBranding
+                                                    .instance.buttonColor,
+                                              ),
+                                              child: Icon(
+                                                Icons.video_camera_back,
+                                                color: kWhiteColor,
+                                                size: 24.sp,
+                                              ),
                                             ),
-                                            child: Icon(
-                                              Icons.video_camera_back,
-                                              color: kWhiteColor,
-                                              size: 24.sp,
+                                            kVerticalPaddingMedium,
+                                            Text(
+                                              "Video",
+                                              style: lmBranding.fonts.medium,
                                             ),
-                                          ),
-                                          kVerticalPaddingMedium,
-                                          Text(
-                                            "Video",
-                                            style: lmBranding.fonts.medium,
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: SizedBox(
-                                      width: 40.w,
-                                      height: 22.w,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: 38.sp,
-                                            height: 38.sp,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40.w),
-                                              color: LMBranding
-                                                  .instance.buttonColor,
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: SizedBox(
+                                        width: 40.w,
+                                        height: 22.w,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 38.sp,
+                                              height: 38.sp,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(40.w),
+                                                color: LMBranding
+                                                    .instance.buttonColor,
+                                              ),
+                                              child: Icon(
+                                                Icons.file_copy_outlined,
+                                                color: kWhiteColor,
+                                                size: 24.sp,
+                                              ),
                                             ),
-                                            child: Icon(
-                                              Icons.file_copy_outlined,
-                                              color: kWhiteColor,
-                                              size: 24.sp,
+                                            kVerticalPaddingMedium,
+                                            Text(
+                                              "Document",
+                                              style: lmBranding.fonts.medium,
                                             ),
-                                          ),
-                                          kVerticalPaddingMedium,
-                                          Text(
-                                            "Document",
-                                            style: lmBranding.fonts.medium,
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
+                    pressType: PressType.singleClick,
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Icon(Icons.attach_file),
+                    ),
                   ),
-                  pressType: PressType.singleClick,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Icon(Icons.attach_file),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 2.w),
-          GestureDetector(
-            onTap: () {
-              if (_textEditingController.text.isEmpty) {
-                Fluttertoast.showToast(msg: "Text can't be empty");
-              } else {
-                Fluttertoast.showToast(msg: "Send message");
-                final string = _textEditingController.text;
-                userTags = TaggingHelper.matchTags(string, userTags);
-                result = TaggingHelper.encodeString(string, userTags);
-                result = result?.trim();
-                chatActionBloc!.add(PostConversation(
-                    (PostConversationRequestBuilder()
-                          ..chatroomId(widget.chatroomId)
-                          ..text(result!)
-                          ..temporaryId(
-                              DateTime.now().millisecondsSinceEpoch.toString()))
-                        .build()));
-                _textEditingController.clear();
-                userTags = [];
-                result = "";
-              }
-            },
-            child: Container(
-              height: 12.w,
-              width: 12.w,
-              decoration: BoxDecoration(
-                color: LMBranding.instance.buttonColor,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.send,
-                  color: Colors.white,
-                ),
+                ],
               ),
             ),
-          ),
-        ],
+            SizedBox(width: 2.w),
+            GestureDetector(
+              onTap: () {
+                if (_textEditingController.text.isEmpty) {
+                  Fluttertoast.showToast(msg: "Text can't be empty");
+                } else {
+                  Fluttertoast.showToast(msg: "Send message");
+                  final string = _textEditingController.text;
+                  userTags = TaggingHelper.matchTags(string, userTags);
+                  result = TaggingHelper.encodeString(string, userTags);
+                  result = result?.trim();
+                  chatActionBloc!.add(PostConversation(
+                      (PostConversationRequestBuilder()
+                            ..chatroomId(widget.chatroomId)
+                            ..text(result!)
+                            ..temporaryId(DateTime.now()
+                                .millisecondsSinceEpoch
+                                .toString()))
+                          .build()));
+                  _textEditingController.clear();
+                  userTags = [];
+                  result = "";
+                }
+              },
+              child: Container(
+                height: 12.w,
+                width: 12.w,
+                decoration: BoxDecoration(
+                  color: LMBranding.instance.buttonColor,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

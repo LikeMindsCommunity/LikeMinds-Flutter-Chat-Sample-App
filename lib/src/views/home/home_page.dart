@@ -5,6 +5,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 // import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 // import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
@@ -133,9 +134,10 @@ List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
   for (int i = 0; i < chatrooms.length; i++) {
     chats.add(ChatItem(
       name: chatrooms[i].header,
-      message: lastConversations[chatrooms[i].lastConversationId.toString()]
-              ?.answer ??
-          "...",
+      message: TaggingHelper.convertRouteToTag(
+          lastConversations[chatrooms[i].lastConversationId.toString()]
+                  ?.answer ??
+              "..."),
       time: lastConversations[chatrooms[i].lastConversationId.toString()]
               ?.lastUpdated
               .toString() ??

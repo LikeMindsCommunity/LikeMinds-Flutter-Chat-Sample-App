@@ -118,14 +118,14 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
 
         suggestionsBoxController: _suggestionsBoxController,
         suggestionsBoxDecoration: SuggestionsBoxDecoration(
-          offsetX: -13.w,
+          offsetX: -1.5.w,
           elevation: 0,
-          borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10.0), topRight: Radius.circular(10.0)),
+          clipBehavior: Clip.hardEdge,
+          borderRadius: BorderRadius.circular(12.0),
           hasScrollbar: false,
           constraints: BoxConstraints(
             maxHeight: 24.h,
-            minWidth: 50.w,
+            minWidth: 80.w,
           ),
         ),
         // keepSuggestionsOnLocading: true,
