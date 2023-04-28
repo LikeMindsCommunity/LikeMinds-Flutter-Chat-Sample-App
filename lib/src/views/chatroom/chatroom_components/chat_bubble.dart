@@ -262,71 +262,16 @@ class _ChatBubbleState extends State<ChatBubble> {
               ),
               const SizedBox(width: 6),
               isSent
-                  ? Container(
-                      width: 42,
-                      height: 42,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(21),
-                      ),
-                      child: profileImageUrl == null
-                          ? Center(
-                              child: Text(
-                                getInitials(widget.user.name),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                ),
-                              ),
-                            )
-                          : CircleAvatar(
-                              backgroundImage: NetworkImage(profileImageUrl),
-                            ),
+                  ? PictureOrInitial(
+                      fallbackText: widget.user.name,
+                      imageUrl: profileImageUrl,
+                      size: 28.sp,
+                      fontSize: 14.sp,
                     )
                   : const SizedBox(),
             ],
           ),
         ),
-        // if (reactions.isNotEmpty)
-        //   Padding(
-        //     padding: const EdgeInsets.symmetric(horizontal: 64.0),
-        //     child: Row(
-        //       mainAxisAlignment:
-        //           isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
-        //       children: reactions.map((e) {
-        //         switch (e) {
-        //           case Reactions.like:
-        //             return ReactionChip(
-        //               text: "1",
-        //               icon: emojiParser.emojify(":thumbsup:"),
-        //             );
-        //           case Reactions.dislike:
-        //             return ReactionChip(
-        //               text: "1",
-        //               icon: emojiParser.emojify(":thumbsdown:"),
-        //             );
-        //           case Reactions.love:
-        //             return ReactionChip(
-        //               text: "1",
-        //               icon: emojiParser.emojify(":heart:"),
-        //             );
-        //           case Reactions.happy:
-        //             return ReactionChip(
-        //               text: "1",
-        //               icon: emojiParser.emojify(":joy:"),
-        //             );
-        //           case Reactions.sad:
-        //             return ReactionChip(
-        //               text: "1",
-        //               icon: emojiParser.emojify(":cry:"),
-        //             );
-        //           default:
-        //             return const SizedBox();
-        //         }
-        //       }).toList(),
-        //     ),
-        //   ),
       ],
     );
   }

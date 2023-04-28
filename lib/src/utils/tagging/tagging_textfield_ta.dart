@@ -111,7 +111,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       child: TypeAheadField<UserTag>(
-        tagColor: lmBranding.textLinkColor,
+        tagColor: LMTheme.textLinkColor,
         onTagTap: (p) {
           // print(p);
         },
@@ -124,8 +124,8 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
               topLeft: Radius.circular(10.0), topRight: Radius.circular(10.0)),
           hasScrollbar: false,
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.22,
-            minWidth: 68.w,
+            maxHeight: 24.h,
+            minWidth: 50.w,
           ),
         ),
         // keepSuggestionsOnLocading: true,
@@ -138,7 +138,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           controller: _controller,
           style: LMTheme.regular,
           focusNode: _focusNode,
-          minLines: 2,
+          minLines: 1,
           maxLines: 200,
           decoration: widget.decoration ??
               const InputDecoration(

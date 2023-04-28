@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // const SizedBox(height: 72),
                 Container(
-                  height: 14.h,
+                  height: 16.h,
                   width: 100.w,
                   color: LMBranding.instance.headerColor,
                   child: Padding(
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(context, route);
                             },
                             child: PictureOrInitial(
-                              fallbackText: userName!,
+                              fallbackText: userName ?? "..",
                               size: 30.sp,
                               imageUrl: user.imageUrl,
                               backgroundColor: LMTheme.buttonColor,

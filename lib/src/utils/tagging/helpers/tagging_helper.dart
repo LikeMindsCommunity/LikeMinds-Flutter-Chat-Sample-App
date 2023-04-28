@@ -4,7 +4,7 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 
 class TaggingHelper {
-  static final RegExp tagRegExp = RegExp(r'@([a-z\sA-Z]+)~');
+  static final RegExp tagRegExp = RegExp(r'@([a-z\sA-Z\s0-9]+)~');
 
   /// Encodes the string with the user tags and returns the encoded string
   static String encodeString(String string, List<UserTag> userTags) {
@@ -53,10 +53,6 @@ class TaggingHelper {
 
   static void routeToProfile(String userId) {
     print(userId);
-    // if (!locator<LikeMindsService>().isProd) {
-    //   toast('Profile call back fired');
-    // }
-    // locator<LikeMindsService>().routeToProfile(userId);
   }
 
   static String convertRouteToTag(String text, {bool withTilde = true}) {
