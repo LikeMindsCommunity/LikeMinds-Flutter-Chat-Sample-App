@@ -51,6 +51,8 @@ dependencies:
   equatable: 
   flutter_typeahead: 
     path: lib/packages/flutter_typeahead-4.3.7
+  image_picker: ^0.8.7+4
+  file_picker: ^5.2.10
   
 dev_dependencies:
   flutter_test:

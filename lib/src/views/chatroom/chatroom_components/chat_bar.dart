@@ -21,6 +21,7 @@ class _ChatBarState extends State<ChatBar> {
   late CustomPopupMenuController _popupMenuController;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
+  LMBranding lmBranding = LMBranding.instance;
 
   List<UserTag> userTags = [];
   String? result;
@@ -112,146 +113,174 @@ class _ChatBarState extends State<ChatBar> {
                     CustomPopupMenu(
                       controller: _popupMenuController,
                       arrowColor: Colors.white,
-                      menuBuilder: () => ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 80.w,
-                          height: 148,
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Row(
+                      showArrow: false,
+                      menuBuilder: () => Container(
+                        margin: const EdgeInsets.only(bottom: 25),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 100.w,
+                            height: 55.w,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Column(
-                                        children: [
-                                          Icon(
-                                            Icons.camera_alt_outlined,
-                                            color:
-                                                LMBranding.instance.buttonColor,
+                                      GestureDetector(
+                                        onTap: () {},
+                                        child: SizedBox(
+                                          width: 40.w,
+                                          height: 22.w,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                width: 38.sp,
+                                                height: 38.sp,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          40.w),
+                                                  color: LMBranding
+                                                      .instance.buttonColor,
+                                                ),
+                                                child: Icon(
+                                                  Icons.camera_alt_outlined,
+                                                  color: kWhiteColor,
+                                                  size: 24.sp,
+                                                ),
+                                              ),
+                                              kVerticalPaddingMedium,
+                                              Text(
+                                                "Camera",
+                                                style: lmBranding.fonts.medium,
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(height: 2),
-                                          const Text(
-                                            "Camera",
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                       GestureDetector(
                                         onTap: () {},
-                                        child: Column(
-                                          children: [
-                                            Icon(
-                                              Icons.photo_outlined,
-                                              color: LMBranding
-                                                  .instance.buttonColor,
-                                            ),
-                                            const SizedBox(height: 2),
-                                            const Text(
-                                              "Gallery",
-                                              style: TextStyle(
-                                                fontSize: 16,
+                                        child: SizedBox(
+                                          width: 40.w,
+                                          height: 22.w,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                width: 38.sp,
+                                                height: 38.sp,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          40.w),
+                                                  color: LMBranding
+                                                      .instance.buttonColor,
+                                                ),
+                                                child: Icon(
+                                                  Icons.photo_outlined,
+                                                  color: kWhiteColor,
+                                                  size: 24.sp,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                              kVerticalPaddingMedium,
+                                              Text(
+                                                "Photo",
+                                                style: lmBranding.fonts.medium,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      Column(
-                                        children: [
-                                          Icon(
-                                            Icons.file_copy_outlined,
-                                            color:
-                                                LMBranding.instance.buttonColor,
-                                          ),
-                                          const SizedBox(height: 2),
-                                          const Text(
-                                            "Document",
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
                                       ),
                                     ],
                                   ),
-                                ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Column(
-                                        children: [
-                                          Icon(
-                                            Icons.headphones_outlined,
-                                            color:
-                                                LMBranding.instance.buttonColor,
-                                          ),
-                                          const SizedBox(height: 2),
-                                          const Text(
-                                            "Audio",
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(width: 36),
                                       GestureDetector(
-                                        onTap: () {
-                                          // Navigator.push(
-                                          //   context,
-                                          //   MaterialPageRoute(
-                                          //     builder: (context) =>
-                                          //         ChatroomPollsPage(),
-                                          //   ),
-                                          // );
-                                        },
-                                        child: Column(
-                                          children: [
-                                            Icon(
-                                              Icons.bar_chart_outlined,
-                                              color: LMBranding
-                                                  .instance.buttonColor,
-                                            ),
-                                            const SizedBox(height: 2),
-                                            const Text(
-                                              "Poll",
-                                              style: TextStyle(
-                                                fontSize: 16,
+                                        onTap: () {},
+                                        child: SizedBox(
+                                          width: 40.w,
+                                          height: 22.w,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                width: 38.sp,
+                                                height: 38.sp,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          40.w),
+                                                  color: LMBranding
+                                                      .instance.buttonColor,
+                                                ),
+                                                child: Icon(
+                                                  Icons.video_camera_back,
+                                                  color: kWhiteColor,
+                                                  size: 24.sp,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                              kVerticalPaddingMedium,
+                                              Text(
+                                                "Video",
+                                                style: lmBranding.fonts.medium,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                      // Column(
-                                      //   children: const [
-                                      //     Icon(Icons.camera_alt),
-                                      //     SizedBox(width: 4),
-                                      //     Text(
-                                      //       "Camera",
-                                      //       style: TextStyle(
-                                      //         fontSize: 16,
-                                      //       ),
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      GestureDetector(
+                                        onTap: () {},
+                                        child: SizedBox(
+                                          width: 40.w,
+                                          height: 22.w,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                width: 38.sp,
+                                                height: 38.sp,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          40.w),
+                                                  color: LMBranding
+                                                      .instance.buttonColor,
+                                                ),
+                                                child: Icon(
+                                                  Icons.file_copy_outlined,
+                                                  color: kWhiteColor,
+                                                  size: 24.sp,
+                                                ),
+                                              ),
+                                              kVerticalPaddingMedium,
+                                              Text(
+                                                "Document",
+                                                style: lmBranding.fonts.medium,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

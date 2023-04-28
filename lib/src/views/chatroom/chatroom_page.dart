@@ -223,13 +223,17 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         fontSize: 14.sp,
                       ),
                       const SizedBox(width: 12),
-                      Text(
-                        chatroom!.header,
-                        style: LMTheme.medium.copyWith(
-                          fontSize: 14.sp,
+                      Expanded(
+                        child: Text(
+                          chatroom!.header,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: LMTheme.medium.copyWith(
+                            fontSize: 14.sp,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      kHorizontalPaddingMedium,
                       ChatroomMenu(
                         chatroom: chatroom!,
                       ),
