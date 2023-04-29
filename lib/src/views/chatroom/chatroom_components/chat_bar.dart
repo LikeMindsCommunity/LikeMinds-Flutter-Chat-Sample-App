@@ -1,8 +1,15 @@
+import 'dart:io';
+
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
@@ -18,6 +25,8 @@ class ChatBar extends StatefulWidget {
 
 class _ChatBarState extends State<ChatBar> {
   ChatActionBloc? chatActionBloc;
+  ImagePicker? imagePicker;
+  FilePicker? filePicker;
   late CustomPopupMenuController _popupMenuController;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
@@ -32,6 +41,8 @@ class _ChatBarState extends State<ChatBar> {
     _popupMenuController = CustomPopupMenuController();
     _textEditingController = TextEditingController();
     _focusNode = FocusNode();
+    imagePicker = ImagePicker();
+    filePicker = FilePicker.platform;
     super.initState();
   }
 
@@ -114,7 +125,19 @@ class _ChatBarState extends State<ChatBar> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     GestureDetector(
-                                      onTap: () {},
+                                      onTap: () async {
+                                        if (await handlePermissions(1)) {
+                                          XFile? pickedImage =
+                                              await imagePicker!.pickImage(
+                                            source: ImageSource.camera,
+                                          );
+                                          if (pickedImage != null) {
+                                            context.pushNamed("media_forward",
+                                                extra: File(pickedImage.path),
+                                                params: {'mediaType': "1"});
+                                          }
+                                        }
+                                      },
                                       child: SizedBox(
                                         width: 40.w,
                                         height: 22.w,

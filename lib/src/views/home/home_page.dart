@@ -25,9 +25,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? communityName;
   String? userName;
+  HomeBloc? homeBloc;
 
   @override
   Widget build(BuildContext context) {
+    homeBloc = BlocProvider.of<HomeBloc>(context);
     return Scaffold(
       body: BlocConsumer<HomeBloc, HomeState>(
         listener: (context, state) {
@@ -52,64 +54,76 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // const SizedBox(height: 72),
                 Container(
-                  height: 16.h,
                   width: 100.w,
                   color: LMBranding.instance.headerColor,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 20,
+                      horizontal: 24.0,
+                      vertical: 12.0,
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            communityName ?? "Chatrooms",
-                            style: LMBranding.instance.fonts.bold
-                                .copyWith(fontSize: 16.sp, color: kWhiteColor),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            alignment: Alignment.center,
+                            child: Text(
+                              communityName ?? "Chatrooms",
+                              style: LMBranding.instance.fonts.bold.copyWith(
+                                  fontSize: 16.sp, color: kWhiteColor),
+                            ),
                           ),
-                        ),
-                        GestureDetector(
-                            onTap: () {
-                              Route route = MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    BlocProvider<ProfileBloc>(
-                                  create: (BuildContext context) =>
-                                      ProfileBloc()..add(InitProfileEvent()),
-                                  child: const ProfilePage(
-                                    isSelf: true,
+                          GestureDetector(
+                              onTap: () {
+                                Route route = MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      BlocProvider<ProfileBloc>(
+                                    create: (BuildContext context) =>
+                                        ProfileBloc()..add(InitProfileEvent()),
+                                    child: const ProfilePage(
+                                      isSelf: true,
+                                    ),
                                   ),
-                                ),
-                              );
-                              Navigator.push(context, route);
-                            },
-                            child: PictureOrInitial(
-                              fallbackText: userName ?? "..",
-                              size: 30.sp,
-                              imageUrl: user.imageUrl,
-                              backgroundColor: LMTheme.buttonColor,
-                            )),
-                      ],
+                                );
+                                Navigator.push(context, route);
+                              },
+                              child: PictureOrInitial(
+                                fallbackText: userName ?? "..",
+                                size: 30.sp,
+                                imageUrl: user.imageUrl,
+                                backgroundColor: LMTheme.buttonColor,
+                              )),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 // const SizedBox(height: 18),
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 18,
-                    ),
-                    itemCount: chatItems.length,
-                    itemBuilder: (context, index) {
-                      // if (index == 0) {
-                      //   return const ExploreSpacesBar();
-                      // }
-                      return chatItems[index];
+                  child: RefreshIndicator(
+                    onRefresh: () {
+                      homeBloc!.add(
+                        InitHomeEvent(),
+                      );
+                      return Future.value();
                     },
+                    child: SafeArea(
+                      top: false,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                        ),
+                        itemCount: chatItems.length,
+                        itemBuilder: (context, index) {
+                          // if (index == 0) {
+                          //   return const ExploreSpacesBar();
+                          // }
+                          return chatItems[index];
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ],

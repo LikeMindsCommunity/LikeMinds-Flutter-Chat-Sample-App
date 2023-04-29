@@ -406,6 +406,7 @@ class _CredScreenState extends State<CredScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 80),
             ],
           ),
         ),

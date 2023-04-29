@@ -2,6 +2,7 @@ library likeminds_chat_mm_fl;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
@@ -10,6 +11,8 @@ import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:sizer/sizer.dart';
 
@@ -87,24 +90,31 @@ class LMChat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Sizer(
       builder: ((context, orientation, deviceType) {
-        return FutureBuilder(
-          future: initiateUser(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final user = snapshot.data!.user;
-              LMNotificationHandler.instance.registerDevice(user.id);
-              return MaterialApp.router(
-                routerConfig: router,
-                debugShowCheckedModeBanner: true,
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<ChatActionBloc>(
+              create: (context) => ChatActionBloc(),
+            ),
+          ],
+          child: FutureBuilder(
+            future: initiateUser(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final user = snapshot.data!.user;
+                LMNotificationHandler.instance.registerDevice(user.id);
+                return MaterialApp.router(
+                  routerConfig: router,
+                  debugShowCheckedModeBanner: true,
+                );
+              }
+              return Container(
+                color: kWhiteColor,
+                child: Spinner(
+                  color: LMBranding.instance.headerColor,
+                ),
               );
-            }
-            return Container(
-              color: kWhiteColor,
-              child: Spinner(
-                color: LMBranding.instance.headerColor,
-              ),
-            );
-          },
+            },
+          ),
         );
       }),
     );

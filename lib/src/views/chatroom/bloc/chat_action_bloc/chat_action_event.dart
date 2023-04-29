@@ -19,3 +19,13 @@ class DeleteConversation extends ChatActionEvent {
 
   DeleteConversation(this.deleteConversationRequest);
 }
+
+class PostMultiMediaConversation extends ChatActionEvent {
+  PostConversationRequest postConversationRequest;
+  List<File> mediaFiles;
+
+  PostMultiMediaConversation(
+    this.postConversationRequest,
+    this.mediaFiles,
+  );
+}

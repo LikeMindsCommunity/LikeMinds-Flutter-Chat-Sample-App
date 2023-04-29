@@ -5,6 +5,38 @@ import 'package:path/path.dart';
 
 import 'package:simple_s3/simple_s3.dart';
 
+enum MediaType { photo, video, document, audio, poll }
+
+MediaType mapIntToMediaType(int mediaType) {
+  switch (mediaType) {
+    case 1:
+      return MediaType.photo;
+    case 2:
+      return MediaType.video;
+    case 3:
+      return MediaType.document;
+    case 4:
+      return MediaType.audio;
+    case 5:
+      return MediaType.poll;
+    default:
+      return MediaType.photo;
+  }
+}
+
+int mapMediaTypeToInt(MediaType mediaType) {
+  switch (mediaType) {
+    case MediaType.photo:
+      return 1;
+    case MediaType.video:
+      return 2;
+    case MediaType.document:
+      return 3;
+    default:
+      return -1;
+  }
+}
+
 class MediaService {
   late final String _bucketName;
   late final String _poolId;

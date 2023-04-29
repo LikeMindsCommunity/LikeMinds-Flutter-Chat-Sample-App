@@ -204,57 +204,54 @@ class _ChatBubbleState extends State<ChatBubble> {
                     //   _showReactions = !_showReactions;
                     // });
                   },
-                  child: ConstrainedBox(
+                  child: Container(
                     constraints: BoxConstraints(
                       minHeight: 42,
-                      maxWidth: getWidth(context) * 0.6,
+                      maxWidth: 60.w,
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSent
-                            ? Colors.white.withOpacity(0.8)
-                            : lmBranding.buttonColor.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: isSent
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            isSent
-                                ? const SizedBox()
-                                : Text(
-                                    widget.user.name,
-                                    style: LMFonts.instance.medium.copyWith(
-                                      fontSize: 10.sp,
-                                      color: isSent
-                                          ? Colors.black.withOpacity(0.6)
-                                          : lmBranding.headerColor,
-                                    ),
+                    decoration: BoxDecoration(
+                      color: isSent
+                          ? Colors.white.withOpacity(0.8)
+                          : lmBranding.buttonColor.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: isSent
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          isSent
+                              ? const SizedBox()
+                              : Text(
+                                  widget.user.name,
+                                  style: LMFonts.instance.medium.copyWith(
+                                    fontSize: 10.sp,
+                                    color: isSent
+                                        ? Colors.black.withOpacity(0.6)
+                                        : lmBranding.headerColor,
                                   ),
-                            const SizedBox(height: 6),
-                            FutureBuilder(
-                                builder: ((context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return snapshot.data!;
-                                  } else {
-                                    return const Spinner();
-                                  }
-                                }),
-                                future:
-                                    getContent(contentType, message, isSent)),
-                            const SizedBox(height: 8),
-                            Text(
-                              time,
-                              style: LMFonts.instance.regular.copyWith(
-                                fontSize: 8.sp,
-                                color: kGreyColor,
-                              ),
+                                ),
+                          const SizedBox(height: 6),
+                          FutureBuilder(
+                              builder: ((context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return snapshot.data!;
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              }),
+                              future: getContent(contentType, message, isSent)),
+                          const SizedBox(height: 8),
+                          Text(
+                            time,
+                            style: LMFonts.instance.regular.copyWith(
+                              fontSize: 8.sp,
+                              color: kGreyColor,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

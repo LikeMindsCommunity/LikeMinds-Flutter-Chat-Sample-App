@@ -127,144 +127,148 @@ class _ChatroomPageState extends State<ChatroomPage> {
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
-      body: BlocConsumer<ChatroomBloc, ChatroomState>(
-        listener: (context, state) {
-          if (state is ChatroomLoaded) {
-            Fluttertoast.showToast(msg: "Chatroom loaded");
-          }
-        },
-        builder: (context, state) {
-          if (state is ChatroomLoading) {
-            return const Spinner();
-          }
+      body: SafeArea(
+        bottom: false,
+        child: BlocConsumer<ChatroomBloc, ChatroomState>(
+          listener: (context, state) {
+            if (state is ChatroomLoaded) {
+              Fluttertoast.showToast(msg: "Chatroom loaded");
+            }
+          },
+          builder: (context, state) {
+            if (state is ChatroomLoading) {
+              return const Spinner();
+            }
 
-          if (state is ChatroomLoaded) {
-            chatroom = state.getChatroomResponse.chatroom!;
+            if (state is ChatroomLoaded) {
+              chatroom = state.getChatroomResponse.chatroom!;
 
-            var pagedListView = ValueListenableBuilder(
-                valueListenable: rebuildConversationList,
-                builder: (context, _, __) {
-                  return BlocConsumer<ConversationBloc, ConversationState>(
-                    bloc: conversationBloc,
-                    listener: (context, state) =>
-                        updatePagingControllers(state),
-                    builder: (context, state) => PagedListView(
-                      pagingController: pagedListController,
-                      physics: const ClampingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      reverse: true,
-                      scrollDirection: Axis.vertical,
-                      builderDelegate: PagedChildBuilderDelegate<Conversation>(
-                        noItemsFoundIndicatorBuilder: (context) =>
-                            const SizedBox(
-                          height: 10,
-                        ),
-                        firstPageProgressIndicatorBuilder: (context) =>
-                            const Spinner(),
-                        newPageProgressIndicatorBuilder: (context) =>
-                            const Spinner(),
-                        itemBuilder: (context, item, index) {
-                          if (item.isTimeStamp != null && item.isTimeStamp!) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 5),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: kWhiteColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    item.answer,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                )
-                              ],
+              var pagedListView = ValueListenableBuilder(
+                  valueListenable: rebuildConversationList,
+                  builder: (context, _, __) {
+                    return BlocConsumer<ConversationBloc, ConversationState>(
+                      bloc: conversationBloc,
+                      listener: (context, state) =>
+                          updatePagingControllers(state),
+                      builder: (context, state) => PagedListView(
+                        pagingController: pagedListController,
+                        physics: const ClampingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        reverse: true,
+                        scrollDirection: Axis.vertical,
+                        builderDelegate:
+                            PagedChildBuilderDelegate<Conversation>(
+                          noItemsFoundIndicatorBuilder: (context) =>
+                              const SizedBox(
+                            height: 10,
+                          ),
+                          firstPageProgressIndicatorBuilder: (context) =>
+                              const Spinner(),
+                          newPageProgressIndicatorBuilder: (context) =>
+                              const Spinner(),
+                          itemBuilder: (context, item, index) {
+                            if (item.isTimeStamp != null && item.isTimeStamp!) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: kWhiteColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      item.answer,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                ],
+                              );
+                            }
+                            // item.
+                            return ChatBubble(
+                              key: Key(item.id.toString()),
+                              message: item.answer,
+                              time: item.createdAt,
+                              isSent: item.userId == null
+                                  ? item.memberId == currentUser.id
+                                  : item.userId == currentUser.id,
+                              user: userMeta[item.userId ?? item.memberId]!,
+                              showReactions: true,
+                              // onTap: () => print("Tapped $i"),
                             );
-                          }
-                          // item.
-                          return ChatBubble(
-                            key: Key(item.id.toString()),
-                            message: item.answer,
-                            time: item.createdAt,
-                            isSent: item.userId == null
-                                ? item.memberId == currentUser.id
-                                : item.userId == currentUser.id,
-                            user: userMeta[item.userId ?? item.memberId]!,
-                            showReactions: true,
-                            // onTap: () => print("Tapped $i"),
-                          );
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                });
+                    );
+                  });
 
-            return Column(
-              children: [
-                const SizedBox(height: 64),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const BB.BackButton(),
-                      const SizedBox(width: 18),
-                      PictureOrInitial(
-                        fallbackText: chatroom!.header,
-                        imageUrl: chatroom?.chatroomImageUrl,
-                        size: 28.sp,
-                        fontSize: 14.sp,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          chatroom!.header,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: LMTheme.medium.copyWith(
-                            fontSize: 14.sp,
+              return Column(
+                children: [
+                  kVerticalPaddingLarge,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const BB.BackButton(),
+                        const SizedBox(width: 18),
+                        PictureOrInitial(
+                          fallbackText: chatroom!.header,
+                          imageUrl: chatroom?.chatroomImageUrl,
+                          size: 28.sp,
+                          fontSize: 14.sp,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            chatroom!.header,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: LMTheme.medium.copyWith(
+                              fontSize: 14.sp,
+                            ),
                           ),
                         ),
-                      ),
-                      kHorizontalPaddingMedium,
-                      ChatroomMenu(
-                        chatroom: chatroom!,
-                      ),
-                    ],
+                        kHorizontalPaddingMedium,
+                        ChatroomMenu(
+                          chatroom: chatroom!,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 18),
-                Expanded(
-                  child: Container(
-                    color: LMBranding.instance.headerColor.withOpacity(0.2),
-                    child: pagedListView,
+                  const SizedBox(height: 18),
+                  Expanded(
+                    child: Container(
+                      color: LMBranding.instance.headerColor.withOpacity(0.2),
+                      child: pagedListView,
+                    ),
                   ),
-                ),
-                BlocConsumer(
-                    bloc: chatActionBloc,
-                    listener: (context, state) {
-                      if (state is ConversationPosted) {
-                        addConversationToPagedList(
-                          state.postConversationResponse.conversation!,
-                        );
-                      }
-                    },
-                    builder: (context, state) {
-                      return ChatBar(chatroomId: widget.chatroomId);
-                    }),
-              ],
-            );
-          }
+                  BlocConsumer(
+                      bloc: chatActionBloc,
+                      listener: (context, state) {
+                        if (state is ConversationPosted) {
+                          addConversationToPagedList(
+                            state.postConversationResponse.conversation!,
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        return ChatBar(chatroomId: widget.chatroomId);
+                      }),
+                ],
+              );
+            }
 
-          return Container(color: Colors.red);
-        },
+            return Container(color: Colors.red);
+          },
+        ),
       ),
     );
   }
