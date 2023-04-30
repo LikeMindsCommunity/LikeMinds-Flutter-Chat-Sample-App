@@ -218,74 +218,80 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
             if (state is ChatroomLoaded) {
               var pagedListView = ValueListenableBuilder(
-                  valueListenable: rebuildConversationList,
-                  builder: (context, _, __) {
-                    return BlocConsumer<ConversationBloc, ConversationState>(
+                valueListenable: rebuildConversationList,
+                builder: (context, _, __) {
+                  return BlocConsumer<ConversationBloc, ConversationState>(
                       bloc: conversationBloc,
                       listener: (context, state) =>
                           updatePagingControllers(state),
-                      builder: (context, state) => PagedListView(
-                        pagingController: pagedListController,
-                        physics: const ClampingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        reverse: true,
-                        scrollDirection: Axis.vertical,
-                        builderDelegate:
-                            PagedChildBuilderDelegate<Conversation>(
-                          noItemsFoundIndicatorBuilder: (context) =>
-                              const SizedBox(
-                            height: 10,
-                          ),
-                          firstPageProgressIndicatorBuilder: (context) =>
-                              const Spinner(),
-                          newPageProgressIndicatorBuilder: (context) =>
-                              const Spinner(),
-                          animateTransitions: true,
-                          transitionDuration: const Duration(milliseconds: 500),
-                          itemBuilder: (context, item, index) {
-                            if (item.isTimeStamp != null && item.isTimeStamp!) {
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    margin:
-                                        const EdgeInsets.symmetric(vertical: 5),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: kWhiteColor,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      item.answer,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  )
-                                ],
+                      builder: (context, state) {
+                        return PagedListView(
+                          pagingController: pagedListController,
+                          physics: const ClampingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          reverse: true,
+                          scrollDirection: Axis.vertical,
+                          builderDelegate:
+                              PagedChildBuilderDelegate<Conversation>(
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const SizedBox(
+                              height: 10,
+                            ),
+                            firstPageProgressIndicatorBuilder: (context) =>
+                                const Spinner(),
+                            newPageProgressIndicatorBuilder: (context) =>
+                                const Spinner(),
+                            animateTransitions: true,
+                            transitionDuration:
+                                const Duration(milliseconds: 500),
+                            itemBuilder: (context, item, index) {
+                              if (item.isTimeStamp != null &&
+                                  item.isTimeStamp!) {
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: kWhiteColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        item.answer,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    )
+                                  ],
+                                );
+                              }
+                              // item.
+                              return ChatBubble(
+                                key: Key(item.id.toString()),
+                                chatroom: chatroom!,
+                                conversation: item,
+                                sender:
+                                    userMeta[item.userId ?? item.memberId] ??
+                                        item.member!,
+                                mediaFiles: mediaFiles,
+                                conversationAttachments:
+                                    conversationAttachmentsMeta
+                                            .containsKey(item.id.toString())
+                                        ? conversationAttachmentsMeta[
+                                            '${item.id}']
+                                        : null,
                               );
-                            }
-                            // item.
-                            return ChatBubble(
-                              key: Key(item.id.toString()),
-                              chatroom: chatroom!,
-                              conversation: item,
-                              sender: userMeta[item.userId ?? item.memberId]!,
-                              mediaFiles: mediaFiles,
-                              conversationAttachments:
-                                  conversationAttachmentsMeta
-                                          .containsKey(item.id.toString())
-                                      ? conversationAttachmentsMeta[
-                                          '${item.id}']
-                                      : null,
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  });
+                            },
+                          ),
+                        );
+                      });
+                },
+              );
 
               return Column(
                 children: [
@@ -303,7 +309,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                           size: 28.sp,
                           fontSize: 14.sp,
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(
+                          width: 12,
+                        ),
                         Expanded(
                           child: Text(
                             chatroom!.header,

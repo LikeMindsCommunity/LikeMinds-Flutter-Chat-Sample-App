@@ -69,9 +69,7 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   @override
   Widget build(BuildContext context) {
-    isSent = widget.conversation.userId != null
-        ? widget.conversation.userId == user.id
-        : widget.conversation.memberId == user.id;
+    isSent = widget.sender.id == user.id;
     return Column(
       crossAxisAlignment:
           isSent! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
