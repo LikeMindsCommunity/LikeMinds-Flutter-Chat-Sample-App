@@ -13,19 +13,12 @@ class ChatroomBloc extends Bloc<ChatroomEvent, ChatroomState> {
     on<ChatroomEvent>((event, emit) async {
       if (event is InitChatroomEvent) {
         emit(ChatroomLoading());
-        //Perform logic
         LMResponse<GetChatroomResponse> getChatroomResponse =
             await locator<LikeMindsService>()
                 .getChatroom(event.chatroomRequest);
-        emit(
-          ChatroomLoaded(
-            getChatroomResponse: getChatroomResponse.data!,
-          ),
-        );
-      }
-
-      if (event is ReloadChatroomEvent) {
-        emit(ChatroomLoading());
+        emit(ChatroomLoaded(
+          getChatroomResponse: getChatroomResponse.data!,
+        ));
       }
     });
   }

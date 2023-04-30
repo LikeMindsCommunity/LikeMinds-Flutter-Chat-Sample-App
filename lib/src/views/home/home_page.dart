@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
@@ -5,14 +7,11 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
-// import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
-// import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/chat_item.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/skeleton_list.dart';
-import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,117 +24,110 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? communityName;
   String? userName;
+  User? user;
   HomeBloc? homeBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    UserLocalPreference userLocalPreference = UserLocalPreference.instance;
+    userName = userLocalPreference.fetchUserData().name;
+    communityName = userLocalPreference.fetchCommunityData()["community_name"];
+  }
 
   @override
   Widget build(BuildContext context) {
     homeBloc = BlocProvider.of<HomeBloc>(context);
     return Scaffold(
-      body: BlocConsumer<HomeBloc, HomeState>(
-        listener: (context, state) {
-          if (state is HomeLoaded) {
-            Fluttertoast.showToast(msg: "Chats loaded");
-          }
-        },
-        builder: (context, state) {
-          if (state is HomeLoading) {
-            return const SkeletonChatList();
-          }
-
-          if (state is HomeLoaded) {
-            UserLocalPreference userLocalPreference =
-                UserLocalPreference.instance;
-            final user = userLocalPreference.fetchUserData();
-            final GetHomeFeedResponse response = state.response;
-            communityName = response.communityMeta?.values.first.name;
-            userName = response.userMeta?[user.id.toString()]?.name;
-            List<ChatItem> chatItems = getChats(context, state.response);
-            return Column(
-              children: [
-                // const SizedBox(height: 72),
-                Container(
-                  width: 100.w,
-                  color: LMBranding.instance.headerColor,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0,
-                      vertical: 12.0,
-                    ),
-                    child: SafeArea(
-                      bottom: false,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            alignment: Alignment.center,
-                            child: Text(
-                              communityName ?? "Chatrooms",
-                              style: LMBranding.instance.fonts.bold.copyWith(
-                                  fontSize: 16.sp, color: kWhiteColor),
-                            ),
-                          ),
-                          GestureDetector(
-                              onTap: () {
-                                Route route = MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      BlocProvider<ProfileBloc>(
-                                    create: (BuildContext context) =>
-                                        ProfileBloc()..add(InitProfileEvent()),
-                                    child: const ProfilePage(
-                                      isSelf: true,
-                                    ),
-                                  ),
-                                );
-                                Navigator.push(context, route);
-                              },
-                              child: PictureOrInitial(
-                                fallbackText: userName ?? "..",
-                                size: 30.sp,
-                                imageUrl: user.imageUrl,
-                                backgroundColor: LMTheme.buttonColor,
-                              )),
-                        ],
-                      ),
+        body: Column(
+      children: [
+        Container(
+          width: 100.w,
+          color: LMBranding.instance.headerColor,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 4.w,
+              vertical: 2.h,
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    alignment: Alignment.center,
+                    child: Text(
+                      communityName ?? "Chatrooms",
+                      style: LMBranding.instance.fonts.bold
+                          .copyWith(fontSize: 16.sp, color: kWhiteColor),
                     ),
                   ),
-                ),
-                // const SizedBox(height: 18),
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () {
-                      homeBloc!.add(
-                        InitHomeEvent(),
-                      );
-                      return Future.value();
-                    },
-                    child: SafeArea(
-                      top: false,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                        ),
-                        itemCount: chatItems.length,
-                        itemBuilder: (context, index) {
-                          // if (index == 0) {
-                          //   return const ExploreSpacesBar();
-                          // }
-                          return chatItems[index];
-                        },
+                  //   communityName ??
+                  // ),
+                  PictureOrInitial(
+                    fallbackText: userName ?? "..",
+                    size: 30.sp,
+                    imageUrl: user?.imageUrl,
+                    backgroundColor: LMTheme.buttonColor,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: BlocConsumer<HomeBloc, HomeState>(
+            bloc: homeBloc,
+            listener: (context, state) {
+              if (state is HomeLoaded) {
+                // Fluttertoast.showToast(msg: "Chats loaded");
+              }
+              if (state is RealTimeUpdate) {
+                Fluttertoast.showToast(
+                  msg:
+                      "Realtime update with ${state.chatroomId} and ${state.conversationId}",
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is HomeLoading) {
+                return const SkeletonChatList();
+              }
+
+              if (state is HomeLoaded) {
+                List<ChatItem> chatItems = getChats(context, state.response);
+                return RefreshIndicator(
+                  onRefresh: () {
+                    homeBloc!.add(
+                      InitHomeEvent(),
+                    );
+                    return Future.value();
+                  },
+                  child: SafeArea(
+                    top: false,
+                    child: ListView.builder(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 5.w,
+                        vertical: 2.h,
                       ),
+                      itemCount: chatItems.length,
+                      itemBuilder: (context, index) {
+                        return chatItems[index];
+                      },
                     ),
                   ),
-                ),
-              ],
-            );
-          }
+                );
+              }
 
-          return const Center(
-            child: Text(""),
-          );
-        },
-      ),
-    );
+              return Center(
+                child: Container(),
+              );
+            },
+          ),
+        ),
+      ],
+    ));
   }
 }
 
@@ -159,6 +151,7 @@ List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
       avatarUrl: chatrooms[i].chatroomImageUrl,
       unreadCount: chatrooms[i].unseenCount ?? 0,
       onTap: () {
+        LMRealtime.instance.chatroomId = chatrooms[i].id;
         context.push("/chatroom/${chatrooms[i].id}");
       },
     ));
@@ -166,3 +159,20 @@ List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
 
   return chats;
 }
+
+Widget getShimmer() => Shimmer.fromColors(
+      baseColor: Colors.grey.shade200,
+      highlightColor: Colors.grey.shade300,
+      period: const Duration(seconds: 2),
+      direction: ShimmerDirection.ltr,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          bottom: 12,
+        ),
+        child: Container(
+          height: 16,
+          width: 32.w,
+          color: kWhiteColor,
+        ),
+      ),
+    );

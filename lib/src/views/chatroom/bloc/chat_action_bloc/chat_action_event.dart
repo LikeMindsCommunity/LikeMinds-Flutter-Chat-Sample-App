@@ -50,3 +50,23 @@ class PostMultiMediaConversation extends ChatActionEvent {
         mediaFiles,
       ];
 }
+
+class NewConversation extends ChatActionEvent {
+  final int chatroomId;
+  final int conversationId;
+
+  NewConversation({
+    required this.chatroomId,
+    required this.conversationId,
+  });
+}
+
+class UpdateConversationList extends ChatActionEvent {
+  final int conversationId;
+  final int chatroomId;
+
+  UpdateConversationList({
+    required this.conversationId,
+    required this.chatroomId,
+  });
+}

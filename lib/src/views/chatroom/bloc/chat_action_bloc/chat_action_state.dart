@@ -33,6 +33,14 @@ class ConversationPosted extends ChatActionState {
       ];
 }
 
+class UpdateConversation extends ChatActionState {
+  Conversation response;
+
+  UpdateConversation(
+    this.response,
+  );
+}
+
 class ConversationEdited extends ChatActionState {
   final EditConversationResponse editConversationResponse;
 

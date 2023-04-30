@@ -1,10 +1,12 @@
 // GoRouter configuration
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
@@ -26,7 +28,6 @@ const moderationRoute = '/moderation';
 const mediaForwardRoute = '/media_forward/:chatroomId/:mediaType';
 
 final router = GoRouter(
-  // initialLocation: homeRoute,
   routes: [
     GoRoute(
       path: startRoute,
@@ -86,4 +87,13 @@ final router = GoRouter(
       ),
     ),
   ],
+  errorBuilder: (context, state) => Scaffold(
+    backgroundColor: LMTheme.headerColor,
+    body: Center(
+      child: Text(
+        state.error.toString(),
+        style: LMTheme.bold,
+      ),
+    ),
+  ),
 );

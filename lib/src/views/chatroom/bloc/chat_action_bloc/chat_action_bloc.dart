@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'dart:ui' as ui show Image;
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:equatable/equatable.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:bloc/bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
@@ -15,7 +18,41 @@ part 'chat_action_state.dart';
 
 class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
   MediaService mediaService = MediaService(false);
+  final DatabaseReference realTime = LMRealtime.instance.chatroom();
+  int? lastConversationId;
+
   ChatActionBloc() : super(ConversationInitial()) {
+    on<NewConversation>((event, emit) {
+      int chatroomId = event.chatroomId;
+      lastConversationId = event.conversationId;
+
+      realTime.onValue.listen((event) {
+        if (event.snapshot.value != null) {
+          final response = event.snapshot.value as Map;
+          final conversationId = int.parse(response["collabcard"]["answer_id"]);
+          if (lastConversationId != null &&
+              conversationId != lastConversationId) {
+            add(UpdateConversationList(
+              chatroomId: chatroomId,
+              conversationId: conversationId,
+            ));
+          }
+        }
+      });
+    });
+    on<UpdateConversationList>((event, emit) async {
+      if (lastConversationId != null &&
+          event.conversationId != lastConversationId) {
+        final response = await locator<LikeMindsService>()
+            .getSingleConversation((GetSingleConversationRequestBuilder()
+                  ..chatroomId(event.chatroomId)
+                  ..conversationId(event.conversationId))
+                .build());
+        if (response.success) {
+          emit(UpdateConversation(response.data!.conversation!));
+        }
+      }
+    });
     on<PostConversation>((event, emit) async {
       await mapPostConversationFunction(
         event.postConversationRequest,
@@ -145,12 +182,8 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
 
       if (response.success) {
         if (response.data!.success) {
-          emit(
-            ConversationPosted(
-              response.data!,
-            ),
-          );
-          return true;
+          lastConversationId = response.data!.conversation!.id;
+          emit(ConversationPosted(response.data!));
         } else {
           emit(
             ChatActionError(

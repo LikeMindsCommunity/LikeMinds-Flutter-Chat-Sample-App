@@ -34,3 +34,5 @@ class ConversationError extends ConversationState {
   @override
   List<Object> get props => [message];
 }
+
+class ChatroomUpdated extends ConversationState {}
