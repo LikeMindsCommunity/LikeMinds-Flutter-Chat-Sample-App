@@ -1,6 +1,9 @@
 library likeminds_chat_mm_fl;
 
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -13,6 +16,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart
 import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:sizer/sizer.dart';
 
@@ -32,12 +36,11 @@ class LMChat extends StatelessWidget {
   }
 
   static LMChat? _instance;
-  static LMBranding? _branding;
-
   static LMChat instance({required LMChatBuilder builder}) {
     if (builder.getUserId == null || builder.getUserName == null) {
       throw Exception(
-          'LMChat builder needs to be initialized with userId, and userName');
+        'LMChat builder needs to be initialized with userId, and userName',
+      );
     } else {
       return _instance ??= LMChat._internal(
         builder.getUserId,
@@ -56,14 +59,6 @@ class LMChat extends StatelessWidget {
     );
   }
 
-  static void setBranding({LMBranding? branding}) {
-    if (branding != null) {
-      _branding = branding;
-    } else {
-      LMBranding.instance.initialize();
-    }
-  }
-
   Future<InitiateUser> initiateUser() async {
     final response = await locator<LikeMindsService>().initiateUser(
       InitiateUserRequest(
@@ -71,18 +66,38 @@ class LMChat extends StatelessWidget {
         userName: _userName,
       ),
     );
-    UserLocalPreference.instance
-        .storeUserData(response.data!.initiateUser!.user);
-    firebase();
-    return response.data!.initiateUser!;
+    final initiateUser = response.data!.initiateUser!;
+    UserLocalPreference.instance.storeUserData(initiateUser.user);
+    UserLocalPreference.instance.storeCommunityData(initiateUser.community);
+    await firebase();
+    return initiateUser;
   }
 
-  firebase() {
+  firebase() async {
     try {
-      final firebase = Firebase.app();
-      print("Firebase - ${firebase.options.appId}");
+      final clientFirebase = Firebase.app();
+      final ourFirebase = await Firebase.initializeApp(
+        name: 'likeminds_chat',
+        options: Platform.isIOS
+            ? const FirebaseOptions(
+                apiKey: 'AIzaSyBWjDQEiYKdQbQNvoiVvvOn_cbufQzvWuo',
+                appId: '1:983690302378:ios:00ee53e9ab9afe851b91d3',
+                messagingSenderId: '983690302378',
+                projectId: 'collabmates-beta',
+                databaseURL: "https://collabmates-beta.firebaseio.com/",
+              )
+            : const FirebaseOptions(
+                apiKey: 'AIzaSyB-9J8X0Z3Q4Z2Z3Z2Z3Z2Z3Z2Z3Z2Z3Z2',
+                appId: '1:983690302378:android:46abad58705780a81b91d3',
+                messagingSenderId: '983690302378',
+                projectId: 'collabmates-beta',
+                databaseURL: "https://collabmates-beta.firebaseio.com/",
+              ),
+      );
+      debugPrint("Client Firebase - ${clientFirebase.options.appId}");
+      debugPrint("Our Firebase - ${ourFirebase.options.appId}");
     } on FirebaseException catch (e) {
-      print("Make sure you have initialized firebase, ${e.toString()}");
+      debugPrint("Make sure you have initialized firebase, ${e.toString()}");
     }
   }
 

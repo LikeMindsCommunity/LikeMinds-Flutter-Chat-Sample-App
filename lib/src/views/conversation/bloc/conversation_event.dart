@@ -10,12 +10,22 @@ class GetConversation extends ConversationEvent {
   });
 }
 
-class ReloadChatroomEvent extends ConversationEvent {}
-
 class ChatroomDetailsEvent extends ConversationEvent {}
 
 class MarkReadChatroomEvent extends ConversationEvent {
   final int chatroomId;
 
   MarkReadChatroomEvent({required this.chatroomId});
+}
+
+class ReloadChatroomEvent extends ConversationEvent {
+  final int id;
+
+  ReloadChatroomEvent({required this.id});
+}
+
+class UpdateChatroomEvent extends ConversationEvent {
+  final int id;
+
+  UpdateChatroomEvent({required this.id});
 }

@@ -1,12 +1,12 @@
 // GoRouter configuration
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
@@ -17,7 +17,6 @@ import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 
 const startRoute = '/';
 const homeRoute = '/home';
@@ -29,7 +28,6 @@ const moderationRoute = '/moderation';
 const mediaForwardRoute = '/media_forward/:mediaType';
 
 final router = GoRouter(
-  // initialLocation: homeRoute,
   routes: [
     GoRoute(
       path: startRoute,
@@ -88,4 +86,13 @@ final router = GoRouter(
       ),
     ),
   ],
+  errorBuilder: (context, state) => Scaffold(
+    backgroundColor: LMTheme.headerColor,
+    body: Center(
+      child: Text(
+        state.error.toString(),
+        style: LMTheme.bold,
+      ),
+    ),
+  ),
 );

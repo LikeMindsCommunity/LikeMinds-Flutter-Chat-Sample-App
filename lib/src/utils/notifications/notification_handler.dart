@@ -1,8 +1,11 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 /// This class handles all the notification related logic
@@ -121,6 +124,11 @@ class LMNotificationHandler {
     //     ),
     //   );
     // }
+
+    if (host == "collabcard") {
+      final path = "/chatroom/${queryParams["collabcard_id"]}/";
+      router.push(path);
+    }
   }
 
   /// Show a simple notification using overlay package
@@ -133,25 +141,40 @@ class LMNotificationHandler {
           onTap: () {
             routeNotification(message);
           },
-          child: Text(
-            message.data["sub_title"],
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                message.data["title"],
+                style: LMTheme.medium.copyWith(
+                  fontSize: 11.sp,
+                  color: LMTheme.headerColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                message.data["sub_title"],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: LMTheme.regular.copyWith(
+                  fontSize: 9.sp,
+                ),
+              ),
+            ],
           ),
         ),
         background: Colors.white,
         duration: const Duration(seconds: 3),
         leading: Icon(
           Icons.notifications,
-          color: Colors.blue.shade400,
-          size: 24,
+          color: LMTheme.buttonColor,
+          size: 24.sp,
         ),
         trailing: Icon(
           Icons.swipe_right_outlined,
           color: Colors.grey.shade400,
-          size: 18,
+          size: 18.sp,
         ),
         position: NotificationPosition.top,
         slideDismissDirection: DismissDirection.horizontal,

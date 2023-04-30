@@ -1,5 +1,6 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:intl/intl.dart';
@@ -77,8 +78,10 @@ class _ChatItemState extends State<ChatItem> {
                 ),
               ),
             ),
+            kHorizontalPaddingMedium,
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   getTime(_time),
@@ -94,7 +97,7 @@ class _ChatItemState extends State<ChatItem> {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 10, 24, 103),
+                      color: LMTheme.buttonColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -124,11 +127,6 @@ String getTime(String time) {
   final Duration difference = now.difference(messageTime);
   if (difference.inDays > 0) {
     return DateFormat('dd/MM/yyyy').format(messageTime);
-  } else if (difference.inHours > 0) {
-    return DateFormat('kk:mm').format(messageTime);
-  } else if (difference.inMinutes > 0) {
-    return DateFormat('kk:mm').format(messageTime);
-  } else {
-    return DateFormat('dd/MM/yyyy').format(messageTime);
   }
+  return DateFormat('kk:mm').format(messageTime);
 }

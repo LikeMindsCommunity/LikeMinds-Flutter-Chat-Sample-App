@@ -22,6 +22,8 @@ abstract class ILikeMindsService {
       SetChatroomTopicRequest request);
   Future<LMResponse<GetConversationResponse>> getConversation(
       GetConversationRequest request);
+  Future<LMResponse<GetSingleConversationResponse>> getSingleConversation(
+      GetSingleConversationRequest request);
   Future<LMResponse<PostConversationResponse>> postConversation(
       PostConversationRequest request);
   Future<LMResponse<EditConversationResponse>> editConversation(
@@ -111,6 +113,12 @@ class LikeMindsService implements ILikeMindsService {
   Future<LMResponse<GetConversationResponse>> getConversation(
       GetConversationRequest request) {
     return client.getConversation(request);
+  }
+
+  @override
+  Future<LMResponse<GetSingleConversationResponse>> getSingleConversation(
+      GetSingleConversationRequest request) {
+    return client.getSingleConversation(request);
   }
 
   @override

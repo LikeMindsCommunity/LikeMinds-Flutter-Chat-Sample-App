@@ -53,6 +53,7 @@ dependencies:
     path: lib/packages/flutter_typeahead-4.3.7
   image_picker: ^0.8.7+4
   file_picker: ^5.2.10
+  firebase_database: ^10.1.1
   
 dev_dependencies:
   flutter_test:

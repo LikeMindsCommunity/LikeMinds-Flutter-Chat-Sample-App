@@ -32,7 +32,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
   ConversationBloc? conversationBloc;
-  Map<int, User> userMeta = <int, User>{};
+  Map<int, User?> userMeta = <int, User?>{};
   ChatRoom? chatroom;
   User currentUser = UserLocalPreference.instance.fetchUserData();
 
@@ -88,6 +88,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
     super.initState();
     Bloc.observer = SimpleBlocObserver();
     _addPaginationListener();
+    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     conversationBloc = ConversationBloc()
       ..add(
         MarkReadChatroomEvent(chatroomId: widget.chatroomId),
@@ -124,7 +125,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
   @override
   Widget build(BuildContext context) {
     // conversationBloc = BlocProvider.of<ConversationBloc>(context);
-    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -132,7 +132,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
         child: BlocConsumer<ChatroomBloc, ChatroomState>(
           listener: (context, state) {
             if (state is ChatroomLoaded) {
-              Fluttertoast.showToast(msg: "Chatroom loaded");
+              chatroom = state.getChatroomResponse.chatroom!;
+              chatActionBloc?.add(
+                NewConversation(
+                  chatroomId: chatroom!.id,
+                  conversationId: state.getChatroomResponse.lastConversationId!,
+                ),
+              );
             }
           },
           builder: (context, state) {
@@ -141,8 +147,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
             }
 
             if (state is ChatroomLoaded) {
-              chatroom = state.getChatroomResponse.chatroom!;
-
               var pagedListView = ValueListenableBuilder(
                   valueListenable: rebuildConversationList,
                   builder: (context, _, __) {
@@ -199,7 +203,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               isSent: item.userId == null
                                   ? item.memberId == currentUser.id
                                   : item.userId == currentUser.id,
-                              user: userMeta[item.userId ?? item.memberId]!,
+                              user: userMeta[item.userId ?? item.memberId] ??
+                                  item.member!,
                               showReactions: true,
                               // onTap: () => print("Tapped $i"),
                             );
@@ -258,6 +263,11 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             state.postConversationResponse.conversation!,
                           );
                         }
+                        if (state is UpdateConversation) {
+                          addConversationToPagedList(
+                            state.response,
+                          );
+                        }
                       },
                       builder: (context, state) {
                         return ChatBar(chatroomId: widget.chatroomId);
@@ -273,51 +283,3 @@ class _ChatroomPageState extends State<ChatroomPage> {
     );
   }
 }
-
-// List<Widget> getChats(BuildContext context) {
-//   List<Widget> chats = [];
-
-//   for (int i = 0; i < 10; i++) {
-//     chats.add(
-//       ChatBubble(
-//         key: Key(i.toString()),
-//         isSent: i % 2 == 0,
-//         message:
-//             "Lorem ipsum message $i dolor sit amet, consectetur adipiscing elit.",
-//         time: "11:1$i",
-//         profileImageUrl: "https://picsum.photos/200/300",
-//         showReactions: false,
-//         // onTap: () => print("Tapped $i"),
-//       ),
-//     );
-//   }
-
-//   chats.add(
-//     ChatBubble(
-//       key: UniqueKey(),
-//       isSent: false,
-//       message: "https://picsum.photos/700/600",
-//       time: "12:34",
-//       profileImageUrl: "https://picsum.photos/600/600",
-//       showReactions: false,
-//       contentType: ContentType.image,
-//       // onTap: () => print("Tapped $i"),
-//     ),
-//   );
-
-//   chats.add(
-//     ChatBubble(
-//       key: UniqueKey(),
-//       isSent: true,
-//       message:
-//           "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
-//       time: "12:34",
-//       profileImageUrl: "https://picsum.photos/600/600",
-//       showReactions: false,
-//       contentType: ContentType.video,
-//       // onTap: () => print("Tapped $i"),
-//     ),
-//   );
-
-//   return chats;
-// }

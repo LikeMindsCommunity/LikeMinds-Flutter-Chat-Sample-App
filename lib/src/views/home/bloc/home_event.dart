@@ -7,4 +7,12 @@ class InitHomeEvent extends HomeEvent {
   InitHomeEvent();
 }
 
-class ReloadHomeEvent extends HomeEvent {}
+class ReloadHomeEvent extends HomeEvent {
+  final GetHomeFeedResponse response;
+
+  ReloadHomeEvent({required this.response});
+}
+
+class UpdateHomeEvent extends HomeEvent {
+  UpdateHomeEvent();
+}

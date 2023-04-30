@@ -9,6 +9,4 @@ class InitChatroomEvent extends ChatroomEvent {
   InitChatroomEvent(this.chatroomRequest);
 }
 
-class ReloadChatroomEvent extends ChatroomEvent {}
-
 class ChatroomDetailsEvent extends ChatroomEvent {}

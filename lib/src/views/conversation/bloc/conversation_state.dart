@@ -19,3 +19,5 @@ class ConversationError extends ConversationState {
 
   ConversationError(this.message);
 }
+
+class ChatroomUpdated extends ConversationState {}
