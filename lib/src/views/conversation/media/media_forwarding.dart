@@ -2,22 +2,36 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 
 class MediaForward extends StatefulWidget {
+  int chatroomId;
   File mediaFile;
   MediaType mediaType;
-  MediaForward({Key? key, required this.mediaFile, required this.mediaType})
-      : super(key: key);
+  MediaForward({
+    Key? key,
+    required this.mediaFile,
+    required this.mediaType,
+    required this.chatroomId,
+  }) : super(key: key);
 
   @override
   State<MediaForward> createState() => _MediaForwardState();
 }
 
 class _MediaForwardState extends State<MediaForward> {
+  TextEditingController _textEditingController = TextEditingController();
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     ChatActionBloc chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
@@ -55,10 +69,36 @@ class _MediaForwardState extends State<MediaForward> {
             ),
             SizedBox(
               width: 60.w,
-              child: TextField(),
+              child: TextField(
+                controller: _textEditingController,
+                style: LMTheme.medium.copyWith(
+                  color: kWhiteColor,
+                ),
+                decoration: InputDecoration(
+                  hintStyle: LMTheme.medium.copyWith(
+                    color: kWhiteColor,
+                  ),
+                  border: InputBorder.none,
+                ),
+              ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                context.pop();
+                chatActionBloc.add(
+                  PostMultiMediaConversation(
+                    (PostConversationRequestBuilder()
+                          ..attachmentCount(1)
+                          ..chatroomId(widget.chatroomId)
+                          ..temporaryId(
+                              DateTime.now().millisecondsSinceEpoch.toString())
+                          ..text(_textEditingController.text)
+                          ..hasFiles(true))
+                        .build(),
+                    [widget.mediaFile],
+                  ),
+                );
+              },
               child: Container(
                 width: 12.w,
                 height: 12.w,

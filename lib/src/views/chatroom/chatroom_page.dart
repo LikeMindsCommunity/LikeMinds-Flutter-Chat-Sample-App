@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -29,6 +31,8 @@ class ChatroomPage extends StatefulWidget {
 
 class _ChatroomPageState extends State<ChatroomPage> {
   ChatActionBloc? chatActionBloc;
+  Map<String, dynamic> conversationAttachmentsMeta = <String, dynamic>{};
+  Map<String, List<File>> mediaFiles = <String, List<File>>{};
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
   ConversationBloc? conversationBloc;
@@ -65,21 +69,80 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
     if (conversationList.isNotEmpty) {
       if (conversationList.first.date != conversation.date) {
-        conversationList.add(Conversation(
-          isTimeStamp: true,
-          id: 1,
-          answer: conversation.date!,
-          communityId: chatroom!.communityId!,
-          createdAt: conversation.date!,
-          header: conversation.date,
-        ));
+        conversationList.insert(
+          0,
+          Conversation(
+            isTimeStamp: true,
+            id: 1,
+            hasFiles: false,
+            attachmentCount: 0,
+            attachmentsUploaded: false,
+            createdEpoch: conversation.createdEpoch,
+            chatroomId: chatroom!.id,
+            date: conversation.date,
+            memberId: conversation.memberId,
+            userId: conversation.userId,
+            temporaryId: conversation.temporaryId,
+            answer: conversation.date ?? '',
+            communityId: chatroom!.communityId!,
+            createdAt: conversation.createdAt,
+            header: conversation.header,
+          ),
+        );
       }
     }
     conversationList.insert(0, conversation);
+    if (conversationList.length >= 500) {
+      conversationList.removeLast();
+    }
     if (!userMeta.containsKey(currentUser.id)) {
       userMeta[currentUser.id] = currentUser;
     }
     pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
+  }
+
+  void addMultiMediaConversation(MultiMediaConversationPosted state) {
+    if (!userMeta.containsKey(currentUser.id)) {
+      userMeta[currentUser.id] = currentUser;
+    }
+    if (!conversationAttachmentsMeta
+        .containsKey(state.postConversationResponse.conversation!.id)) {
+      conversationAttachmentsMeta[
+              '${state.postConversationResponse.conversation!.id}'] =
+          state.putMediaResponse;
+    }
+    List<Conversation> conversationList =
+        pagedListController.itemList ?? <Conversation>[];
+
+    conversationList.removeWhere((element) =>
+        element.temporaryId ==
+        state.postConversationResponse.conversation!.temporaryId);
+
+    mediaFiles.remove(state.postConversationResponse.conversation!.temporaryId);
+
+    conversationList.insert(
+      0,
+      Conversation(
+        id: state.postConversationResponse.conversation!.id,
+        hasFiles: true,
+        attachmentCount: state.putMediaResponse.length,
+        attachmentsUploaded: true,
+        chatroomId: chatroom!.id,
+        date: state.postConversationResponse.conversation!.date,
+        memberId: state.postConversationResponse.conversation!.memberId,
+        userId: state.postConversationResponse.conversation!.userId,
+        temporaryId: state.postConversationResponse.conversation!.temporaryId,
+        answer: state.postConversationResponse.conversation!.answer,
+        communityId: chatroom!.communityId!,
+        createdAt: state.postConversationResponse.conversation!.createdAt,
+        header: state.postConversationResponse.conversation!.header,
+      ),
+    );
+
+    if (conversationList.length >= 500) {
+      conversationList.removeLast();
+    }
     rebuildConversationList.value = !rebuildConversationList.value;
   }
 
@@ -103,6 +166,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
   void updatePagingControllers(Object? state) {
     if (state is ConversationLoaded) {
       _page++;
+
+      if (state.getConversationResponse.conversationAttachmentsMeta != null &&
+          state.getConversationResponse.conversationAttachmentsMeta!
+              .isNotEmpty) {
+        conversationAttachmentsMeta
+            .addAll(state.getConversationResponse.conversationAttachmentsMeta!);
+      }
 
       if (state.getConversationResponse.userMeta != null) {
         userMeta.addAll(state.getConversationResponse.userMeta!);
@@ -166,6 +236,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               const Spinner(),
                           newPageProgressIndicatorBuilder: (context) =>
                               const Spinner(),
+                          animateTransitions: true,
+                          transitionDuration: const Duration(milliseconds: 500),
                           itemBuilder: (context, item, index) {
                             if (item.isTimeStamp != null && item.isTimeStamp!) {
                               return Row(
@@ -194,14 +266,16 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             // item.
                             return ChatBubble(
                               key: Key(item.id.toString()),
-                              message: item.answer,
-                              time: item.createdAt,
-                              isSent: item.userId == null
-                                  ? item.memberId == currentUser.id
-                                  : item.userId == currentUser.id,
-                              user: userMeta[item.userId ?? item.memberId]!,
-                              showReactions: true,
-                              // onTap: () => print("Tapped $i"),
+                              chatroom: chatroom!,
+                              conversation: item,
+                              sender: userMeta[item.userId ?? item.memberId]!,
+                              mediaFiles: mediaFiles,
+                              conversationAttachments:
+                                  conversationAttachmentsMeta
+                                          .containsKey(item.id.toString())
+                                      ? conversationAttachmentsMeta[
+                                          '${item.id}']
+                                      : null,
                             );
                           },
                         ),
@@ -257,6 +331,23 @@ class _ChatroomPageState extends State<ChatroomPage> {
                           addConversationToPagedList(
                             state.postConversationResponse.conversation!,
                           );
+                        } else if (state is MultiMediaConversationLoading) {
+                          if (!userMeta.containsKey(currentUser.id)) {
+                            userMeta[currentUser.id] = currentUser;
+                          }
+                          mediaFiles[state.postConversationResponse
+                              .conversation!.temporaryId!] = state.mediaFiles;
+
+                          List<Conversation> conversationList =
+                              pagedListController.itemList ?? <Conversation>[];
+
+                          conversationList.insert(
+                              0, state.postConversationResponse.conversation!);
+
+                          rebuildConversationList.value =
+                              !rebuildConversationList.value;
+                        } else if (state is MultiMediaConversationPosted) {
+                          addMultiMediaConversation(state);
                         }
                       },
                       builder: (context, state) {

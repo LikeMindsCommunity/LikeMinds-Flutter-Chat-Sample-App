@@ -1,47 +1,182 @@
 import 'dart:io';
+import 'dart:ui' as ui show Image;
 
+import 'package:equatable/equatable.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:bloc/bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 
 part 'chat_action_event.dart';
 part 'chat_action_state.dart';
 
 class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
+  MediaService mediaService = MediaService(false);
   ChatActionBloc() : super(ConversationInitial()) {
     on<PostConversation>((event, emit) async {
-      await mapPostConversationFunction(event.postConversationRequest, emit);
+      await mapPostConversationFunction(
+        event.postConversationRequest,
+        emit,
+      );
     });
     on<PostMultiMediaConversation>(
       (event, emit) async {
-        mapPostConversationFunction(event.postConversationRequest, emit);
+        await mapPostMultiMediaConversation(
+          event,
+          emit,
+        );
       },
     );
+  }
+
+  mapPostMultiMediaConversation(
+    PostMultiMediaConversation event,
+    Emitter<ChatActionState> emit,
+  ) async {
+    try {
+      LMResponse<PostConversationResponse> response =
+          await locator<LikeMindsService>().postConversation(
+        event.postConversationRequest,
+      );
+
+      if (response.success) {
+        PostConversationResponse postConversationResponse = response.data!;
+        if (postConversationResponse.success) {
+          emit(
+            MultiMediaConversationLoading(
+              response.data!,
+              event.mediaFiles,
+            ),
+          );
+          List<dynamic> fileLink = [];
+          User user = UserLocalPreference.instance.fetchUserData();
+          int length = event.mediaFiles.length;
+          for (int i = 0; i < length; i++) {
+            File file = event.mediaFiles[i];
+            String? url = await mediaService.uploadFile(
+              file,
+              user.userUniqueId,
+            );
+            if (url == null) {
+              throw 'Error uploading file';
+            } else {
+              ui.Image image =
+                  await decodeImageFromList(file.readAsBytesSync());
+              PutMediaRequest putMediaRequest = (PutMediaRequestBuilder()
+                    ..conversationId(postConversationResponse.conversation!.id)
+                    ..filesCount(event.mediaFiles.length)
+                    ..index(i)
+                    ..height(image.height)
+                    ..width(image.width)
+                    ..meta("")
+                    ..type("image")
+                    ..url(url))
+                  .build();
+              LMResponse<PutMediaResponse> uploadFileResponse =
+                  await locator<LikeMindsService>()
+                      .putMultimedia(putMediaRequest);
+              if (!uploadFileResponse.success) {
+                emit(
+                  MultiMediaConversationError(
+                    uploadFileResponse.errorMessage!,
+                    event.postConversationRequest.temporaryId,
+                  ),
+                );
+              } else {
+                if (!uploadFileResponse.data!.success) {
+                  emit(
+                    MultiMediaConversationError(
+                      uploadFileResponse.data!.errorMessage!,
+                      event.postConversationRequest.temporaryId,
+                    ),
+                  );
+                } else {
+                  fileLink.add(
+                    putMediaRequest.toJson(),
+                  );
+                }
+              }
+            }
+          }
+          emit(
+            MultiMediaConversationPosted(
+              postConversationResponse,
+              fileLink,
+            ),
+          );
+        } else {
+          emit(
+            MultiMediaConversationError(
+              postConversationResponse.errorMessage!,
+              event.postConversationRequest.temporaryId,
+            ),
+          );
+        }
+      } else {
+        emit(
+          MultiMediaConversationError(
+            response.errorMessage!,
+            event.postConversationRequest.temporaryId,
+          ),
+        );
+        return false;
+      }
+    } catch (e) {
+      emit(
+        ChatActionError(
+          "An error occurred",
+          event.postConversationRequest.temporaryId,
+        ),
+      );
+      return false;
+    }
   }
 
   mapPostConversationFunction(PostConversationRequest postConversationRequest,
       Emitter<ChatActionState> emit) async {
     try {
       LMResponse<PostConversationResponse> response =
-          await locator<LikeMindsService>()
-              .postConversation(postConversationRequest);
+          await locator<LikeMindsService>().postConversation(
+        postConversationRequest,
+      );
 
       if (response.success) {
         if (response.data!.success) {
-          emit(ConversationPosted(response.data!));
+          emit(
+            ConversationPosted(
+              response.data!,
+            ),
+          );
+          return true;
         } else {
-          emit(ChatActionError(response.data!.errorMessage!,
-              postConversationRequest.temporaryId));
+          emit(
+            ChatActionError(
+              response.data!.errorMessage!,
+              postConversationRequest.temporaryId,
+            ),
+          );
+          return false;
         }
       } else {
-        emit(ChatActionError(
-            response.errorMessage!, postConversationRequest.temporaryId));
+        emit(
+          ChatActionError(
+            response.errorMessage!,
+            postConversationRequest.temporaryId,
+          ),
+        );
+        return false;
       }
     } catch (e) {
-      emit(ChatActionError(
-          "An error occurred", postConversationRequest.temporaryId));
+      emit(
+        ChatActionError(
+          "An error occurred",
+          postConversationRequest.temporaryId,
+        ),
+      );
+      return false;
     }
   }
 }

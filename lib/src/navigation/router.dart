@@ -4,9 +4,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
@@ -17,7 +15,6 @@ import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 
 const startRoute = '/';
 const homeRoute = '/home';
@@ -26,7 +23,7 @@ const participantsRoute = '/participants';
 const exploreRoute = '/explore';
 const profileRoute = '/profile';
 const moderationRoute = '/moderation';
-const mediaForwardRoute = '/media_forward/:mediaType';
+const mediaForwardRoute = '/media_forward/:chatroomId/:mediaType';
 
 final router = GoRouter(
   // initialLocation: homeRoute,
@@ -83,6 +80,7 @@ final router = GoRouter(
       name: "media_forward",
       builder: (context, state) => MediaForward(
         mediaFile: state.extra as File,
+        chatroomId: int.parse(state.params['chatroomId']!),
         mediaType:
             mapIntToMediaType(int.parse(state.params['mediaType'] ?? "1")),
       ),

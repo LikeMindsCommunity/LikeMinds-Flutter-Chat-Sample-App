@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
@@ -6,6 +8,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:likeminds_chat_mm_fl/src/views/video_player_screen.dart';
@@ -13,28 +16,25 @@ import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/reaction_chip.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/reaction_bar.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/enums/reaction_enum.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/enums/content_enum.dart'
     as content;
+import '../../conversation/media/media_utils.dart';
 
 class ChatBubble extends StatefulWidget {
-  final bool? isSent;
-  final User user;
-  final String? message;
-  final String? time;
-  final bool showReactions;
-  final content.ContentType contentType;
+  final Conversation conversation;
+  final ChatRoom chatroom;
+  final User sender;
+  final Map<String, List<File>> mediaFiles;
+  final List<dynamic>? conversationAttachments;
 
   const ChatBubble({
     super.key,
-    this.isSent = true,
-    required this.user,
-    this.message,
-    this.time,
-    this.showReactions = false,
-    this.contentType = content.ContentType.text,
+    required this.chatroom,
+    required this.conversation,
+    required this.sender,
+    required this.mediaFiles,
+    this.conversationAttachments,
   });
 
   @override
@@ -44,9 +44,11 @@ class ChatBubble extends StatefulWidget {
 class _ChatBubbleState extends State<ChatBubble> {
   bool _showReactions = false;
   List reactions = [];
+  late User user;
   LMBranding lmBranding = LMBranding.instance;
   late final EmojiParser emojiParser;
   late final CustomPopupMenuController _controller;
+  bool? isSent;
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
@@ -54,6 +56,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   void initState() {
     emojiParser = EmojiParser();
+    user = UserLocalPreference.instance.fetchUserData();
     _controller = CustomPopupMenuController();
     super.initState();
   }
@@ -66,15 +69,12 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   @override
   Widget build(BuildContext context) {
-    bool isSent = widget.isSent!;
-    content.ContentType contentType = widget.contentType;
-    String message = widget.message ?? "Test message";
-    String time = widget.time ?? "12:00";
-    String? profileImageUrl = widget.user.imageUrl;
-
+    isSent = widget.conversation.userId != null
+        ? widget.conversation.userId == user.id
+        : widget.conversation.memberId == user.id;
     return Column(
       crossAxisAlignment:
-          isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          isSent! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         if (_showReactions)
@@ -93,13 +93,13 @@ class _ChatBubbleState extends State<ChatBubble> {
           ),
           child: Row(
             mainAxisAlignment:
-                isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
+                isSent! ? MainAxisAlignment.end : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              !isSent
+              !isSent!
                   ? PictureOrInitial(
-                      fallbackText: widget.user.name,
-                      imageUrl: profileImageUrl,
+                      fallbackText: widget.sender.name,
+                      imageUrl: widget.sender.imageUrl,
                       size: 28.sp,
                       fontSize: 14.sp,
                     )
@@ -137,8 +137,11 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ListTile(
                             onTap: () {
                               _controller.hideMenu();
-                              Clipboard.setData(ClipboardData(text: message))
-                                  .then((value) {
+                              Clipboard.setData(
+                                ClipboardData(
+                                  text: widget.conversation.answer,
+                                ),
+                              ).then((value) {
                                 Fluttertoast.showToast(
                                     msg: "Copied to clipboard");
                               });
@@ -198,19 +201,14 @@ class _ChatBubbleState extends State<ChatBubble> {
                   onLongPress: () {
                     _controller.showMenu();
                   },
-                  onTap: () {
-                    // Fluttertoast.showToast(msg: "Tapped");
-                    // setState(() {
-                    //   _showReactions = !_showReactions;
-                    // });
-                  },
+                  onTap: () {},
                   child: Container(
                     constraints: BoxConstraints(
                       minHeight: 42,
                       maxWidth: 60.w,
                     ),
                     decoration: BoxDecoration(
-                      color: isSent
+                      color: isSent!
                           ? Colors.white.withOpacity(0.8)
                           : lmBranding.buttonColor.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(6),
@@ -218,17 +216,17 @@ class _ChatBubbleState extends State<ChatBubble> {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
-                        crossAxisAlignment: isSent
+                        crossAxisAlignment: isSent!
                             ? CrossAxisAlignment.end
                             : CrossAxisAlignment.start,
                         children: [
-                          isSent
+                          isSent!
                               ? const SizedBox()
                               : Text(
-                                  widget.user.name,
+                                  widget.sender.name,
                                   style: LMFonts.instance.medium.copyWith(
                                     fontSize: 10.sp,
-                                    color: isSent
+                                    color: isSent!
                                         ? Colors.black.withOpacity(0.6)
                                         : lmBranding.headerColor,
                                   ),
@@ -242,15 +240,24 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   return const SizedBox.shrink();
                                 }
                               }),
-                              future: getContent(contentType, message, isSent)),
+                              future: getContent()),
                           const SizedBox(height: 8),
-                          Text(
-                            time,
-                            style: LMFonts.instance.regular.copyWith(
-                              fontSize: 8.sp,
-                              color: kGreyColor,
-                            ),
-                          ),
+                          ((widget.conversation.hasFiles == null ||
+                                      !widget.conversation.hasFiles!) ||
+                                  (widget.conversation.attachmentsUploaded !=
+                                          null &&
+                                      widget.conversation.attachmentsUploaded!))
+                              ? Text(
+                                  widget.conversation.createdAt,
+                                  style: LMFonts.instance.regular.copyWith(
+                                    fontSize: 8.sp,
+                                    color: kGreyColor,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.timer_outlined,
+                                  size: 8.sp,
+                                ),
                         ],
                       ),
                     ),
@@ -258,10 +265,10 @@ class _ChatBubbleState extends State<ChatBubble> {
                 ),
               ),
               const SizedBox(width: 6),
-              isSent
+              isSent!
                   ? PictureOrInitial(
-                      fallbackText: widget.user.name,
-                      imageUrl: profileImageUrl,
+                      fallbackText: widget.sender.name,
+                      imageUrl: widget.sender.imageUrl,
                       size: 28.sp,
                       fontSize: 14.sp,
                     )
@@ -279,58 +286,128 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   void selectMessage(String messageId) {}
 
-  Future<Widget> getContent(
-    content.ContentType contentType,
-    String message,
-    bool isSent,
-  ) async {
-    switch (contentType) {
-      case content.ContentType.text:
-        return ExpandableText(
-          message,
-          expandText: "",
-          linkStyle: lmBranding.fonts.regular
-              .copyWith(color: lmBranding.textLinkColor),
-          textAlign: TextAlign.start,
-          style: LMFonts.instance.regular.copyWith(
-            fontSize: 10.sp,
+  Future<Widget> getContent() async {
+    Widget expandableText = ExpandableText(
+      widget.conversation.answer,
+      expandText: "",
+      linkStyle:
+          lmBranding.fonts.regular.copyWith(color: lmBranding.textLinkColor),
+      textAlign: TextAlign.start,
+      style: LMFonts.instance.regular.copyWith(
+        fontSize: 10.sp,
+      ),
+    );
+    if (widget.conversation.hasFiles == null ||
+        !widget.conversation.hasFiles!) {
+      return expandableText;
+    } else if (widget.conversation.attachmentsUploaded == null ||
+        !widget.conversation.attachmentsUploaded!) {
+      if (widget.mediaFiles[widget.conversation.temporaryId] == null) {
+        return expandableText;
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              Container(
+                clipBehavior: Clip.hardEdge,
+                height: 60.w,
+                width: 60.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3.0),
+                ),
+                child: Image.file(
+                  widget.mediaFiles[widget.conversation.temporaryId]!.first,
+                  fit: BoxFit.cover,
+                  height: 60.w,
+                  width: 60.w,
+                ),
+              ),
+              SizedBox(
+                height: 60.w,
+                width: 60.w,
+                child: const Center(
+                  child: Spinner(),
+                ),
+              )
+            ],
           ),
-        );
-      case content.ContentType.image:
-        return CachedNetworkImage(imageUrl: message);
-      case content.ContentType.video:
-        final uint8list = await VideoThumbnail.thumbnailData(
-          video: message,
-          imageFormat: ImageFormat.JPEG,
-          maxWidth: 600,
-          quality: 25,
-        );
-
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.memory(uint8list!),
-            GestureDetector(
-              onTap: (() {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => VideoPlayerScreen(
-                      videoUrl: message,
-                    ),
-                  ),
-                );
-              }),
-              child: const Icon(
-                Icons.play_circle_outline,
-                size: 48,
-                color: Colors.white,
+          widget.conversation.answer.isEmpty
+              ? const SizedBox.shrink()
+              : kVerticalPaddingMedium,
+          widget.conversation.answer.isEmpty
+              ? const SizedBox.shrink()
+              : expandableText,
+        ],
+      );
+    } else if (widget.conversation.attachmentsUploaded != null ||
+        widget.conversation.attachmentsUploaded!) {
+      if (widget.conversationAttachments == null) {
+        return expandableText;
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (widget.conversationAttachments!.first['type'] == 'image')
+            Container(
+              height: 60.w,
+              width: 60.w,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(3.0),
+              ),
+              child: CachedNetworkImage(
+                imageUrl: widget.conversationAttachments!.first['file_url'] ??
+                    widget.conversationAttachments!.first['url'],
+                fit: BoxFit.cover,
+                height: 60.w,
+                width: 60.w,
+                errorWidget: (context, url, error) => mediaErrorWidget(),
+                progressIndicatorBuilder: (context, url, progress) =>
+                    mediaShimmer(),
               ),
             ),
-          ],
-        );
-      default:
-        return Text(message);
+          widget.conversation.answer.isEmpty
+              ? const SizedBox.shrink()
+              : kVerticalPaddingMedium,
+          widget.conversation.answer.isEmpty
+              ? const SizedBox.shrink()
+              : expandableText,
+        ],
+      );
     }
+    return const SizedBox();
+
+    // final uint8list = await VideoThumbnail.thumbnailData(
+    //   video: message,
+    //   imageFormat: ImageFormat.JPEG,
+    //   maxWidth: 600,
+    //   quality: 25,
+    // );
+
+    // return Stack(
+    //   alignment: Alignment.center,
+    //   children: [
+    //     Image.memory(uint8list!),
+    //     GestureDetector(
+    //       onTap: (() {
+    //         Navigator.push(
+    //           context,
+    //           MaterialPageRoute(
+    //             builder: (context) => VideoPlayerScreen(
+    //               videoUrl: message,
+    //             ),
+    //           ),
+    //         );
+    //       }),
+    //       child: const Icon(
+    //         Icons.play_circle_outline,
+    //         size: 48,
+    //         color: Colors.white,
+    //       ),
+    //     ),
+    //   ],
+    // );
   }
 }

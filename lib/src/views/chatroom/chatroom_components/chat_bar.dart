@@ -131,10 +131,16 @@ class _ChatBarState extends State<ChatBar> {
                                               await imagePicker!.pickImage(
                                             source: ImageSource.camera,
                                           );
+
                                           if (pickedImage != null) {
                                             context.pushNamed("media_forward",
                                                 extra: File(pickedImage.path),
-                                                params: {'mediaType': "1"});
+                                                params: {
+                                                  'mediaType': "1",
+                                                  'chatroomId': widget
+                                                      .chatroomId
+                                                      .toString()
+                                                });
                                           }
                                         }
                                       },
@@ -170,7 +176,25 @@ class _ChatBarState extends State<ChatBar> {
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () {},
+                                      onTap: () async {
+                                        if (await handlePermissions(1)) {
+                                          XFile? pickedImage =
+                                              await imagePicker!.pickImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+                                          if (pickedImage != null) {
+                                            context.pushNamed("media_forward",
+                                                extra: File(pickedImage.path),
+                                                params: {
+                                                  'mediaType': "1",
+                                                  'chatroomId': widget
+                                                      .chatroomId
+                                                      .toString()
+                                                });
+                                          }
+                                        }
+                                      },
                                       child: SizedBox(
                                         width: 40.w,
                                         height: 22.w,
