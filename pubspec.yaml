@@ -15,7 +15,7 @@ dependencies:
 
   ## LikeMinds Chat SDK
   likeminds_chat_fl:
-    path: ../LikeMinds-Flutter-Groupchat-SDK
+    path: ../LikeMinds-Flutter-GroupChat-SDK
 
   ## Flutter Packages
   sizer: ^2.0.15

@@ -59,6 +59,12 @@ class NewConversation extends ChatActionEvent {
     required this.chatroomId,
     required this.conversationId,
   });
+
+  @override
+  List<Object> get props => [
+        chatroomId,
+        conversationId,
+      ];
 }
 
 class UpdateConversationList extends ChatActionEvent {
@@ -69,4 +75,10 @@ class UpdateConversationList extends ChatActionEvent {
     required this.conversationId,
     required this.chatroomId,
   });
+
+  @override
+  List<Object> get props => [
+        conversationId,
+        chatroomId,
+      ];
 }

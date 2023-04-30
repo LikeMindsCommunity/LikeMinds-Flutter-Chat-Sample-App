@@ -14,13 +14,12 @@ class InitChatroomEvent extends ChatroomEvent {
       ];
 }
 
-class ChatroomDetailsEvent extends ChatroomEvent {}
-class ReloadChatroomEvent extends ChatroomEvent {
+class ChatroomDetailsEvent extends ChatroomEvent {
   @override
   List<Object> get props => [];
 }
 
-class ChatroomDetailsEvent extends ChatroomEvent {
+class ReloadChatroomEvent extends ChatroomEvent {
   @override
   List<Object> get props => [];
 }

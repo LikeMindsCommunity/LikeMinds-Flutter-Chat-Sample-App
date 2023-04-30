@@ -39,6 +39,11 @@ class UpdateConversation extends ChatActionState {
   UpdateConversation(
     this.response,
   );
+
+  @override
+  List<Object> get props => [
+        response,
+      ];
 }
 
 class ConversationEdited extends ChatActionState {

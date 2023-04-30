@@ -13,13 +13,12 @@ class GetConversation extends ConversationEvent {
   List<Object> get props => [];
 }
 
-class ChatroomDetailsEvent extends ConversationEvent {}
-class ReloadChatroomEvent extends ConversationEvent {
+class ChatroomDetailsEvent extends ConversationEvent {
   @override
   List<Object> get props => [];
 }
 
-class ChatroomDetailsEvent extends ConversationEvent {
+class ReloadChatroomEvent extends ConversationEvent {
   @override
   List<Object> get props => [];
 }
@@ -33,14 +32,13 @@ class MarkReadChatroomEvent extends ConversationEvent {
   List<Object> get props => [chatroomId];
 }
 
-class ReloadChatroomEvent extends ConversationEvent {
-  final int id;
-
-  ReloadChatroomEvent({required this.id});
-}
-
 class UpdateChatroomEvent extends ConversationEvent {
   final int id;
 
   UpdateChatroomEvent({required this.id});
+
+  @override
+  List<Object> get props => [
+        id,
+      ];
 }
