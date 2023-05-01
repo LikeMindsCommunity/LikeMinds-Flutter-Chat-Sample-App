@@ -74,7 +74,7 @@ class ConversationDelete extends ChatActionState {
 
 class MultiMediaConversationLoading extends ChatActionState {
   final PostConversationResponse postConversationResponse;
-  final List<File> mediaFiles;
+  final List<Media> mediaFiles;
 
   MultiMediaConversationLoading(
     this.postConversationResponse,

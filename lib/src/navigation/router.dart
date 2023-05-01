@@ -11,6 +11,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart'
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_forwarding.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_preview.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/bloc/explore_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
@@ -25,7 +26,8 @@ const participantsRoute = '/participants';
 const exploreRoute = '/explore';
 const profileRoute = '/profile';
 const moderationRoute = '/moderation';
-const mediaForwardRoute = '/media_forward/:chatroomId/:mediaType';
+const mediaForwardRoute = '/media_forward/:chatroomId';
+const mediaPreviewRoute = '/media_preview';
 
 final router = GoRouter(
   routes: [
@@ -80,10 +82,15 @@ final router = GoRouter(
       path: mediaForwardRoute,
       name: "media_forward",
       builder: (context, state) => MediaForward(
-        mediaFile: state.extra as File,
+        media: state.extra as List<Media>,
         chatroomId: int.parse(state.params['chatroomId']!),
-        mediaType:
-            mapIntToMediaType(int.parse(state.params['mediaType'] ?? "1")),
+      ),
+    ),
+    GoRoute(
+      path: mediaPreviewRoute,
+      name: "media_preview",
+      builder: (context, state) => MediaPreview(
+        conversationAttachments: state.extra as List<dynamic>,
       ),
     ),
   ],

@@ -9,6 +9,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat_bar.dart';
@@ -32,7 +33,7 @@ class ChatroomPage extends StatefulWidget {
 class _ChatroomPageState extends State<ChatroomPage> {
   ChatActionBloc? chatActionBloc;
   Map<String, dynamic> conversationAttachmentsMeta = <String, dynamic>{};
-  Map<String, List<File>> mediaFiles = <String, List<File>>{};
+  Map<String, List<Media>> mediaFiles = <String, List<Media>>{};
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
   ConversationBloc? conversationBloc;
@@ -359,7 +360,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                           rebuildConversationList.value =
                               !rebuildConversationList.value;
                         } else if (state is MultiMediaConversationPosted) {
-                          addMultiMediaConversation(state);
+                          addMultiMediaConversation(
+                            state,
+                          );
                         }
                         if (state is UpdateConversation) {
                           addConversationToPagedList(

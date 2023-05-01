@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,15 +8,17 @@ import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:pdf_render/pdf_render_widgets.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 class MediaForward extends StatefulWidget {
   int chatroomId;
-  File mediaFile;
-  MediaType mediaType;
+  List<Media> media;
   MediaForward({
     Key? key,
-    required this.mediaFile,
-    required this.mediaType,
+    required this.media,
     required this.chatroomId,
   }) : super(key: key);
 
@@ -95,7 +98,7 @@ class _MediaForwardState extends State<MediaForward> {
                           ..text(_textEditingController.text)
                           ..hasFiles(true))
                         .build(),
-                    [widget.mediaFile],
+                    widget.media,
                   ),
                 );
               },
@@ -123,17 +126,77 @@ class _MediaForwardState extends State<MediaForward> {
           const Spacer(),
           Align(
             alignment: Alignment.center,
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Image.file(
-                widget.mediaFile,
-                fit: BoxFit.cover,
-              ),
-            ),
+            child: getMediaPreview(),
           ),
           const Spacer(),
         ],
       ),
     );
+  }
+
+  Widget getMediaPreview() {
+    if (widget.media.first.mediaType == MediaType.photo) {
+      return CarouselSlider.builder(
+        options: CarouselOptions(
+          aspectRatio: 1,
+          clipBehavior: Clip.hardEdge,
+          scrollDirection: Axis.horizontal,
+          initialPage: 0,
+          enableInfiniteScroll: false,
+          enlargeFactor: 0.0,
+          viewportFraction: 1.0,
+        ),
+        itemCount: widget.media.length,
+        itemBuilder: (context, index, realIndex) => AspectRatio(
+          aspectRatio: 1,
+          child: Image.file(
+            widget.media[index].mediaFile!,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else if (widget.media.first.mediaType == MediaType.document) {
+      return SizedBox(
+        width: 100.w,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            AspectRatio(
+              aspectRatio:
+                  (widget.media.first.width! / widget.media.first.height!),
+              child:
+                  Image.file(widget.media.first.thumbnailFile!, width: 100.w),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                SizedBox(
+                  width: 100.w,
+                  child: Text(
+                    basenameWithoutExtension(
+                        widget.media.first.mediaFile!.path),
+                    style: LMTheme.medium.copyWith(color: kWhiteColor),
+                  ),
+                ),
+                SizedBox(
+                  width: 100.w,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                          '${widget.media.first.pageCount} ${widget.media.first.pageCount! > 1 ? 'pages' : 'page'} * ${getFileSizeString(bytes: widget.media.first.size!)} * PDF',
+                          style: LMTheme.medium.copyWith(color: kWhiteColor))
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+    return const SizedBox();
   }
 }

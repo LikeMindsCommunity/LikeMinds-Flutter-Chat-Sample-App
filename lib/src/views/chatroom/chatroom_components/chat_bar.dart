@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:file_picker/file_picker.dart';
@@ -9,11 +10,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf_render/pdf_render.dart';
+import 'package:pdf_render/pdf_render_widgets.dart';
 
 class ChatBar extends StatefulWidget {
   final int chatroomId;
@@ -178,20 +184,32 @@ class _ChatBarState extends State<ChatBar> {
                                     GestureDetector(
                                       onTap: () async {
                                         if (await handlePermissions(1)) {
-                                          XFile? pickedImage =
-                                              await imagePicker!.pickImage(
-                                            source: ImageSource.gallery,
-                                          );
-
-                                          if (pickedImage != null) {
-                                            context.pushNamed("media_forward",
-                                                extra: File(pickedImage.path),
-                                                params: {
-                                                  'mediaType': "1",
-                                                  'chatroomId': widget
-                                                      .chatroomId
-                                                      .toString()
-                                                });
+                                          List<XFile>? pickedImage =
+                                              await imagePicker!
+                                                  .pickMultiImage();
+                                          List<Media> mediaList = [];
+                                          if (pickedImage.isNotEmpty) {
+                                            for (XFile xImage in pickedImage) {
+                                              File file = File(xImage.path);
+                                              ui.Image image =
+                                                  await decodeImageFromList(
+                                                      file.readAsBytesSync());
+                                              Media media = Media(
+                                                mediaType: MediaType.photo,
+                                                height: image.height,
+                                                width: image.width,
+                                                mediaFile: file,
+                                              );
+                                              mediaList.add(media);
+                                            }
+                                            context.pushNamed(
+                                              "media_forward",
+                                              extra: mediaList,
+                                              params: {
+                                                'chatroomId':
+                                                    widget.chatroomId.toString()
+                                              },
+                                            );
                                           }
                                         }
                                       },
@@ -266,7 +284,57 @@ class _ChatBarState extends State<ChatBar> {
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () {},
+                                      onTap: () async {
+                                        FilePickerResult? pickedFile =
+                                            await filePicker!.pickFiles(
+                                                allowMultiple: false,
+                                                type: FileType.custom,
+                                                allowedExtensions: ['pdf']);
+                                        if (pickedFile != null) {
+                                          File file =
+                                              File(pickedFile.paths.first!);
+                                          PdfViewerController
+                                              pdfViewerController =
+                                              PdfViewerController();
+                                          PdfViewer.openFile(
+                                            file.path,
+                                            viewerController:
+                                                pdfViewerController,
+                                          );
+                                          PdfPageImage pdfImage =
+                                              await pdfViewerController
+                                                  .getPage(1)
+                                                  .render();
+                                          ui.Image image = await pdfImage
+                                              .createImageDetached();
+
+                                          final tempDir =
+                                              await getApplicationDocumentsDirectory();
+                                          File thumbnailFile = File(
+                                              "${tempDir.path}/thumbnail_image.png");
+
+                                          final data = await image.toByteData(
+                                            format: ui.ImageByteFormat.png,
+                                          );
+
+                                          final bytes =
+                                              data!.buffer.asUint64List();
+
+                                          thumbnailFile = await thumbnailFile
+                                              .writeAsBytes(bytes, flush: true);
+
+                                          Media media = Media(
+                                            mediaType: MediaType.document,
+                                            mediaFile: file,
+                                            height: image.height,
+                                            width: image.width,
+                                            pageCount:
+                                                pdfViewerController.pageCount,
+                                            size: pickedFile.files.first.size,
+                                            thumbnailFile: thumbnailFile,
+                                          );
+                                        }
+                                      },
                                       child: SizedBox(
                                         width: 40.w,
                                         height: 22.w,

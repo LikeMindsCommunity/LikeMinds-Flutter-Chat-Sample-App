@@ -37,7 +37,7 @@ class DeleteConversation extends ChatActionEvent {
 
 class PostMultiMediaConversation extends ChatActionEvent {
   final PostConversationRequest postConversationRequest;
-  final List<File> mediaFiles;
+  final List<Media> mediaFiles;
 
   PostMultiMediaConversation(
     this.postConversationRequest,

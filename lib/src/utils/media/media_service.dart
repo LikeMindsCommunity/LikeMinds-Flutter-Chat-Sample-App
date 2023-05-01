@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:likeminds_chat_mm_fl/src/utils/credentials/credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:path/path.dart';
@@ -35,6 +36,30 @@ int mapMediaTypeToInt(MediaType mediaType) {
     default:
       return -1;
   }
+}
+
+class Media {
+  File? mediaFile;
+  MediaType mediaType;
+  String? mediaUrl;
+  int? width;
+  int? height;
+  String? thumbnailUrl;
+  File? thumbnailFile;
+  int? pageCount;
+  int? size; // In bytes
+
+  Media({
+    this.mediaFile,
+    required this.mediaType,
+    this.mediaUrl,
+    this.height,
+    this.pageCount,
+    this.size,
+    this.thumbnailFile,
+    this.thumbnailUrl,
+    this.width,
+  });
 }
 
 class MediaService {

@@ -92,22 +92,22 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
           User user = UserLocalPreference.instance.fetchUserData();
           int length = event.mediaFiles.length;
           for (int i = 0; i < length; i++) {
-            File file = event.mediaFiles[i];
+            Media media = event.mediaFiles[i];
             String? url = await mediaService.uploadFile(
-              file,
+              media.mediaFile!,
               user.userUniqueId,
             );
             if (url == null) {
               throw 'Error uploading file';
             } else {
               ui.Image image =
-                  await decodeImageFromList(file.readAsBytesSync());
+                  await decodeImageFromList(media.mediaFile!.readAsBytesSync());
               PutMediaRequest putMediaRequest = (PutMediaRequestBuilder()
                     ..conversationId(postConversationResponse.conversation!.id)
                     ..filesCount(event.mediaFiles.length)
                     ..index(i)
-                    ..height(image.height)
-                    ..width(image.width)
+                    ..height(media.height!)
+                    ..width(media.width!)
                     ..meta("")
                     ..type("image")
                     ..url(url))
