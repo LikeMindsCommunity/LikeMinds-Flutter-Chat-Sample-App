@@ -13,6 +13,15 @@ class MediaPreview extends StatefulWidget {
 }
 
 class _MediaPreviewState extends State<MediaPreview> {
+  int currPosition = 0;
+  CarouselController controller = CarouselController();
+  ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
+
+  bool checkIfMultipleAttachments() {
+    return (widget.conversationAttachments != null &&
+        widget.conversationAttachments!.length > 1);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,14 +43,17 @@ class _MediaPreviewState extends State<MediaPreview> {
           const Spacer(),
           CarouselSlider.builder(
             options: CarouselOptions(
-              aspectRatio: 1,
-              clipBehavior: Clip.hardEdge,
-              scrollDirection: Axis.horizontal,
-              initialPage: 0,
-              enableInfiniteScroll: false,
-              enlargeFactor: 0.0,
-              viewportFraction: 1.0,
-            ),
+                aspectRatio: 1,
+                clipBehavior: Clip.hardEdge,
+                scrollDirection: Axis.horizontal,
+                initialPage: 0,
+                enableInfiniteScroll: false,
+                enlargeFactor: 0.0,
+                viewportFraction: 1.0,
+                onPageChanged: (index, reason) {
+                  currPosition = index;
+                  rebuildCurr.value = !rebuildCurr.value;
+                }),
             itemCount: widget.conversationAttachments!.length,
             itemBuilder: (context, index, realIndex) => AspectRatio(
               aspectRatio: 1,
@@ -52,6 +64,39 @@ class _MediaPreviewState extends State<MediaPreview> {
               ),
             ),
           ),
+          ValueListenableBuilder(
+              valueListenable: rebuildCurr,
+              builder: (context, _, __) {
+                return Column(
+                  children: [
+                    checkIfMultipleAttachments()
+                        ? kVerticalPaddingMedium
+                        : const SizedBox(),
+                    checkIfMultipleAttachments()
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children:
+                                widget.conversationAttachments!.map((url) {
+                              int index =
+                                  widget.conversationAttachments!.indexOf(url);
+                              return Container(
+                                width: 8.0,
+                                height: 8.0,
+                                margin: const EdgeInsets.symmetric(
+                                    vertical: 7.0, horizontal: 2.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: currPosition == index
+                                      ? const Color.fromRGBO(255, 255, 255, 0.9)
+                                      : const Color.fromRGBO(
+                                          255, 255, 255, 0.4),
+                                ),
+                              );
+                            }).toList())
+                        : const SizedBox(),
+                  ],
+                );
+              }),
           const Spacer(),
         ],
       ),

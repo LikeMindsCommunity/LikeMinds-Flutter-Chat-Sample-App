@@ -116,7 +116,7 @@ class _ChatBarState extends State<ChatBar> {
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
                           width: 100.w,
-                          height: 55.w,
+                          height: 30.w,
                           color: Colors.white,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -137,7 +137,7 @@ class _ChatBarState extends State<ChatBar> {
                                               await imagePicker!.pickImage(
                                             source: ImageSource.camera,
                                           );
-
+                                          _popupMenuController.hideMenu();
                                           if (pickedImage != null) {
                                             context.pushNamed("media_forward",
                                                 extra: File(pickedImage.path),
@@ -202,6 +202,7 @@ class _ChatBarState extends State<ChatBar> {
                                               );
                                               mediaList.add(media);
                                             }
+                                            _popupMenuController.hideMenu();
                                             context.pushNamed(
                                               "media_forward",
                                               extra: mediaList,
@@ -246,129 +247,129 @@ class _ChatBarState extends State<ChatBar> {
                                     ),
                                   ],
                                 ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {},
-                                      child: SizedBox(
-                                        width: 40.w,
-                                        height: 22.w,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              width: 38.sp,
-                                              height: 38.sp,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(40.w),
-                                                color: LMBranding
-                                                    .instance.buttonColor,
-                                              ),
-                                              child: Icon(
-                                                Icons.video_camera_back,
-                                                color: kWhiteColor,
-                                                size: 24.sp,
-                                              ),
-                                            ),
-                                            kVerticalPaddingMedium,
-                                            Text(
-                                              "Video",
-                                              style: lmBranding.fonts.medium,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () async {
-                                        FilePickerResult? pickedFile =
-                                            await filePicker!.pickFiles(
-                                                allowMultiple: false,
-                                                type: FileType.custom,
-                                                allowedExtensions: ['pdf']);
-                                        if (pickedFile != null) {
-                                          File file =
-                                              File(pickedFile.paths.first!);
-                                          PdfViewerController
-                                              pdfViewerController =
-                                              PdfViewerController();
-                                          PdfViewer.openFile(
-                                            file.path,
-                                            viewerController:
-                                                pdfViewerController,
-                                          );
+                                // Row(
+                                //   mainAxisAlignment:
+                                //       MainAxisAlignment.spaceEvenly,
+                                //   children: [
+                                //     GestureDetector(
+                                //       onTap: () {},
+                                //       child: SizedBox(
+                                //         width: 40.w,
+                                //         height: 22.w,
+                                //         child: Column(
+                                //           mainAxisAlignment:
+                                //               MainAxisAlignment.center,
+                                //           children: [
+                                //             Container(
+                                //               width: 38.sp,
+                                //               height: 38.sp,
+                                //               decoration: BoxDecoration(
+                                //                 borderRadius:
+                                //                     BorderRadius.circular(40.w),
+                                //                 color: LMBranding
+                                //                     .instance.buttonColor,
+                                //               ),
+                                //               child: Icon(
+                                //                 Icons.video_camera_back,
+                                //                 color: kWhiteColor,
+                                //                 size: 24.sp,
+                                //               ),
+                                //             ),
+                                //             kVerticalPaddingMedium,
+                                //             Text(
+                                //               "Video",
+                                //               style: lmBranding.fonts.medium,
+                                //             ),
+                                //           ],
+                                //         ),
+                                //       ),
+                                //     ),
+                                //     GestureDetector(
+                                //       onTap: () async {
+                                //         FilePickerResult? pickedFile =
+                                //             await filePicker!.pickFiles(
+                                //                 allowMultiple: false,
+                                //                 type: FileType.custom,
+                                //                 allowedExtensions: ['pdf']);
+                                //         if (pickedFile != null) {
+                                //           File file =
+                                //               File(pickedFile.paths.first!);
+                                //           PdfViewerController
+                                //               pdfViewerController =
+                                //               PdfViewerController();
+                                //           PdfViewer.openFile(
+                                //             file.path,
+                                //             viewerController:
+                                //                 pdfViewerController,
+                                //           );
 
-                                          PdfPageImage pdfImage =
-                                              await pdfViewerController
-                                                  .getPage(1)
-                                                  .render();
-                                          ui.Image image = await pdfImage
-                                              .createImageDetached();
+                                //           PdfPageImage pdfImage =
+                                //               await pdfViewerController
+                                //                   .getPage(1)
+                                //                   .render();
+                                //           ui.Image image = await pdfImage
+                                //               .createImageDetached();
 
-                                          final tempDir =
-                                              await getApplicationDocumentsDirectory();
-                                          File thumbnailFile = File(
-                                              "${tempDir.path}/thumbnail_image.png");
+                                //           final tempDir =
+                                //               await getApplicationDocumentsDirectory();
+                                //           File thumbnailFile = File(
+                                //               "${tempDir.path}/thumbnail_image.png");
 
-                                          final data = await image.toByteData(
-                                            format: ui.ImageByteFormat.png,
-                                          );
+                                //           final data = await image.toByteData(
+                                //             format: ui.ImageByteFormat.png,
+                                //           );
 
-                                          final bytes =
-                                              data!.buffer.asUint64List();
+                                //           final bytes =
+                                //               data!.buffer.asUint64List();
 
-                                          thumbnailFile = await thumbnailFile
-                                              .writeAsBytes(bytes, flush: true);
+                                //           thumbnailFile = await thumbnailFile
+                                //               .writeAsBytes(bytes, flush: true);
 
-                                          Media media = Media(
-                                            mediaType: MediaType.document,
-                                            mediaFile: file,
-                                            height: image.height,
-                                            width: image.width,
-                                            pageCount:
-                                                pdfViewerController.pageCount,
-                                            size: pickedFile.files.first.size,
-                                            thumbnailFile: thumbnailFile,
-                                          );
-                                        }
-                                      },
-                                      child: SizedBox(
-                                        width: 40.w,
-                                        height: 22.w,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              width: 38.sp,
-                                              height: 38.sp,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(40.w),
-                                                color: LMBranding
-                                                    .instance.buttonColor,
-                                              ),
-                                              child: Icon(
-                                                Icons.file_copy_outlined,
-                                                color: kWhiteColor,
-                                                size: 24.sp,
-                                              ),
-                                            ),
-                                            kVerticalPaddingMedium,
-                                            Text(
-                                              "Document",
-                                              style: lmBranding.fonts.medium,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                //           Media media = Media(
+                                //             mediaType: MediaType.document,
+                                //             mediaFile: file,
+                                //             height: image.height,
+                                //             width: image.width,
+                                //             pageCount:
+                                //                 pdfViewerController.pageCount,
+                                //             size: pickedFile.files.first.size,
+                                //             thumbnailFile: thumbnailFile,
+                                //           );
+                                //         }
+                                //       },
+                                //       child: SizedBox(
+                                //         width: 40.w,
+                                //         height: 22.w,
+                                //         child: Column(
+                                //           mainAxisAlignment:
+                                //               MainAxisAlignment.center,
+                                //           children: [
+                                //             Container(
+                                //               width: 38.sp,
+                                //               height: 38.sp,
+                                //               decoration: BoxDecoration(
+                                //                 borderRadius:
+                                //                     BorderRadius.circular(40.w),
+                                //                 color: LMBranding
+                                //                     .instance.buttonColor,
+                                //               ),
+                                //               child: Icon(
+                                //                 Icons.file_copy_outlined,
+                                //                 color: kWhiteColor,
+                                //                 size: 24.sp,
+                                //               ),
+                                //             ),
+                                //             kVerticalPaddingMedium,
+                                //             Text(
+                                //               "Document",
+                                //               style: lmBranding.fonts.medium,
+                                //             ),
+                                //           ],
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
                               ],
                             ),
                           ),

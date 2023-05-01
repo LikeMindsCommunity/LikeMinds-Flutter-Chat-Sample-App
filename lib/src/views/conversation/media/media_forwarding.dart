@@ -58,18 +58,18 @@ class _MediaForwardState extends State<MediaForward> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            GestureDetector(
-              onTap: () {},
-              child: SizedBox(
-                width: 10.w,
-                height: 10.w,
-                child: Icon(
-                  Icons.add_a_photo,
-                  color: kWhiteColor,
-                  size: 24.sp,
-                ),
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: () {},
+            //   child: SizedBox(
+            //     width: 10.w,
+            //     height: 10.w,
+            //     child: Icon(
+            //       Icons.add_a_photo,
+            //       color: kWhiteColor,
+            //       size: 24.sp,
+            //     ),
+            //   ),
+            // ),
             SizedBox(
               width: 60.w,
               child: TextField(
