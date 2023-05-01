@@ -301,6 +301,7 @@ class _ChatBarState extends State<ChatBar> {
                                             viewerController:
                                                 pdfViewerController,
                                           );
+
                                           PdfPageImage pdfImage =
                                               await pdfViewerController
                                                   .getPage(1)

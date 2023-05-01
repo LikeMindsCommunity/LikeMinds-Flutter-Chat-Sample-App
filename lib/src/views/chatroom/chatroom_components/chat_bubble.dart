@@ -9,6 +9,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
@@ -318,27 +319,14 @@ class _ChatBubbleState extends State<ChatBubble> {
         children: [
           Stack(
             children: [
-              Container(
-                clipBehavior: Clip.hardEdge,
-                height: 60.w,
-                width: 60.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3.0),
-                ),
-                child: Image.file(
-                  widget.mediaFiles[widget.conversation.temporaryId]!.first
-                      .mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 60.w,
-                  width: 60.w,
-                ),
-              ),
-              SizedBox(
-                height: 60.w,
-                width: 60.w,
-                child: const Center(
-                  child: Spinner(),
-                ),
+              getImageFileMessage(
+                  context, widget.mediaFiles[widget.conversation.temporaryId]!),
+              const Positioned(
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Spinner(),
               )
             ],
           ),
@@ -359,7 +347,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           if (widget.conversationAttachments!.first['type'] == 'image')
-            getImageMessage(),
+            getImageMessage(context, widget.conversationAttachments!),
           widget.conversation.answer.isEmpty
               ? const SizedBox.shrink()
               : kVerticalPaddingMedium,
@@ -401,87 +389,5 @@ class _ChatBubbleState extends State<ChatBubble> {
     //     ),
     //   ],
     // );
-  }
-
-  Widget getImageMessage() {
-    if (widget.conversationAttachments!.length == 1) {
-      return GestureDetector(
-        onTap: () {
-          context.pushNamed(
-            "media_preview",
-            extra: widget.conversationAttachments!,
-          );
-        },
-        child: Container(
-          height: 55.w,
-          width: 55.w,
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(3.0),
-          ),
-          child: CachedNetworkImage(
-            imageUrl: widget.conversationAttachments!.first['file_url'] ??
-                widget.conversationAttachments!.first['url'],
-            fit: BoxFit.cover,
-            height: 55.w,
-            width: 55.w,
-            errorWidget: (context, url, error) => mediaErrorWidget(),
-            progressIndicatorBuilder: (context, url, progress) =>
-                mediaShimmer(),
-          ),
-        ),
-      );
-    } else if (widget.conversationAttachments!.length >= 2) {
-      return GestureDetector(
-        onTap: () {
-          context.pushNamed(
-            "media_preview",
-            extra: widget.conversationAttachments!,
-          );
-        },
-        child: Row(
-          children: <Widget>[
-            Container(
-              height: 27.w,
-              width: 27.w,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: CachedNetworkImage(
-                imageUrl: widget.conversationAttachments![0]['file_url'] ??
-                    widget.conversationAttachments![0]['url'],
-                fit: BoxFit.cover,
-                height: 27.w,
-                width: 27.w,
-                errorWidget: (context, url, error) => mediaErrorWidget(),
-                progressIndicatorBuilder: (context, url, progress) =>
-                    mediaShimmer(),
-              ),
-            ),
-            const Spacer(),
-            Container(
-              height: 27.w,
-              width: 27.w,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: CachedNetworkImage(
-                imageUrl: widget.conversationAttachments![1]['file_url'] ??
-                    widget.conversationAttachments![1]['url'],
-                fit: BoxFit.cover,
-                height: 27.w,
-                width: 27.w,
-                errorWidget: (context, url, error) => mediaErrorWidget(),
-                progressIndicatorBuilder: (context, url, progress) =>
-                    mediaShimmer(),
-              ),
-            )
-          ],
-        ),
-      );
-    }
-    return Container();
   }
 }
