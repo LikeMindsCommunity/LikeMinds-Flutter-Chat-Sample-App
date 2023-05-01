@@ -365,9 +365,14 @@ class _ChatroomPageState extends State<ChatroomPage> {
                           );
                         }
                         if (state is UpdateConversation) {
-                          addConversationToPagedList(
-                            state.response,
-                          );
+                          if (currentUser.id ==
+                              (state.response.userId ??
+                                  state.response.memberId ??
+                                  state.response.member!.id)) {
+                            addConversationToPagedList(
+                              state.response,
+                            );
+                          }
                         }
                       },
                       builder: (context, state) {

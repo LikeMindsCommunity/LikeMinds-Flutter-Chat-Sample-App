@@ -132,12 +132,13 @@ class _ChatBarState extends State<ChatBar> {
                                   children: [
                                     GestureDetector(
                                       onTap: () async {
+                                        _popupMenuController.hideMenu();
                                         if (await handlePermissions(1)) {
                                           XFile? pickedImage =
                                               await imagePicker!.pickImage(
                                             source: ImageSource.camera,
                                           );
-                                          _popupMenuController.hideMenu();
+
                                           if (pickedImage != null) {
                                             context.pushNamed("media_forward",
                                                 extra: File(pickedImage.path),
@@ -183,6 +184,7 @@ class _ChatBarState extends State<ChatBar> {
                                     ),
                                     GestureDetector(
                                       onTap: () async {
+                                        _popupMenuController.hideMenu();
                                         if (await handlePermissions(1)) {
                                           List<XFile>? pickedImage =
                                               await imagePicker!
@@ -202,7 +204,6 @@ class _ChatBarState extends State<ChatBar> {
                                               );
                                               mediaList.add(media);
                                             }
-                                            _popupMenuController.hideMenu();
                                             context.pushNamed(
                                               "media_forward",
                                               extra: mediaList,
