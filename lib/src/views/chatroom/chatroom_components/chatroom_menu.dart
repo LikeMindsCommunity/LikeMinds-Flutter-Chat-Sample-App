@@ -56,22 +56,20 @@ class ChatroomMenu extends StatelessWidget {
   }
 
   Widget? getListTile(ChatroomAction action) {
-    return action.id != 9
-        ? ListTile(
-            onTap: () {
-              _controller.hideMenu();
-              performAction(action);
-            },
-            title: Text(
-              action.title,
-              style: LMTheme.regular.copyWith(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w400,
-                color: LMTheme.buttonColor,
-              ),
-            ),
-          )
-        : null;
+    return ListTile(
+      onTap: () {
+        _controller.hideMenu();
+        performAction(action);
+      },
+      title: Text(
+        action.title,
+        style: LMTheme.regular.copyWith(
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w400,
+          color: LMTheme.buttonColor,
+        ),
+      ),
+    );
   }
 
   void performAction(ChatroomAction action) {
@@ -104,7 +102,7 @@ class ChatroomMenu extends StatelessWidget {
       value: !chatroom.muteStatus!,
     ));
     if (response.success) {
-      Fluttertoast.showToast(msg: "Mute status changed");
+      Fluttertoast.showToast(msg: "Chatroom muted");
     } else {
       toast(response.errorMessage!);
     }
