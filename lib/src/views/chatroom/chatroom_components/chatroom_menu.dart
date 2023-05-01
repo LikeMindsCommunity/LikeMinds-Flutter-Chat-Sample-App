@@ -35,7 +35,10 @@ class ChatroomMenu extends StatelessWidget {
       menuBuilder: () => ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          constraints: BoxConstraints(minWidth: 42.w, maxWidth: 52.w),
+          constraints: BoxConstraints(
+            minWidth: 42.w,
+            maxWidth: 52.w,
+          ),
           color: Colors.white,
           child: ListView.builder(
             padding: EdgeInsets.zero,
@@ -49,7 +52,7 @@ class ChatroomMenu extends StatelessWidget {
       ),
       child: Icon(
         Icons.menu,
-        size: 24,
+        size: 18.sp,
         color: LMTheme.buttonColor,
       ),
     );
@@ -58,6 +61,8 @@ class ChatroomMenu extends StatelessWidget {
   Widget? getListTile(ChatroomAction action) {
     return action.id != 9
         ? ListTile(
+            visualDensity: VisualDensity.compact,
+            minVerticalPadding: kPaddingSmall,
             onTap: () {
               _controller.hideMenu();
               performAction(action);
@@ -65,7 +70,7 @@ class ChatroomMenu extends StatelessWidget {
             title: Text(
               action.title,
               style: LMTheme.regular.copyWith(
-                fontSize: 10.sp,
+                fontSize: 9.sp,
                 fontWeight: FontWeight.w400,
                 color: LMTheme.buttonColor,
               ),
@@ -77,6 +82,7 @@ class ChatroomMenu extends StatelessWidget {
   void performAction(ChatroomAction action) {
     switch (action.id) {
       case 2:
+        _controller.hideMenu();
         router.push("/participants", extra: chatroom);
         break;
       case 6:
@@ -86,6 +92,9 @@ class ChatroomMenu extends StatelessWidget {
         muteChatroom();
         break;
       case 9:
+        leaveChatroom();
+        break;
+      case 15:
         leaveChatroom();
         break;
       default:
@@ -104,6 +113,7 @@ class ChatroomMenu extends StatelessWidget {
       value: !chatroom.muteStatus!,
     ));
     if (response.success) {
+      _controller.hideMenu();
       Fluttertoast.showToast(msg: "Mute status changed");
     } else {
       toast(response.errorMessage!);
@@ -111,16 +121,18 @@ class ChatroomMenu extends StatelessWidget {
   }
 
   void leaveChatroom() async {
-    if (chatroom.isSecret ?? false) {
+    if (!(chatroom.isSecret ?? false)) {
       final response = await locator<LikeMindsService>()
           .followChatroom(FollowChatroomRequest(
         chatroomId: chatroom.id,
         value: false,
       ));
       if (response.success) {
-        toast("Chatroom left");
+        _controller.hideMenu();
+        Fluttertoast.showToast(msg: "Chatroom left");
+        router.pop();
       } else {
-        toast(response.errorMessage!);
+        Fluttertoast.showToast(msg: response.errorMessage!);
       }
     } else {
       final response = await locator<LikeMindsService>()
@@ -129,9 +141,11 @@ class ChatroomMenu extends StatelessWidget {
                 ..isSecret(true))
               .build());
       if (response.success) {
-        toast("Chatroom left");
+        _controller.hideMenu();
+        Fluttertoast.showToast(msg: "Chatroom left");
+        router.pop();
       } else {
-        toast(response.errorMessage!);
+        Fluttertoast.showToast(msg: response.errorMessage!);
       }
     }
     // final response =

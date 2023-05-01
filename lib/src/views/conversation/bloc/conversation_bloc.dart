@@ -20,6 +20,23 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
             .getConversation(event.getConversationRequest);
         if (response.success) {
           GetConversationResponse conversationResponse = response.data;
+          conversationResponse.conversationData!.forEach((element) {
+            element.member = conversationResponse
+                .userMeta?[element.userId ?? element.memberId];
+          });
+          conversationResponse.conversationData!.forEach((element) {
+            String? replyId = element.replyId == null
+                ? element.replyConversation == null
+                    ? null
+                    : element.replyConversation.toString()
+                : element.replyId.toString();
+            element.replyConversationObject =
+                conversationResponse.conversationMeta?[replyId];
+            element.replyConversationObject?.member =
+                conversationResponse.userMeta?[
+                    element.replyConversationObject?.userId ??
+                        element.replyConversationObject?.memberId];
+          });
           emit(
             ConversationLoaded(conversationResponse),
           );

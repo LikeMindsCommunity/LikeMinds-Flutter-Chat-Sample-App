@@ -82,3 +82,22 @@ class UpdateConversationList extends ChatActionEvent {
         chatroomId,
       ];
 }
+
+class ReplyConversation extends ChatActionEvent {
+  final int conversationId;
+  final int chatroomId;
+  final Conversation replyConversation;
+
+  ReplyConversation({
+    required this.conversationId,
+    required this.chatroomId,
+    required this.replyConversation,
+  });
+
+  @override
+  List<Object> get props => [
+        conversationId,
+        chatroomId,
+        replyConversation,
+      ];
+}

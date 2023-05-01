@@ -62,11 +62,12 @@ class SkeletonChatList extends StatelessWidget {
     //   ),
     //   const SizedBox(height: 18),
     return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(
         horizontal: 18,
         vertical: 18,
       ),
-      itemCount: 9,
+      itemCount: 10,
       itemBuilder: (BuildContext context, int index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade200,

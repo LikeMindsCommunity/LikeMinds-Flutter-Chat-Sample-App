@@ -119,3 +119,21 @@ class MultiMediaConversationError extends ChatActionState {
         temporaryId,
       ];
 }
+
+class ReplyConversationState extends ChatActionState {
+  final int chatroomId;
+  final int conversationId;
+  final Conversation conversation;
+
+  ReplyConversationState({
+    required this.chatroomId,
+    required this.conversationId,
+    required this.conversation,
+  });
+
+  @override
+  List<Object> get props => [
+        chatroomId,
+        conversationId,
+      ];
+}

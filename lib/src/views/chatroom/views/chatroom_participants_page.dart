@@ -64,90 +64,94 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer(
-          bloc: participantsBloc,
-          listener: (context, state) {
-            if (state is ParticipantsLoaded) {
-              _page++;
-              if (state.getParticipantsResponse.participants!.isEmpty) {
-                _pagingController.appendLastPage(
-                  state.getParticipantsResponse.participants!,
+      body: SafeArea(
+        child: BlocConsumer(
+            bloc: participantsBloc,
+            listener: (context, state) {
+              if (state is ParticipantsLoaded) {
+                _page++;
+                if (state.getParticipantsResponse.participants!.isEmpty) {
+                  _pagingController.appendLastPage(
+                    state.getParticipantsResponse.participants!,
+                  );
+                } else {
+                  _pagingController.appendPage(
+                    state.getParticipantsResponse.participants!,
+                    _page,
+                  );
+                }
+              } else if (state is ParticipantsError) {
+                _pagingController.error = state.message;
+              }
+            },
+            buildWhen: (prev, curr) {
+              if (curr is ParticipantsPaginationLoading) {
+                return false;
+              }
+              return true;
+            },
+            builder: (context, state) {
+              if (state is ParticipantsLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
-              } else {
-                _pagingController.appendPage(
-                  state.getParticipantsResponse.participants!,
-                  _page,
+              } else if (state is ParticipantsLoaded) {
+                LMAnalytics.get()
+                    .logEvent(AnalyticsKeys.viewChatroomParticipants, {
+                  'chatroom_id': widget.chatroom.id,
+                  'community_id': widget.chatroom.communityId,
+                  'source': 'chatroom_overflow_menu',
+                });
+                return Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        vertical: 2.h,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const BB.BackButton(),
+                          kHorizontalPaddingXLarge,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Participants",
+                                style: LMFonts.instance.medium.copyWith(
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                              kVerticalPaddingXSmall,
+                              Text(
+                                "${widget.chatroom.participantCount ?? '--'} participants",
+                                style: LMFonts.instance.regular,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 32),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(child: _buildParticipantsList()),
+                  ],
+                );
+              } else if (state is ParticipantsError) {
+                return Center(
+                  child: Text(state.message),
                 );
               }
-            } else if (state is ParticipantsError) {
-              _pagingController.error = state.message;
-            }
-          },
-          buildWhen: (prev, curr) {
-            if (curr is ParticipantsPaginationLoading) {
-              return false;
-            }
-            return true;
-          },
-          builder: (context, state) {
-            if (state is ParticipantsLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (state is ParticipantsLoaded) {
-              LMAnalytics.get()
-                  .logEvent(AnalyticsKeys.viewChatroomParticipants, {
-                'chatroom_id': widget.chatroom.id,
-                'community_id': widget.chatroom.communityId,
-                'source': 'chatroom_overflow_menu',
-              });
-              return Column(
-                children: [
-                  const SizedBox(height: 72),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const BB.BackButton(),
-                        kHorizontalPaddingXLarge,
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Participants",
-                              style: LMFonts.instance.bold.copyWith(
-                                fontSize: 14.sp,
-                              ),
-                            ),
-                            kVerticalPaddingXSmall,
-                            Text(
-                              "${widget.chatroom.participantCount ?? '--'} participants",
-                              style: LMFonts.instance.regular,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 32),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(child: _buildParticipantsList()),
-                ],
-              );
-            } else if (state is ParticipantsError) {
-              return Center(
-                child: Text(state.message),
-              );
-            }
-            return const SizedBox();
-          }),
+              return const SizedBox();
+            }),
+      ),
     );
   }
 
   Widget _buildParticipantsList() {
     return PagedListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.zero,
       pagingController: _pagingController,
       builderDelegate: PagedChildBuilderDelegate<User>(
         itemBuilder: (context, item, index) {
@@ -169,18 +173,7 @@ class ParticipantItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Route route = MaterialPageRoute(
-          builder: (BuildContext context) => BlocProvider<ProfileBloc>(
-            create: (BuildContext context) =>
-                ProfileBloc()..add(InitProfileEvent()),
-            child: const ProfilePage(
-              isSelf: false,
-            ),
-          ),
-        );
-        Navigator.push(context, route);
-      },
+      onTap: () {},
       child: Container(
         width: getWidth(context),
         height: 72,

@@ -168,7 +168,7 @@ class ExpandableTextState extends State<ExpandableText>
       children: [
         if (!_expanded)
           TextSpan(
-            text: '\u2026 ',
+            text: '\u2026see more',
             style: widget.linkEllipsis ? linkTextStyle : effectiveTextStyle,
             recognizer: widget.linkEllipsis ? _linkTapGestureRecognizer : null,
           ),
@@ -178,7 +178,7 @@ class ExpandableTextState extends State<ExpandableText>
             children: <TextSpan>[
               if (_expanded)
                 TextSpan(
-                  text: ' ',
+                  text: '',
                 ),
               TextSpan(
                 text: linkText,
@@ -216,7 +216,7 @@ class ExpandableTextState extends State<ExpandableText>
           textAlign: textAlign,
           textDirection: textDirection,
           textScaleFactor: textScaleFactor,
-          maxLines: 3,
+          maxLines: 5,
           locale: locale,
         );
         textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
@@ -248,7 +248,7 @@ class ExpandableTextState extends State<ExpandableText>
             resultText = response['text'];
             final lineCount = textPainter.computeLineMetrics().length;
             final nCount = '\n'.allMatches(resultText).length + 1;
-            if (resultText.length > 300 && nCount <= 4) {
+            if (resultText.length > 500 || nCount > 4) {
               resultText = resultText.substring(0, max(endOffset, 0));
             }
 

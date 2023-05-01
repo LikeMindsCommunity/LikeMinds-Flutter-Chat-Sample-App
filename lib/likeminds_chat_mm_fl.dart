@@ -59,17 +59,20 @@ class LMChat extends StatelessWidget {
     );
   }
 
-  Future<InitiateUser> initiateUser() async {
+  static Future<InitiateUser> initiateUser({
+    String? userId,
+    String? userName,
+  }) async {
     final response = await locator<LikeMindsService>().initiateUser(
       InitiateUserRequest(
-        userId: _userId,
-        userName: _userName,
+        userId: userId ?? _instance?._userId,
+        userName: userName ?? _instance?._userName,
       ),
     );
     final initiateUser = response.data!.initiateUser!;
     UserLocalPreference.instance.storeUserData(initiateUser.user);
     UserLocalPreference.instance.storeCommunityData(initiateUser.community);
-    await firebase();
+    await _instance?.firebase();
     return initiateUser;
   }
 

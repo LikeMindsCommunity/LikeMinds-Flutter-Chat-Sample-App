@@ -119,6 +119,7 @@ class _ChatItemState extends State<ChatItem> {
         ),
       ),
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           LMRealtime.instance.chatroomId = chatroom.id;
           context.push("/chatroom/${chatroom.id}");
