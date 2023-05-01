@@ -26,7 +26,7 @@ import 'package:pdf_render/pdf_render_widgets.dart';
 
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
-  final Conversation? replyToConversation;
+  Conversation? replyToConversation;
   ChatBar({
     super.key,
     required this.chatroom,
@@ -55,7 +55,6 @@ class _ChatBarState extends State<ChatBar> {
     Bloc.observer = SimpleBlocObserver();
     _popupMenuController = CustomPopupMenuController();
     _textEditingController = TextEditingController();
-    replyToConversation = widget.replyToConversation;
     _focusNode = FocusNode();
     imagePicker = ImagePicker();
     filePicker = FilePicker.platform;
@@ -81,6 +80,7 @@ class _ChatBarState extends State<ChatBar> {
 
   @override
   Widget build(BuildContext context) {
+    replyToConversation = widget.replyToConversation;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Column(
       children: [
@@ -135,7 +135,7 @@ class _ChatBarState extends State<ChatBar> {
                       IconButton(
                         onPressed: () {
                           setState(() {
-                            replyToConversation = null;
+                            widget.replyToConversation = null;
                           });
                         },
                         icon: Icon(

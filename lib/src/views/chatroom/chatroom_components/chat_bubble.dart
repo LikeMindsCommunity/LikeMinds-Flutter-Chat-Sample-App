@@ -188,6 +188,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                                   "",
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
+                                              textAlign: TextAlign.left,
                                               style: LMTheme.medium.copyWith(
                                                 color: kPrimaryColor,
                                                 fontSize: 9.sp,
@@ -199,6 +200,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                                   replyToConversation!.answer),
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
+                                              textAlign: TextAlign.left,
                                               style: LMTheme.regular.copyWith(
                                                 fontSize: 8.sp,
                                               ),
@@ -284,7 +286,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       expandText: "",
       linkStyle:
           lmBranding.fonts.regular.copyWith(color: lmBranding.textLinkColor),
-      textAlign: TextAlign.start,
+      textAlign: TextAlign.left,
       style: LMFonts.instance.regular.copyWith(
         fontSize: 10.sp,
       ),

@@ -82,10 +82,10 @@ class ChatroomMenu extends StatelessWidget {
         router.push("/participants", extra: chatroom);
         break;
       case 6:
-        muteChatroom();
+        muteChatroom(action.id);
         break;
       case 8:
-        muteChatroom();
+        muteChatroom(action.id);
         break;
       case 9:
         leaveChatroom();
@@ -102,14 +102,14 @@ class ChatroomMenu extends StatelessWidget {
     Fluttertoast.showToast(msg: "Coming Soon");
   }
 
-  void muteChatroom() async {
+  void muteChatroom(int id) async {
     final response =
         await locator<LikeMindsService>().muteChatroom(MuteChatroomRequest(
       chatroomId: chatroom.id,
       value: !chatroom.muteStatus!,
     ));
     if (response.success) {
-      Fluttertoast.showToast(msg: "Chatroom muted");
+      Fluttertoast.showToast(msg: "Chatroom ${id == 6 ? "muted" : "unmuted"}");
     } else {
       toast(response.errorMessage!);
     }
