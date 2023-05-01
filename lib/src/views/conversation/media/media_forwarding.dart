@@ -1,12 +1,15 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
@@ -28,11 +31,26 @@ class MediaForward extends StatefulWidget {
 
 class _MediaForwardState extends State<MediaForward> {
   TextEditingController _textEditingController = TextEditingController();
+  ImagePicker imagePicker = ImagePicker();
+  List<Media> mediaList = [];
+  int currPosition = 0;
+  CarouselController controller = CarouselController();
+  ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
+
+  @override
+  void initState() {
+    super.initState();
+    mediaList = widget.media;
+  }
 
   @override
   void dispose() {
     _textEditingController.dispose();
     super.dispose();
+  }
+
+  bool checkIfMultipleAttachments() {
+    return mediaList.length > 1;
   }
 
   @override
@@ -53,24 +71,54 @@ class _MediaForwardState extends State<MediaForward> {
         elevation: 0,
       ),
       bottomSheet: Container(
-        color: kBlackColor,
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
+        decoration: const BoxDecoration(
+            color: kBlackColor,
+            border: Border(
+              top: BorderSide(
+                color: kGreyColor,
+                width: 0.1,
+              ),
+            )),
+        padding: const EdgeInsets.symmetric(vertical: 12.5, horizontal: 5.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            // GestureDetector(
-            //   onTap: () {},
-            //   child: SizedBox(
-            //     width: 10.w,
-            //     height: 10.w,
-            //     child: Icon(
-            //       Icons.add_a_photo,
-            //       color: kWhiteColor,
-            //       size: 24.sp,
-            //     ),
-            //   ),
-            // ),
-            SizedBox(
+            GestureDetector(
+              onTap: () async {
+                if (await handlePermissions(1)) {
+                  List<XFile>? pickedImage = await imagePicker.pickMultiImage();
+
+                  if (pickedImage.isNotEmpty) {
+                    for (XFile xImage in pickedImage) {
+                      File file = File(xImage.path);
+                      ui.Image image =
+                          await decodeImageFromList(file.readAsBytesSync());
+                      Media media = Media(
+                        mediaType: MediaType.photo,
+                        height: image.height,
+                        width: image.width,
+                        mediaFile: file,
+                      );
+                      mediaList.add(media);
+                    }
+                  }
+                  setState(() {});
+                }
+              },
+              child: SizedBox(
+                width: 10.w,
+                height: 10.w,
+                child: Icon(
+                  Icons.add_a_photo,
+                  color: kWhiteColor,
+                  size: 24.sp,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+              ),
               width: 60.w,
               child: TextField(
                 controller: _textEditingController,
@@ -81,6 +129,7 @@ class _MediaForwardState extends State<MediaForward> {
                   hintStyle: LMTheme.medium.copyWith(
                     color: kWhiteColor,
                   ),
+                  hintText: 'Write something here...',
                   border: InputBorder.none,
                 ),
               ),
@@ -98,7 +147,7 @@ class _MediaForwardState extends State<MediaForward> {
                           ..text(_textEditingController.text)
                           ..hasFiles(true))
                         .build(),
-                    widget.media,
+                    mediaList,
                   ),
                 );
               },
@@ -135,37 +184,76 @@ class _MediaForwardState extends State<MediaForward> {
   }
 
   Widget getMediaPreview() {
-    if (widget.media.first.mediaType == MediaType.photo) {
-      return CarouselSlider.builder(
-        options: CarouselOptions(
-          aspectRatio: 1,
-          clipBehavior: Clip.hardEdge,
-          scrollDirection: Axis.horizontal,
-          initialPage: 0,
-          enableInfiniteScroll: false,
-          enlargeFactor: 0.0,
-          viewportFraction: 1.0,
-        ),
-        itemCount: widget.media.length,
-        itemBuilder: (context, index, realIndex) => AspectRatio(
-          aspectRatio: 1,
-          child: Image.file(
-            widget.media[index].mediaFile!,
-            fit: BoxFit.cover,
+    if (mediaList.first.mediaType == MediaType.photo) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CarouselSlider.builder(
+            options: CarouselOptions(
+              aspectRatio: 1,
+              clipBehavior: Clip.hardEdge,
+              scrollDirection: Axis.horizontal,
+              initialPage: 0,
+              enableInfiniteScroll: false,
+              enlargeFactor: 0.0,
+              viewportFraction: 1.0,
+              onPageChanged: (index, reason) {
+                currPosition = index;
+                rebuildCurr.value = !rebuildCurr.value;
+              },
+            ),
+            itemCount: mediaList.length,
+            itemBuilder: (context, index, realIndex) => AspectRatio(
+              aspectRatio: 1,
+              child: Image.file(
+                mediaList[index].mediaFile!,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
+          ValueListenableBuilder(
+              valueListenable: rebuildCurr,
+              builder: (context, _, __) {
+                return Column(
+                  children: [
+                    checkIfMultipleAttachments()
+                        ? kVerticalPaddingMedium
+                        : const SizedBox(),
+                    checkIfMultipleAttachments()
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: mediaList.map((url) {
+                              int index = mediaList.indexOf(url);
+                              return Container(
+                                width: 8.0,
+                                height: 8.0,
+                                margin: const EdgeInsets.symmetric(
+                                    vertical: 7.0, horizontal: 2.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: currPosition == index
+                                      ? const Color.fromRGBO(255, 255, 255, 0.9)
+                                      : const Color.fromRGBO(
+                                          255, 255, 255, 0.4),
+                                ),
+                              );
+                            }).toList())
+                        : const SizedBox(),
+                  ],
+                );
+              }),
+        ],
       );
-    } else if (widget.media.first.mediaType == MediaType.document) {
+    } else if (mediaList.first.mediaType == MediaType.document) {
       return SizedBox(
         width: 100.w,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             AspectRatio(
-              aspectRatio:
-                  (widget.media.first.width! / widget.media.first.height!),
-              child:
-                  Image.file(widget.media.first.thumbnailFile!, width: 100.w),
+              aspectRatio: (mediaList.first.width! / mediaList.first.height!),
+              child: Image.file(mediaList.first.thumbnailFile!, width: 100.w),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -174,8 +262,7 @@ class _MediaForwardState extends State<MediaForward> {
                 SizedBox(
                   width: 100.w,
                   child: Text(
-                    basenameWithoutExtension(
-                        widget.media.first.mediaFile!.path),
+                    basenameWithoutExtension(mediaList.first.mediaFile!.path),
                     style: LMTheme.medium.copyWith(color: kWhiteColor),
                   ),
                 ),
@@ -186,7 +273,7 @@ class _MediaForwardState extends State<MediaForward> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                          '${widget.media.first.pageCount} ${widget.media.first.pageCount! > 1 ? 'pages' : 'page'} * ${getFileSizeString(bytes: widget.media.first.size!)} * PDF',
+                          '${mediaList.first.pageCount} ${mediaList.first.pageCount! > 1 ? 'pages' : 'page'} * ${getFileSizeString(bytes: mediaList.first.size!)} * PDF',
                           style: LMTheme.medium.copyWith(color: kWhiteColor))
                     ],
                   ),

@@ -138,12 +138,22 @@ class _ChatBarState extends State<ChatBar> {
                                               await imagePicker!.pickImage(
                                             source: ImageSource.camera,
                                           );
-
+                                          List<Media> mediaList = [];
                                           if (pickedImage != null) {
+                                            File file = File(pickedImage.path);
+                                            ui.Image image =
+                                                await decodeImageFromList(
+                                                    file.readAsBytesSync());
+                                            Media media = Media(
+                                              mediaType: MediaType.photo,
+                                              height: image.height,
+                                              width: image.width,
+                                              mediaFile: file,
+                                            );
+                                            mediaList.add(media);
                                             context.pushNamed("media_forward",
-                                                extra: File(pickedImage.path),
+                                                extra: mediaList,
                                                 params: {
-                                                  'mediaType': "1",
                                                   'chatroomId': widget
                                                       .chatroomId
                                                       .toString()

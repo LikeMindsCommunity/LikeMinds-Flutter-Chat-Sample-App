@@ -381,7 +381,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 ],
               );
             }
-
             return Container(color: Colors.red);
           },
         ),
