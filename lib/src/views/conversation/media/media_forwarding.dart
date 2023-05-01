@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -87,9 +88,20 @@ class _MediaForwardState extends State<MediaForward> {
               onTap: () async {
                 if (await handlePermissions(1)) {
                   List<XFile>? pickedImage = await imagePicker.pickMultiImage();
-
+                  if (mediaList.length + pickedImage.length > 10) {
+                    Fluttertoast.showToast(
+                        msg: 'Only 10 attachments can be sent');
+                    return;
+                  }
                   if (pickedImage.isNotEmpty) {
                     for (XFile xImage in pickedImage) {
+                      int fileBytes = await xImage.length();
+                      if (getFileSizeInDouble(fileBytes) > 100) {
+                        Fluttertoast.showToast(
+                          msg: 'File size should be smaller than 100MB',
+                        );
+                        return;
+                      }
                       File file = File(xImage.path);
                       ui.Image image =
                           await decodeImageFromList(file.readAsBytesSync());

@@ -17,6 +17,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.da
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf_render/pdf_render.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
@@ -199,9 +200,26 @@ class _ChatBarState extends State<ChatBar> {
                                           List<XFile>? pickedImage =
                                               await imagePicker!
                                                   .pickMultiImage();
+                                          if (pickedImage.length > 10) {
+                                            Fluttertoast.showToast(
+                                                msg:
+                                                    'Only 10 attachments can be sent');
+                                            return;
+                                          }
                                           List<Media> mediaList = [];
                                           if (pickedImage.isNotEmpty) {
                                             for (XFile xImage in pickedImage) {
+                                              int fileBytes =
+                                                  await xImage.length();
+                                              if (getFileSizeInDouble(
+                                                      fileBytes) >
+                                                  100) {
+                                                Fluttertoast.showToast(
+                                                  msg:
+                                                      'File size should be smaller than 100 MB',
+                                                );
+                                                return;
+                                              }
                                               File file = File(xImage.path);
                                               ui.Image image =
                                                   await decodeImageFromList(
