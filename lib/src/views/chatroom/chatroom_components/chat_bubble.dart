@@ -9,6 +9,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
@@ -335,6 +336,12 @@ class _ChatBubbleState extends State<ChatBubble> {
       if (widget.conversationAttachments == null) {
         return expandableText;
       }
+      LMAnalytics.get().logEvent(AnalyticsKeys.imageViewed, {
+        'chatroom_id': widget.chatroom.id,
+        'community_id': widget.chatroom.communityId,
+        'chatroom_type': widget.chatroom.type,
+        'message_id': widget.conversation.id,
+      });
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

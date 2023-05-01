@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
@@ -218,6 +219,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
             }
 
             if (state is ChatroomLoaded) {
+              LMAnalytics.get().logEvent(AnalyticsKeys.chatroomOpened, {
+                'chatroom_id': chatroom!.id,
+                'community_id': chatroom!.communityId,
+                'chatroom_type': chatroom!.type,
+                'source': 'home_feed',
+              });
               var pagedListView = ValueListenableBuilder(
                 valueListenable: rebuildConversationList,
                 builder: (context, _, __) {
@@ -376,7 +383,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         }
                       },
                       builder: (context, state) {
-                        return ChatBar(chatroomId: widget.chatroomId);
+                        return ChatBar(chatroom: chatroom!);
                       }),
                 ],
               );

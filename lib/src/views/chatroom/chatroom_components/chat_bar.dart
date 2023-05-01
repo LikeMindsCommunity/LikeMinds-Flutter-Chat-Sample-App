@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
@@ -23,8 +24,8 @@ import 'package:pdf_render/pdf_render.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
 
 class ChatBar extends StatefulWidget {
-  final int chatroomId;
-  const ChatBar({super.key, required this.chatroomId});
+  final ChatRoom chatroom;
+  const ChatBar({super.key, required this.chatroom});
 
   @override
   State<ChatBar> createState() => _ChatBarState();
@@ -95,10 +96,17 @@ class _ChatBarState extends State<ChatBar> {
                   Expanded(
                     child: TaggingAheadTextField(
                       isDown: false,
-                      chatroomId: widget.chatroomId,
+                      chatroomId: widget.chatroom.id,
                       onTagSelected: (tag) {
                         print(tag);
                         userTags.add(tag);
+                        LMAnalytics.get()
+                            .logEvent(AnalyticsKeys.userTagsSomeone, {
+                          'community_id': widget.chatroom.id,
+                          'chatroom_name': widget.chatroom.title,
+                          'tagged_user_id': tag.id,
+                          'tagged_user_name': tag.name,
+                        });
                       },
                       onChange: (value) {
                         print(value);
@@ -156,7 +164,7 @@ class _ChatBarState extends State<ChatBar> {
                                                 extra: mediaList,
                                                 params: {
                                                   'chatroomId': widget
-                                                      .chatroomId
+                                                      .chatroom.id
                                                       .toString()
                                                 });
                                           }
@@ -236,8 +244,8 @@ class _ChatBarState extends State<ChatBar> {
                                               "media_forward",
                                               extra: mediaList,
                                               params: {
-                                                'chatroomId':
-                                                    widget.chatroomId.toString()
+                                                'chatroomId': widget.chatroom.id
+                                                    .toString()
                                               },
                                             );
                                           }
@@ -420,14 +428,13 @@ class _ChatBarState extends State<ChatBar> {
                 if (_textEditingController.text.isEmpty) {
                   Fluttertoast.showToast(msg: "Text can't be empty");
                 } else {
-                  Fluttertoast.showToast(msg: "Send message");
                   final string = _textEditingController.text;
                   userTags = TaggingHelper.matchTags(string, userTags);
                   result = TaggingHelper.encodeString(string, userTags);
                   result = result?.trim();
                   chatActionBloc!.add(PostConversation(
                       (PostConversationRequestBuilder()
-                            ..chatroomId(widget.chatroomId)
+                            ..chatroomId(widget.chatroom.id)
                             ..text(result!)
                             ..temporaryId(DateTime.now()
                                 .millisecondsSinceEpoch

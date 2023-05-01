@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
@@ -96,6 +97,12 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                 child: CircularProgressIndicator(),
               );
             } else if (state is ParticipantsLoaded) {
+              LMAnalytics.get()
+                  .logEvent(AnalyticsKeys.viewChatroomParticipants, {
+                'chatroom_id': widget.chatroom.id,
+                'community_id': widget.chatroom.communityId,
+                'source': 'chatroom_overflow_menu',
+              });
               return Column(
                 children: [
                   const SizedBox(height: 72),
