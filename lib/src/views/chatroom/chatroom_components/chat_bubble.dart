@@ -241,15 +241,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   ),
                                 ),
                           const SizedBox(height: 6),
-                          FutureBuilder(
-                              builder: ((context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return snapshot.data!;
-                                } else {
-                                  return const SizedBox.shrink();
-                                }
-                              }),
-                              future: getContent()),
+                          getContent(),
                           const SizedBox(height: 8),
                           ((widget.conversation.hasFiles == null ||
                                       !widget.conversation.hasFiles!) ||
@@ -295,7 +287,7 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   void selectMessage(String messageId) {}
 
-  Future<Widget> getContent() async {
+  Widget getContent() {
     Widget expandableText = ExpandableText(
       widget.conversation.answer,
       expandText: "",
