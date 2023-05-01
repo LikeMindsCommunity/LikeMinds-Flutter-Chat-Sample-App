@@ -11,6 +11,8 @@ import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
@@ -37,6 +39,9 @@ class _MediaForwardState extends State<MediaForward> {
   int currPosition = 0;
   CarouselController controller = CarouselController();
   ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
+
+  List<UserTag> userTags = [];
+  String? result;
 
   @override
   void initState() {
@@ -127,28 +132,29 @@ class _MediaForwardState extends State<MediaForward> {
                 ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
-              width: 60.w,
-              child: TextField(
+            Expanded(
+              child: TaggingAheadTextField(
+                isDown: false,
+                chatroomId: widget.chatroomId,
+                style: LMTheme.medium.copyWith(color: kWhiteColor),
+                onTagSelected: (tag) {
+                  print(tag);
+                  userTags.add(tag);
+                },
+                onChange: (value) {
+                  print(value);
+                },
                 controller: _textEditingController,
-                style: LMTheme.medium.copyWith(
-                  color: kWhiteColor,
-                ),
-                decoration: InputDecoration(
-                  hintStyle: LMTheme.medium.copyWith(
-                    color: kWhiteColor,
-                  ),
-                  hintText: 'Write something here...',
-                  border: InputBorder.none,
-                ),
+                focusNode: FocusNode(),
               ),
             ),
             GestureDetector(
               onTap: () {
                 context.pop();
+                final string = _textEditingController.text;
+                userTags = TaggingHelper.matchTags(string, userTags);
+                result = TaggingHelper.encodeString(string, userTags);
+                result = result?.trim();
                 chatActionBloc.add(
                   PostMultiMediaConversation(
                     (PostConversationRequestBuilder()
@@ -156,7 +162,7 @@ class _MediaForwardState extends State<MediaForward> {
                           ..chatroomId(widget.chatroomId)
                           ..temporaryId(
                               DateTime.now().millisecondsSinceEpoch.toString())
-                          ..text(_textEditingController.text)
+                          ..text(result!)
                           ..hasFiles(true))
                         .build(),
                     mediaList,

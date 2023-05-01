@@ -15,6 +15,7 @@ class TaggingAheadTextField extends StatefulWidget {
   final Function(UserTag) onTagSelected;
   final TextEditingController? controller;
   final InputDecoration? decoration;
+  final TextStyle? style;
   final Function(String)? onChange;
   final int chatroomId;
 
@@ -25,6 +26,7 @@ class TaggingAheadTextField extends StatefulWidget {
     required this.onTagSelected,
     required this.controller,
     required this.focusNode,
+    this.style,
     this.decoration,
     this.onChange,
   });
@@ -136,7 +138,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
         textFieldConfiguration: TextFieldConfiguration(
           keyboardType: TextInputType.multiline,
           controller: _controller,
-          style: LMTheme.regular,
+          style: widget.style ?? LMTheme.regular,
           focusNode: _focusNode,
           minLines: 1,
           maxLines: 200,
