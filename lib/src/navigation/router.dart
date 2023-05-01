@@ -8,7 +8,9 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_participants_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_forwarding.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_preview.dart';
@@ -76,6 +78,15 @@ final router = GoRouter(
       builder: (context, state) => BlocProvider(
         create: (context) => ProfileBloc()..add(InitProfileEvent()),
         child: const ProfilePage(),
+      ),
+    ),
+    GoRoute(
+      path: participantsRoute,
+      builder: (context, state) => BlocProvider<ParticipantsBloc>(
+        create: (context) => ParticipantsBloc(),
+        child: ChatroomParticipantsPage(
+          chatroom: state.extra as ChatRoom,
+        ),
       ),
     ),
     GoRoute(

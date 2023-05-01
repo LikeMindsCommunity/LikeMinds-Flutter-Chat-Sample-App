@@ -36,6 +36,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
               chatroomId: chatroomId,
               conversationId: conversationId,
             ));
+            lastConversationId = conversationId;
           }
         }
       });
@@ -49,7 +50,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
                   ..conversationId(event.conversationId))
                 .build());
         if (response.success) {
-          emit(UpdateConversation(response.data!.conversation!));
+          emit(UpdateConversation(response: response.data!.conversation!));
         }
       }
     });
@@ -138,6 +139,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
               }
             }
           }
+          lastConversationId = response.data!.conversation!.id;
           emit(
             MultiMediaConversationPosted(
               postConversationResponse,

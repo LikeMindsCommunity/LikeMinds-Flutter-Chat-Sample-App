@@ -20,6 +20,8 @@ abstract class ILikeMindsService {
       ShareChatroomRequest request);
   Future<LMResponse<SetChatroomTopicResponse>> setChatroomTopic(
       SetChatroomTopicRequest request);
+  Future<LMResponse<DeleteParticipantResponse>> deleteParticipant(
+      DeleteParticipantRequest request);
   Future<LMResponse<GetConversationResponse>> getConversation(
       GetConversationRequest request);
   Future<LMResponse<GetSingleConversationResponse>> getSingleConversation(
@@ -101,6 +103,12 @@ class LikeMindsService implements ILikeMindsService {
   Future<LMResponse<ShareChatroomResponse>> shareChatroomUrl(
       ShareChatroomRequest request) {
     return client.shareChatroomUrl(request);
+  }
+
+  @override
+  Future<LMResponse<DeleteParticipantResponse>> deleteParticipant(
+      DeleteParticipantRequest request) {
+    return client.deleteParticipant(request);
   }
 
   @override

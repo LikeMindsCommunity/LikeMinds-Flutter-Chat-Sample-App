@@ -34,11 +34,11 @@ class ConversationPosted extends ChatActionState {
 }
 
 class UpdateConversation extends ChatActionState {
-  Conversation response;
+  final Conversation response;
 
-  UpdateConversation(
-    this.response,
-  );
+  UpdateConversation({
+    required this.response,
+  });
 
   @override
   List<Object> get props => [

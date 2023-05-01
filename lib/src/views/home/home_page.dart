@@ -107,10 +107,7 @@ class _HomePageState extends State<HomePage> {
                   child: SafeArea(
                     top: false,
                     child: ListView.builder(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 5.w,
-                        vertical: 2.h,
-                      ),
+                      padding: EdgeInsets.zero,
                       itemCount: chatItems.length,
                       itemBuilder: (context, index) {
                         return chatItems[index];
@@ -139,21 +136,9 @@ List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
 
   for (int i = 0; i < chatrooms.length; i++) {
     chats.add(ChatItem(
-      name: chatrooms[i].header,
-      message: TaggingHelper.convertRouteToTag(
-          lastConversations[chatrooms[i].lastConversationId.toString()]
-                  ?.answer ??
-              "..."),
-      time: lastConversations[chatrooms[i].lastConversationId.toString()]
-              ?.lastUpdated
-              .toString() ??
-          "...",
-      avatarUrl: chatrooms[i].chatroomImageUrl,
-      unreadCount: chatrooms[i].unseenCount ?? 0,
-      onTap: () {
-        LMRealtime.instance.chatroomId = chatrooms[i].id;
-        context.push("/chatroom/${chatrooms[i].id}");
-      },
+      chatroom: chatrooms[i],
+      conversation:
+          lastConversations[chatrooms[i].lastConversationId.toString()]!,
     ));
   }
 

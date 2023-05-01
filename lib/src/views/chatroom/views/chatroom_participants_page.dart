@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
@@ -17,7 +15,7 @@ import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class ChatroomParticipantsPage extends StatefulWidget {
   final ChatRoom chatroom;
-  ChatroomParticipantsPage({super.key, required this.chatroom});
+  const ChatroomParticipantsPage({super.key, required this.chatroom});
 
   @override
   State<ChatroomParticipantsPage> createState() =>

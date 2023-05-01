@@ -97,6 +97,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  carousel_slider:
+    dependency: transitive
+    description:
+      name: carousel_slider
+      sha256: "9c695cc963bf1d04a47bd6021f68befce8970bcd61d24938e1fb0918cf5d9c42"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.1"
   characters:
     dependency: transitive
     description:
@@ -664,9 +672,9 @@ packages:
     source: hosted
     version: "1.3.0"
   likeminds_chat_fl:
-    dependency: "direct main"
+    dependency: transitive
     description:
-      path: "../../LikeMinds-Flutter-Groupchat-SDK"
+      path: "../../LikeMinds-Flutter-GroupChat-SDK"
       relative: true
     source: path
     version: "1.0.0"
@@ -837,6 +845,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.5"
+  pdf_render:
+    dependency: transitive
+    description:
+      name: pdf_render
+      sha256: "3670dc6465a8d9423a16e19ed1f5e6346b117b5e2c655038211fcac865522eca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.8"
   pedantic:
     dependency: transitive
     description:
@@ -974,7 +990,7 @@ packages:
     source: hosted
     version: "3.2.1"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences
       sha256: "858aaa72d8f61637d64e776aca82e1c67e6d9ee07979123c5d17115031c1b13b"
@@ -1130,6 +1146,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  swipe_to_action:
+    dependency: "direct main"
+    description:
+      name: swipe_to_action
+      sha256: "0914f78df07a15b5fd97e800036fd63a2bcd4dbe67a4a514a597303806a361ea"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   synchronized:
     dependency: transitive
     description:

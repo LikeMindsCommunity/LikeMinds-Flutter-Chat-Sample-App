@@ -160,7 +160,7 @@ class _ChatBarState extends State<ChatBar> {
                                               mediaFile: file,
                                             );
                                             mediaList.add(media);
-                                            context.pushNamed("media_forward",
+                                            router.pushNamed("media_forward",
                                                 extra: mediaList,
                                                 params: {
                                                   'chatroomId': widget
@@ -428,6 +428,7 @@ class _ChatBarState extends State<ChatBar> {
                 if (_textEditingController.text.isEmpty) {
                   Fluttertoast.showToast(msg: "Text can't be empty");
                 } else {
+                  // Fluttertoast.showToast(msg: "Send message");
                   final string = _textEditingController.text;
                   userTags = TaggingHelper.matchTags(string, userTags);
                   result = TaggingHelper.encodeString(string, userTags);
