@@ -22,6 +22,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           GetHomeFeedRequest(),
         );
         if (response.success) {
+          response.data?.conversationMeta?.forEach((key, value) {
+            String? userId = value.userId == null
+                ? value.memberId == null
+                    ? null
+                    : value.memberId.toString()
+                : value.userId.toString();
+            final user = response.data?.userMeta?[userId];
+            value.member = user;
+          });
           add(ReloadHomeEvent(response: response.data!));
           emit(HomeLoaded(response: response.data!));
         } else {
@@ -38,6 +47,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           GetHomeFeedRequest(),
         );
         if (response.success) {
+          response.data?.conversationMeta?.forEach((key, value) {
+            String? userId = value.userId == null
+                ? value.memberId == null
+                    ? null
+                    : value.memberId.toString()
+                : value.userId.toString();
+            final user = response.data?.userMeta?[userId];
+            value.member = user;
+          });
           emit(HomeLoaded(response: response.data!));
         } else {
           HomeError(response.errorMessage!);

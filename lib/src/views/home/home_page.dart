@@ -117,15 +117,21 @@ List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
   final List<ChatRoom> chatrooms = response.chatroomsData ?? [];
   final Map<String, Conversation> lastConversations =
       response.conversationMeta ?? {};
-  final Map<int, User> userMeta = response.userMeta ?? {};
+  final Map<String, User> userMeta = response.userMeta ?? {};
 
   for (int i = 0; i < chatrooms.length; i++) {
+    final Conversation conversation =
+        lastConversations[chatrooms[i].lastConversationId.toString()]!;
+    String? userId = conversation.userId == null
+        ? conversation.memberId == null
+            ? null
+            : conversation.memberId.toString()
+        : conversation.userId.toString();
     chats.add(
       ChatItem(
         chatroom: chatrooms[i],
-        conversation:
-            lastConversations[chatrooms[i].lastConversationId.toString()]!,
-        userMeta: userMeta,
+        conversation: conversation,
+        user: conversation.member,
       ),
     );
   }

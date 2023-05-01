@@ -136,7 +136,7 @@ class _MediaForwardState extends State<MediaForward> {
               child: TaggingAheadTextField(
                 isDown: false,
                 chatroomId: widget.chatroomId,
-                style: LMTheme.medium.copyWith(color: kWhiteColor),
+                style: LMTheme.regular.copyWith(color: kWhiteColor),
                 onTagSelected: (tag) {
                   print(tag);
                   userTags.add(tag);

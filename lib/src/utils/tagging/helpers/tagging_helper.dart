@@ -56,13 +56,14 @@ class TaggingHelper {
     print(userId);
   }
 
-  static String convertRouteToTag(String text) {
+  static String? convertRouteToTag(String? text) {
+    if (text == null) return null;
     final Iterable<RegExpMatch> matches = routeRegExp.allMatches(text);
 
     for (final match in matches) {
       final String tag = match.group(1) ?? match.group(3) ?? match.group(5)!;
       final String id = match.group(2) ?? match.group(4) ?? match.group(6)!;
-      text = text.replaceAll('<<$tag|route://member/$id>>', '@$tag');
+      text = text!.replaceAll('<<$tag|route://member/$id>>', '@$tag');
     }
     return text;
   }

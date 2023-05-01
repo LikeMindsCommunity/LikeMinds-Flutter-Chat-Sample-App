@@ -18,13 +18,13 @@ import 'package:swipe_to_action/swipe_to_action.dart';
 class ChatItem extends StatefulWidget {
   final ChatRoom chatroom;
   final Conversation conversation;
-  final Map<int, User> userMeta;
+  final User? user;
 
   const ChatItem({
     super.key,
     required this.chatroom,
     required this.conversation,
-    required this.userMeta,
+    required this.user,
   });
 
   @override
@@ -49,7 +49,7 @@ class _ChatItemState extends State<ChatItem> {
     Conversation conversation = widget.conversation;
     String _name = chatroom.header;
     String _message =
-        '${widget.userMeta[conversation.userId ?? conversation.memberId ?? conversation.member!.id]?.name}${widget.userMeta[conversation.userId ?? conversation.memberId ?? conversation.member!.id]?.name != null ? ':' : ''} ${TaggingHelper.convertRouteToTag(conversation.answer)}';
+        '${widget.user?.name}: ${TaggingHelper.convertRouteToTag(conversation.answer)}';
     String _time = conversation.lastUpdated.toString();
     bool _isSecret = chatroom.isSecret ?? false;
     bool? hasAttachments = conversation.hasFiles;

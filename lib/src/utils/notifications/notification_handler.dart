@@ -104,27 +104,6 @@ class LMNotificationHandler {
       }
     }
 
-    // Route the notification to the appropriate screen
-    // If the notification is post related, route to the post detail screen
-    // if (host == "post_detail") {
-    //   final String postId = queryParams["post_id"]!;
-    //   final GetPostResponse postDetails =
-    //       await locator<LikeMindsService>().getPost(
-    //     (GetPostRequestBuilder()
-    //           ..postId(postId)
-    //           ..page(1)
-    //           ..pageSize(10))
-    //         .build(),
-    //   );
-    //   locator<NavigationService>().navigateTo(
-    //     AllCommentsScreen.route,
-    //     arguments: AllCommentsScreenArguments(
-    //       post: postDetails.post!,
-    //       feedroomId: locator<LikeMindsService>().feedroomId!,
-    //     ),
-    //   );
-    // }
-
     if (host == "collabcard") {
       final path = "/chatroom/${queryParams["collabcard_id"]}/";
       router.push(path);

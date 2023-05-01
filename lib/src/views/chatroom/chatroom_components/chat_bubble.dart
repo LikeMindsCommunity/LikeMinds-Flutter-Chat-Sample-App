@@ -164,55 +164,59 @@ class _ChatBubbleState extends State<ChatBubble> {
                               ? CrossAxisAlignment.end
                               : CrossAxisAlignment.start,
                           children: [
-                            replyToConversation != null
-                                ? Container(
-                                    color: kGreyColor.withOpacity(0.1),
-                                    child: Row(
+                            Visibility(
+                              visible: replyToConversation != null,
+                              maintainState: true,
+                              maintainSize: false,
+                              child: Container(
+                                color: kGreyColor.withOpacity(0.1),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 6.h,
+                                      width: 1.w,
+                                      color: LMTheme.buttonColor,
+                                    ),
+                                    kHorizontalPaddingMedium,
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Container(
-                                          height: 6.h,
-                                          width: 1.w,
-                                          color: LMTheme.buttonColor,
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          replyToConversation?.member?.name ??
+                                              "",
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                          style: LMTheme.medium.copyWith(
+                                            color: kPrimaryColor,
+                                            fontSize: 9.sp,
+                                          ),
                                         ),
-                                        kHorizontalPaddingMedium,
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              replyToConversation!
-                                                      .member?.name ??
-                                                  "",
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              textAlign: TextAlign.left,
-                                              style: LMTheme.medium.copyWith(
-                                                color: kPrimaryColor,
-                                                fontSize: 9.sp,
-                                              ),
-                                            ),
-                                            kVerticalPaddingXSmall,
-                                            Text(
-                                              TaggingHelper.convertRouteToTag(
-                                                  replyToConversation!.answer),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              textAlign: TextAlign.left,
-                                              style: LMTheme.regular.copyWith(
-                                                fontSize: 8.sp,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                          ],
+                                        kVerticalPaddingXSmall,
+                                        Text(
+                                          TaggingHelper.convertRouteToTag(
+                                                  replyToConversation
+                                                      ?.answer) ??
+                                              "",
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                          style: LMTheme.regular.copyWith(
+                                            fontSize: 8.sp,
+                                          ),
                                         ),
+                                        const SizedBox(height: 6),
                                       ],
                                     ),
-                                  )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            replyToConversation != null
+                                ? const SizedBox(height: 8)
                                 : const SizedBox(),
-                            const SizedBox(height: 8),
                             isSent
                                 ? const SizedBox()
                                 : Text(
@@ -225,7 +229,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                                           : lmBranding.headerColor,
                                     ),
                                   ),
-                            const SizedBox(height: 6),
+                            isSent
+                                ? const SizedBox()
+                                : const SizedBox(height: 6),
                             getContent(),
                             const SizedBox(height: 8),
                             ((widget.conversation.hasFiles == null ||

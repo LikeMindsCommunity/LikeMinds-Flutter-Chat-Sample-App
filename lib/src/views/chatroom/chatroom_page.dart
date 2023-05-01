@@ -42,7 +42,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
   ChatRoom? chatroom;
   ValueNotifier rebuildChatBar = ValueNotifier(false);
   User currentUser = UserLocalPreference.instance.fetchUserData();
+  bool showScrollButton = false;
+  int lastConversationId = 0;
 
+  ScrollController scrollController = ScrollController();
   PagingController<int, Conversation> pagedListController =
       PagingController<int, Conversation>(firstPageKey: 1);
 
@@ -149,11 +152,45 @@ class _ChatroomPageState extends State<ChatroomPage> {
     rebuildConversationList.value = !rebuildConversationList.value;
   }
 
+  void _scrollToBottom() {
+    scrollController.animateTo(
+      scrollController.position.minScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _showScrollToBottomButton() {
+    if (scrollController.position.pixels >
+        scrollController.position.viewportDimension) {
+      _showButton();
+    }
+    if (scrollController.position.pixels <
+        scrollController.position.viewportDimension) {
+      _hideButton();
+    }
+  }
+
+  void _showButton() {
+    setState(() {
+      showScrollButton = true;
+    });
+  }
+
+  void _hideButton() {
+    setState(() {
+      showScrollButton = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     Bloc.observer = SimpleBlocObserver();
     _addPaginationListener();
+    scrollController.addListener(() {
+      _showScrollToBottomButton();
+    });
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     conversationBloc = ConversationBloc()
       ..add(
@@ -200,16 +237,44 @@ class _ChatroomPageState extends State<ChatroomPage> {
     // conversationBloc = BlocProvider.of<ConversationBloc>(context);
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: showScrollButton
+          ? Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Container(
+                height: 32.sp,
+                width: 32.sp,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.sp),
+                  color: LMTheme.buttonColor,
+                ),
+                child: Center(
+                  child: IconButton(
+                    iconSize: 18.sp,
+                    onPressed: () {
+                      _scrollToBottom();
+                    },
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.white,
+                      size: 18.sp,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: SafeArea(
         bottom: false,
         child: BlocConsumer<ChatroomBloc, ChatroomState>(
           listener: (context, state) {
             if (state is ChatroomLoaded) {
               chatroom = state.getChatroomResponse.chatroom!;
+              lastConversationId =
+                  state.getChatroomResponse.lastConversationId!;
               chatActionBloc?.add(
                 NewConversation(
                   chatroomId: chatroom!.id,
-                  conversationId: state.getChatroomResponse.lastConversationId!,
+                  conversationId: lastConversationId,
                 ),
               );
             }
@@ -236,6 +301,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       builder: (context, state) {
                         return PagedListView(
                           pagingController: pagedListController,
+                          scrollController: scrollController,
                           physics: const ClampingScrollPhysics(),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           reverse: true,
@@ -389,13 +455,11 @@ class _ChatroomPageState extends State<ChatroomPage> {
                           );
                         }
                         if (state is UpdateConversation) {
-                          if (currentUser.id ==
-                              (state.response.userId ??
-                                  state.response.memberId ??
-                                  state.response.member!.id)) {
+                          if (state.response.id != lastConversationId) {
                             addConversationToPagedList(
                               state.response,
                             );
+                            lastConversationId = state.response.id;
                           }
                         }
                         if (state is ReplyConversationState) {
@@ -410,9 +474,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 return ChatBar(
                                   chatroom: chatroom!,
                                   replyToConversation: state.conversation,
+                                  scrollToBottom: _scrollToBottom,
                                 );
                               }
-                              return ChatBar(chatroom: chatroom!);
+                              return ChatBar(
+                                chatroom: chatroom!,
+                                scrollToBottom: _scrollToBottom,
+                              );
                             });
                       }),
                 ],

@@ -27,10 +27,13 @@ import 'package:pdf_render/pdf_render_widgets.dart';
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
   Conversation? replyToConversation;
+  final Function() scrollToBottom;
+
   ChatBar({
     super.key,
     required this.chatroom,
     this.replyToConversation,
+    required this.scrollToBottom,
   });
 
   @override
@@ -118,12 +121,15 @@ class _ChatBarState extends State<ChatBar> {
                                       ),
                                     ),
                                     kVerticalPaddingSmall,
-                                    Text(
-                                      TaggingHelper.convertRouteToTag(
-                                          replyToConversation!.answer),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: LMTheme.regular,
+                                    SizedBox(
+                                      child: Text(
+                                        TaggingHelper.convertRouteToTag(
+                                                replyToConversation?.answer) ??
+                                            "",
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: LMTheme.regular,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -159,6 +165,7 @@ class _ChatBarState extends State<ChatBar> {
             top: false,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
                   width: 80.w,
@@ -547,6 +554,7 @@ class _ChatBarState extends State<ChatBar> {
                       userTags = [];
                       result = "";
                       replyToConversation = null;
+                      widget.scrollToBottom();
                     }
                   },
                   child: Container(

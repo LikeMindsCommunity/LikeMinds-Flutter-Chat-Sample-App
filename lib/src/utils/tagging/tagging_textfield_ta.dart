@@ -91,6 +91,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           (TagRequestModelBuilder()
                 ..chatroomId(widget.chatroomId)
                 ..page(page)
+                ..searchQuery(tag)
                 ..pageSize(FIXED_SIZE))
               .build(),
         ))
@@ -143,8 +144,9 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           minLines: 1,
           maxLines: 200,
           decoration: widget.decoration ??
-              const InputDecoration(
+              InputDecoration(
                 hintText: 'Write something here...',
+                hintStyle: widget.style,
                 border: InputBorder.none,
               ),
           onChanged: ((value) {
