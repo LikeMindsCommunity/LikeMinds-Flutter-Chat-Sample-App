@@ -1,14 +1,10 @@
 import 'dart:async';
 
-import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/chat_item.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/skeleton_list.dart';
@@ -79,16 +75,12 @@ class _HomePageState extends State<HomePage> {
         Expanded(
           child: BlocConsumer<HomeBloc, HomeState>(
             bloc: homeBloc,
-            listener: (context, state) {
-              if (state is HomeLoaded) {
-                // Fluttertoast.showToast(msg: "Chats loaded");
+            listener: (context, state) {},
+            buildWhen: (previous, current) {
+              if (previous is HomeLoaded && current is HomeLoading) {
+                return false;
               }
-              if (state is RealTimeUpdate) {
-                Fluttertoast.showToast(
-                  msg:
-                      "Realtime update with ${state.chatroomId} and ${state.conversationId}",
-                );
-              }
+              return true;
             },
             builder: (context, state) {
               if (state is HomeLoading) {
@@ -97,22 +89,14 @@ class _HomePageState extends State<HomePage> {
 
               if (state is HomeLoaded) {
                 List<ChatItem> chatItems = getChats(context, state.response);
-                return RefreshIndicator(
-                  onRefresh: () {
-                    homeBloc!.add(
-                      InitHomeEvent(),
-                    );
-                    return Future.value();
-                  },
-                  child: SafeArea(
-                    top: false,
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: chatItems.length,
-                      itemBuilder: (context, index) {
-                        return chatItems[index];
-                      },
-                    ),
+                return SafeArea(
+                  top: false,
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: chatItems.length,
+                    itemBuilder: (context, index) {
+                      return chatItems[index];
+                    },
                   ),
                 );
               }
@@ -133,13 +117,17 @@ List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
   final List<ChatRoom> chatrooms = response.chatroomsData ?? [];
   final Map<String, Conversation> lastConversations =
       response.conversationMeta ?? {};
+  final Map<int, User> userMeta = response.userMeta ?? {};
 
   for (int i = 0; i < chatrooms.length; i++) {
-    chats.add(ChatItem(
-      chatroom: chatrooms[i],
-      conversation:
-          lastConversations[chatrooms[i].lastConversationId.toString()]!,
-    ));
+    chats.add(
+      ChatItem(
+        chatroom: chatrooms[i],
+        conversation:
+            lastConversations[chatrooms[i].lastConversationId.toString()]!,
+        userMeta: userMeta,
+      ),
+    );
   }
 
   return chats;
