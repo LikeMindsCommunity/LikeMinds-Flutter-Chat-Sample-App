@@ -2,12 +2,23 @@ import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class BackButton extends StatelessWidget {
-  const BackButton({super.key});
+  final Function? onTap;
+  const BackButton({
+    super.key,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.pop(),
+      onTap: () {
+        if (onTap == null) {
+          context.pop();
+        } else {
+          onTap!();
+          context.pop();
+        }
+      },
       child: Container(
         height: 24.sp,
         width: 24.sp,

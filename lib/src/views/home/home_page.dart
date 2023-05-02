@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                     alignment: Alignment.center,
                     child: Text(
                       communityName ?? "Chatrooms",
-                      style: LMBranding.instance.fonts.bold
+                      style: LMBranding.instance.fonts.medium
                           .copyWith(fontSize: 16.sp, color: kWhiteColor),
                     ),
                   ),

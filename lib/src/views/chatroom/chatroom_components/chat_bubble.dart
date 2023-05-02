@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
@@ -44,16 +46,15 @@ class ChatBubble extends StatefulWidget {
 }
 
 class _ChatBubbleState extends State<ChatBubble> {
-  bool _replying = false;
   List reactions = [];
   late User user;
-  LMBranding lmBranding = LMBranding.instance;
   late final EmojiParser emojiParser;
   late final CustomPopupMenuController _controller;
   late bool isSent;
   late Conversation conversation;
   late Conversation? replyToConversation;
   bool isSelected = false;
+  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
@@ -78,6 +79,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   void dispose() {
     _controller.dispose();
+    _isSelected.dispose();
     super.dispose();
   }
 
@@ -93,24 +95,32 @@ class _ChatBubbleState extends State<ChatBubble> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () {
+        _isSelected.value = true;
         debugPrint("Long Pressed");
         widget.onLongPress(conversation);
         setState(() {
-          isSelected = true;
+          _controller.showMenu();
           widget.isSelected(isSelected);
         });
       },
       onTap: () {
+        _isSelected.value = false;
         debugPrint("Tapped");
         setState(() {
-          isSelected = false;
+          _controller.hideMenu();
           widget.isSelected(isSelected);
         });
       },
-      child: Container(
-        color: isSelected
-            ? LMTheme.buttonColor.withOpacity(0.2)
-            : Colors.transparent,
+      child: ValueListenableBuilder(
+        valueListenable: _isSelected,
+        builder: (BuildContext context, dynamic value, Widget? child) {
+          return Container(
+            color: value
+                ? LMTheme.buttonColor.withOpacity(0.2)
+                : Colors.transparent,
+            child: child,
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Swipeable(
@@ -140,169 +150,273 @@ class _ChatBubbleState extends State<ChatBubble> {
               ),
             ),
             direction: SwipeDirection.startToEnd,
-            child: Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 4.w,
-                      // vertical: 0.5..h,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: isSent
-                          ? MainAxisAlignment.end
-                          : MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+            child: CustomPopupMenu(
+              controller: _controller,
+              pressType: PressType.longPress,
+              showArrow: false,
+              verticalMargin: 1.h,
+              menuBuilder: () => ClipRRect(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  width: 42.w,
+                  // color: Colors.white,
+                  child: IntrinsicWidth(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        !isSent
-                            ? PictureOrInitial(
-                                fallbackText: widget.sender.name,
-                                imageUrl: widget.sender.imageUrl,
-                                size: 28.sp,
-                                fontSize: 14.sp,
-                              )
-                            : const SizedBox(),
-                        const SizedBox(width: 6),
-                        !isSent
-                            ? Transform(
-                                alignment: Alignment.center,
-                                transform: Matrix4.rotationY(3.14),
-                                child: CustomPaint(
-                                  painter: BubbleTriangle(),
-                                ),
-                              )
-                            : const SizedBox(),
-                        Container(
-                          constraints: BoxConstraints(
-                            minHeight: 42,
-                            maxWidth: 60.w,
+                        ListTile(
+                          onTap: () {
+                            widget.onReply(conversation);
+                            _controller.hideMenu();
+                          },
+                          leading: Icon(
+                            Icons.reply_outlined,
+                            color: LMTheme.buttonColor,
+                            size: 16.sp,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: isSent
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
-                              children: [
-                                Visibility(
-                                  visible: replyToConversation != null,
-                                  maintainState: true,
-                                  maintainSize: false,
-                                  child: Container(
-                                    color: kGreyColor.withOpacity(0.1),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          height: 6.h,
-                                          width: 1.w,
-                                          color: LMTheme.buttonColor,
-                                        ),
-                                        kHorizontalPaddingMedium,
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              replyToConversation
-                                                      ?.member?.name ??
-                                                  "",
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: LMTheme.medium.copyWith(
-                                                color: kPrimaryColor,
-                                                fontSize: 9.sp,
-                                              ),
-                                            ),
-                                            kVerticalPaddingXSmall,
-                                            Text(
-                                              TaggingHelper.convertRouteToTag(
-                                                      replyToConversation
-                                                          ?.answer) ??
-                                                  "",
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: LMTheme.regular.copyWith(
-                                                fontSize: 8.sp,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                replyToConversation != null
-                                    ? const SizedBox(height: 8)
-                                    : const SizedBox(),
-                                isSent
-                                    ? const SizedBox()
-                                    : Text(
-                                        widget.sender.name,
-                                        textAlign: TextAlign.left,
-                                        style: LMFonts.instance.medium.copyWith(
-                                          fontSize: 10.sp,
-                                          color: isSent
-                                              ? Colors.black.withOpacity(0.6)
-                                              : lmBranding.headerColor,
-                                        ),
-                                      ),
-                                isSent
-                                    ? const SizedBox()
-                                    : const SizedBox(height: 6),
-                                getContent(),
-                                const SizedBox(height: 8),
-                                ((widget.conversation.hasFiles == null ||
-                                            !widget.conversation.hasFiles!) ||
-                                        (widget.conversation
-                                                    .attachmentsUploaded !=
-                                                null &&
-                                            widget.conversation
-                                                .attachmentsUploaded!))
-                                    ? Text(
-                                        widget.conversation.createdAt,
-                                        textAlign: TextAlign.right,
-                                        style:
-                                            LMFonts.instance.regular.copyWith(
-                                          fontSize: 8.sp,
-                                          color: kGreyColor,
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.timer_outlined,
-                                        size: 8.sp,
-                                      ),
-                              ],
+                          title: Text(
+                            "Reply",
+                            style: LMTheme.regular.copyWith(
+                              fontSize: 10.sp,
                             ),
                           ),
                         ),
-                        isSent
-                            ? CustomPaint(
-                                painter: BubbleTriangle(),
-                              )
-                            : const SizedBox(),
-                        const SizedBox(width: 6),
-                        isSent
-                            ? PictureOrInitial(
-                                fallbackText: widget.sender.name,
-                                imageUrl: widget.sender.imageUrl,
-                                size: 28.sp,
-                                fontSize: 14.sp,
-                              )
-                            : const SizedBox(),
+                        ListTile(
+                          onTap: () {
+                            _controller.hideMenu();
+                            Clipboard.setData(
+                              ClipboardData(
+                                text: TaggingHelper.convertRouteToTag(
+                                    widget.conversation.answer),
+                              ),
+                            ).then((value) {
+                              Fluttertoast.showToast(
+                                  msg: "Copied to clipboard");
+                            });
+                          },
+                          leading: Icon(
+                            Icons.copy,
+                            color: LMTheme.buttonColor,
+                            size: 16.sp,
+                          ),
+                          title: Text(
+                            "Copy text",
+                            style: LMTheme.regular.copyWith(
+                              fontSize: 10.sp,
+                            ),
+                          ),
+                        ),
+                        kVerticalPaddingMedium
+                        // ListTile(
+                        //   onTap: () {
+                        //     _controller.hideMenu();
+                        //     Fluttertoast.showToast(
+                        //         msg: "Add report screen");
+                        //   },
+                        //   leading: const Icon(
+                        //     Icons.report_outlined,
+                        //     size: 18,
+                        //     color: Colors.red,
+                        //   ),
+                        //   title: Text(
+                        //     "Report",
+                        //     style: GoogleFonts.roboto(
+                        //       fontSize: 16,
+                        //       color: Colors.red,
+                        //     ),
+                        //   ),
+                        // ),
+                        // ListTile(
+                        //   onTap: () {
+                        //     _controller.hideMenu();
+                        //     Fluttertoast.showToast(
+                        //         msg: "Add select all functionality");
+                        //   },
+                        //   leading: const Icon(
+                        //     Icons.select_all,
+                        //     size: 18,
+                        //   ),
+                        //   title: Text(
+                        //     "Select",
+                        //     style: GoogleFonts.roboto(
+                        //       fontSize: 16,
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
-                ],
+                ),
+              ),
+              child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        // vertical: 0.5..h,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: isSent
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          !isSent
+                              ? PictureOrInitial(
+                                  fallbackText: widget.sender.name,
+                                  imageUrl: widget.sender.imageUrl,
+                                  size: 28.sp,
+                                  fontSize: 14.sp,
+                                )
+                              : const SizedBox(),
+                          const SizedBox(width: 6),
+                          !isSent
+                              ? Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.rotationY(3.14),
+                                  child: CustomPaint(
+                                    painter: BubbleTriangle(),
+                                  ),
+                                )
+                              : const SizedBox(),
+                          Container(
+                            constraints: BoxConstraints(
+                              minHeight: 4.h,
+                              minWidth: 10.w,
+                              maxWidth: 60.w,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: isSent
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
+                                children: [
+                                  Visibility(
+                                    visible: replyToConversation != null,
+                                    maintainState: true,
+                                    maintainSize: false,
+                                    child: Container(
+                                      color: kGreyColor.withOpacity(0.1),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            height: 6.h,
+                                            width: 1.w,
+                                            color: LMTheme.buttonColor,
+                                          ),
+                                          kHorizontalPaddingMedium,
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                replyToConversation
+                                                        ?.member?.name ??
+                                                    "",
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: LMTheme.medium.copyWith(
+                                                  color: kPrimaryColor,
+                                                  fontSize: 9.sp,
+                                                ),
+                                              ),
+                                              kVerticalPaddingXSmall,
+                                              Text(
+                                                TaggingHelper.convertRouteToTag(
+                                                        replyToConversation
+                                                            ?.answer) ??
+                                                    "",
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: LMTheme.regular.copyWith(
+                                                  fontSize: 8.sp,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 6),
+                                            ],
+                                          ),
+                                          kHorizontalPaddingMedium,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  replyToConversation != null
+                                      ? const SizedBox(height: 8)
+                                      : const SizedBox(),
+                                  isSent
+                                      ? const SizedBox()
+                                      : Text(
+                                          widget.sender.name,
+                                          style:
+                                              LMFonts.instance.medium.copyWith(
+                                            fontSize: 10.sp,
+                                            color: isSent
+                                                ? Colors.black.withOpacity(0.6)
+                                                : LMTheme.headerColor,
+                                          ),
+                                        ),
+                                  isSent
+                                      ? const SizedBox()
+                                      : const SizedBox(height: 6),
+                                  getContent(),
+                                  const SizedBox(height: 8),
+                                  ((widget.conversation.hasFiles == null ||
+                                              !widget.conversation.hasFiles!) ||
+                                          (widget.conversation
+                                                      .attachmentsUploaded !=
+                                                  null &&
+                                              widget.conversation
+                                                  .attachmentsUploaded!))
+                                      ? Text(
+                                          widget.conversation.createdAt,
+                                          style:
+                                              LMFonts.instance.regular.copyWith(
+                                            fontSize: 8.sp,
+                                            color: kGreyColor,
+                                          ),
+                                        )
+                                      : Icon(
+                                          Icons.timer_outlined,
+                                          size: 8.sp,
+                                        ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          isSent
+                              ? CustomPaint(
+                                  painter: BubbleTriangle(),
+                                )
+                              : const SizedBox(),
+                          const SizedBox(width: 6),
+                          isSent
+                              ? PictureOrInitial(
+                                  fallbackText: widget.sender.name,
+                                  imageUrl: widget.sender.imageUrl,
+                                  size: 28.sp,
+                                  fontSize: 14.sp,
+                                )
+                              : const SizedBox(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -321,11 +435,10 @@ class _ChatBubbleState extends State<ChatBubble> {
     Widget expandableText = ExpandableText(
       widget.conversation.answer,
       expandText: "",
-      linkStyle:
-          lmBranding.fonts.regular.copyWith(color: lmBranding.textLinkColor),
+      linkStyle: LMTheme.regular.copyWith(color: LMTheme.textLinkColor),
       textAlign: TextAlign.left,
       style: LMFonts.instance.regular.copyWith(
-        fontSize: 10.sp,
+        fontSize: 9.sp,
       ),
     );
     if (widget.conversation.hasFiles == null ||
@@ -417,96 +530,3 @@ class _ChatBubbleState extends State<ChatBubble> {
 
 
 /// Code or conversation actions
-// CustomPopupMenu(
-//                     controller: _controller,
-//                     pressType: PressType.longPress,
-//                     showArrow: false,
-//                     verticalMargin: 12,
-//                     menuBuilder: () => ClipRRect(
-//                       child: Container(
-//                         width: getWidth(context) * 0.4,
-//                         color: Colors.white,
-//                         child: IntrinsicWidth(
-//                           child: Column(
-//                             crossAxisAlignment: CrossAxisAlignment.stretch,
-//                             children: [
-//                               ListTile(
-//                                 onTap: () {
-//                                   Fluttertoast.showToast(msg: "Reply to message");
-//                                   _controller.hideMenu();
-//                                 },
-//                                 leading: const Icon(
-//                                   Icons.reply_outlined,
-//                                   size: 18,
-//                                 ),
-//                                 title: Text(
-//                                   "Reply",
-//                                   style: GoogleFonts.roboto(
-//                                     fontSize: 16,
-//                                   ),
-//                                 ),
-//                               ),
-//                               ListTile(
-//                                 onTap: () {
-//                                   _controller.hideMenu();
-//                                   Clipboard.setData(
-//                                     ClipboardData(
-//                                       text: widget.conversation.answer,
-//                                     ),
-//                                   ).then((value) {
-//                                     Fluttertoast.showToast(
-//                                         msg: "Copied to clipboard");
-//                                   });
-//                                 },
-//                                 leading: const Icon(
-//                                   Icons.copy,
-//                                   size: 18,
-//                                 ),
-//                                 title: Text(
-//                                   "Copy text",
-//                                   style: GoogleFonts.roboto(
-//                                     fontSize: 16,
-//                                   ),
-//                                 ),
-//                               ),
-//                               ListTile(
-//                                 onTap: () {
-//                                   _controller.hideMenu();
-//                                   Fluttertoast.showToast(
-//                                       msg: "Add report screen");
-//                                 },
-//                                 leading: const Icon(
-//                                   Icons.report_outlined,
-//                                   size: 18,
-//                                   color: Colors.red,
-//                                 ),
-//                                 title: Text(
-//                                   "Report",
-//                                   style: GoogleFonts.roboto(
-//                                     fontSize: 16,
-//                                     color: Colors.red,
-//                                   ),
-//                                 ),
-//                               ),
-//                               ListTile(
-//                                 onTap: () {
-//                                   _controller.hideMenu();
-//                                   Fluttertoast.showToast(
-//                                       msg: "Add select all functionality");
-//                                 },
-//                                 leading: const Icon(
-//                                   Icons.select_all,
-//                                   size: 18,
-//                                 ),
-//                                 title: Text(
-//                                   "Select",
-//                                   style: GoogleFonts.roboto(
-//                                     fontSize: 16,
-//                                   ),
-//                                 ),
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                       ),
-//                     ),

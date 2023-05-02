@@ -80,7 +80,7 @@ class ChatroomMenu extends StatelessWidget {
   void performAction(ChatroomAction action) {
     switch (action.id) {
       case 2:
-        _controller.hideMenu();
+        // _controller.hideMenu();
         router.push("/participants", extra: chatroom);
         break;
       case 6:
@@ -131,6 +131,8 @@ class ChatroomMenu extends StatelessWidget {
       value: !chatroom.muteStatus!,
     ));
     if (response.success) {
+      // _controller.hideMenu();
+      // rebuildChatroomMenu.value = !rebuildChatroomMenu.value;
       Fluttertoast.showToast(msg: "Chatroom ${id == 6 ? "muted" : "unmuted"}");
       homeBloc!.add(UpdateHomeEvent());
     } else {
@@ -146,7 +148,7 @@ class ChatroomMenu extends StatelessWidget {
         value: false,
       ));
       if (response.success) {
-        _controller.hideMenu();
+        // _controller.hideMenu();
         Fluttertoast.showToast(msg: "Chatroom left");
         router.pop();
       } else {
@@ -159,7 +161,7 @@ class ChatroomMenu extends StatelessWidget {
                 ..isSecret(true))
               .build());
       if (response.success) {
-        _controller.hideMenu();
+        // _controller.hideMenu();
         Fluttertoast.showToast(msg: "Chatroom left");
         router.pop();
       } else {

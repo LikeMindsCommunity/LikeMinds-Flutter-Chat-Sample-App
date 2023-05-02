@@ -3,12 +3,10 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
 
 import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
@@ -111,6 +109,7 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const BB.BackButton(),
                           kHorizontalPaddingXLarge,
@@ -119,11 +118,11 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                             children: [
                               Text(
                                 "Participants",
-                                style: LMFonts.instance.medium.copyWith(
-                                  fontSize: 14.sp,
+                                style: LMFonts.instance.bold.copyWith(
+                                  fontSize: 12.sp,
                                 ),
                               ),
-                              kVerticalPaddingXSmall,
+                              kVerticalPaddingSmall,
                               Text(
                                 "${widget.chatroom.participantCount ?? '--'} participants",
                                 style: LMFonts.instance.regular,
@@ -176,9 +175,10 @@ class ParticipantItem extends StatelessWidget {
       onTap: () {},
       child: Container(
         width: getWidth(context),
-        height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        height: 8.h,
+        padding: EdgeInsets.symmetric(horizontal: 6.w),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             PictureOrInitial(
               fallbackText: participant.name,
@@ -191,21 +191,11 @@ class ParticipantItem extends StatelessWidget {
                 participant.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.montserrat(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                style: LMTheme.medium.copyWith(
+                  fontSize: 12.sp,
                 ),
               ),
             ),
-
-            // Text(
-            //   participant.customTitle ?? "",
-            //   style: GoogleFonts.montserrat(
-            //     fontSize: 16,
-            //     fontWeight: FontWeight.w600,
-            //   ),
-            // ),
-            // const SizedBox(width: 16),
           ],
         ),
       ),

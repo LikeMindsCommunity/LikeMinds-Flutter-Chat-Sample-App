@@ -18,6 +18,7 @@ import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
+import 'package:sizer/sizer.dart';
 
 const startRoute = '/';
 const homeRoute = '/home';
@@ -102,8 +103,11 @@ final router = GoRouter(
     backgroundColor: LMTheme.headerColor,
     body: Center(
       child: Text(
-        state.error.toString(),
-        style: LMTheme.bold,
+        "An error occurred\nTry again later",
+        style: LMTheme.medium.copyWith(
+          color: Colors.white,
+          fontSize: 24.sp,
+        ),
       ),
     ),
   ),

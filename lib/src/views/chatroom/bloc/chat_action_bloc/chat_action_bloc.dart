@@ -193,6 +193,23 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       if (response.success) {
         if (response.data!.success) {
           lastConversationId = response.data!.conversation!.id;
+          Conversation conversation = response.data!.conversation!;
+          if (conversation.replyId != null ||
+              conversation.replyConversation != null) {
+            final int? replyId =
+                conversation.replyId ?? conversation.replyConversation;
+            if (replyId != null) {
+              final replyResponse = await locator<LikeMindsService>()
+                  .getSingleConversation((GetSingleConversationRequestBuilder()
+                        ..chatroomId(postConversationRequest.chatroomId)
+                        ..conversationId(replyId))
+                      .build());
+              if (replyResponse.success) {
+                conversation.replyConversationObject =
+                    replyResponse.data!.conversation;
+              }
+            }
+          }
           emit(ConversationPosted(response.data!));
         } else {
           emit(
