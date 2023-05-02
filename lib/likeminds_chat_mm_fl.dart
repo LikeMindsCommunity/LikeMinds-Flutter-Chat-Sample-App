@@ -3,7 +3,6 @@ library likeminds_chat_mm_fl;
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -15,8 +14,6 @@ import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:sizer/sizer.dart';

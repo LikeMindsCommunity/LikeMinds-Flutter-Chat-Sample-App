@@ -34,10 +34,6 @@ final router = GoRouter(
     GoRoute(
         path: startRoute,
         builder: (context, state) {
-          HomeBloc homeBloc = BlocProvider.of<HomeBloc>(context);
-          // ..add(
-          //   InitHomeEvent(page: 1),
-          // );
           return const HomePage();
         }),
     GoRoute(

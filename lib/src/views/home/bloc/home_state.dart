@@ -20,6 +20,8 @@ class UpdateHomeFeed extends HomeState {
   UpdateHomeFeed({required this.response});
 }
 
+class UpdatedHomeFeed extends HomeState {}
+
 class RealTimeUpdate extends HomeState {
   final int chatroomId;
   final int conversationId;
