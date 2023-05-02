@@ -23,6 +23,8 @@ class ChatBubble extends StatefulWidget {
   final Map<String, List<Media>> mediaFiles;
   final List<dynamic>? conversationAttachments;
   final Function(Conversation replyingTo) onReply;
+  final Function(Conversation conversation) onLongPress;
+  final ValueChanged<bool> isSelected;
 
   const ChatBubble({
     super.key,
@@ -33,6 +35,8 @@ class ChatBubble extends StatefulWidget {
     required this.mediaFiles,
     this.conversationAttachments,
     required this.onReply,
+    required this.onLongPress,
+    required this.isSelected,
   });
 
   @override
@@ -49,6 +53,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   late bool isSent;
   late Conversation conversation;
   late Conversation? replyToConversation;
+  bool isSelected = false;
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
@@ -85,202 +90,222 @@ class _ChatBubbleState extends State<ChatBubble> {
         !widget.conversation.attachmentsUploaded!) {
       return const SizedBox.shrink();
     }
-    return Swipeable(
-      key: ValueKey(conversation.id),
-      onSwipe: (direction) {
-        widget.onReply(conversation);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () {
+        debugPrint("Long Pressed");
+        widget.onLongPress(conversation);
+        setState(() {
+          isSelected = true;
+          widget.isSelected(isSelected);
+        });
       },
-      background: Container(
-        child: Padding(
-          padding: EdgeInsets.only(left: 2.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment:
-                isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.reply_outlined,
-                color: LMTheme.buttonColor,
-                size: 18.sp,
-              ),
-              // kVerticalPaddingSmall,
-              // Text(
-              //   "Reply",
-              //   style: LMFonts.instance.regular.copyWith(
-              //     fontSize: 10.sp,
-              //   ),
-              // ),
-            ],
-          ),
-        ),
-      ),
-      direction: isSent ? SwipeDirection.endToStart : SwipeDirection.startToEnd,
+      onTap: () {
+        debugPrint("Tapped");
+        setState(() {
+          isSelected = false;
+          widget.isSelected(isSelected);
+        });
+      },
       child: Container(
-        child: Column(
-          crossAxisAlignment:
-              isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 4.w,
-                vertical: 1.h,
+        color: isSelected
+            ? LMTheme.buttonColor.withOpacity(0.2)
+            : Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Swipeable(
+            key: ValueKey(conversation.id),
+            onSwipe: (direction) {
+              widget.onReply(conversation);
+            },
+            background: Container(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 2.w,
+                  right: 2.w,
+                  top: 0.2.h,
+                  bottom: 0.2.h,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.reply_outlined,
+                      color: LMTheme.buttonColor,
+                      size: 18.sp,
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                mainAxisAlignment:
-                    isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
+            ),
+            direction: SwipeDirection.startToEnd,
+            child: Container(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  !isSent
-                      ? PictureOrInitial(
-                          fallbackText: widget.sender.name,
-                          imageUrl: widget.sender.imageUrl,
-                          size: 28.sp,
-                          fontSize: 14.sp,
-                        )
-                      : const SizedBox(),
-                  const SizedBox(width: 6),
-                  !isSent
-                      ? Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.rotationY(3.14),
-                          child: CustomPaint(
-                            painter: BubbleTriangle(),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 4.w,
+                      // vertical: 0.5..h,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: isSent
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        !isSent
+                            ? PictureOrInitial(
+                                fallbackText: widget.sender.name,
+                                imageUrl: widget.sender.imageUrl,
+                                size: 28.sp,
+                                fontSize: 14.sp,
+                              )
+                            : const SizedBox(),
+                        const SizedBox(width: 6),
+                        !isSent
+                            ? Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.rotationY(3.14),
+                                child: CustomPaint(
+                                  painter: BubbleTriangle(),
+                                ),
+                              )
+                            : const SizedBox(),
+                        Container(
+                          constraints: BoxConstraints(
+                            minHeight: 42,
+                            maxWidth: 60.w,
                           ),
-                        )
-                      : const SizedBox(),
-                  GestureDetector(
-                    onLongPress: () {
-                      // _controller.showMenu();
-                    },
-                    onTap: () {},
-                    child: Container(
-                      constraints: BoxConstraints(
-                        minHeight: 42,
-                        maxWidth: 60.w,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: isSent
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            Visibility(
-                              visible: replyToConversation != null,
-                              maintainState: true,
-                              maintainSize: false,
-                              child: Container(
-                                color: kGreyColor.withOpacity(0.1),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      height: 6.h,
-                                      width: 1.w,
-                                      color: LMTheme.buttonColor,
-                                    ),
-                                    kHorizontalPaddingMedium,
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: isSent
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
+                              children: [
+                                Visibility(
+                                  visible: replyToConversation != null,
+                                  maintainState: true,
+                                  maintainSize: false,
+                                  child: Container(
+                                    color: kGreyColor.withOpacity(0.1),
+                                    child: Row(
                                       children: [
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          replyToConversation?.member?.name ??
-                                              "",
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                          style: LMTheme.medium.copyWith(
-                                            color: kPrimaryColor,
-                                            fontSize: 9.sp,
-                                          ),
+                                        Container(
+                                          height: 6.h,
+                                          width: 1.w,
+                                          color: LMTheme.buttonColor,
                                         ),
-                                        kVerticalPaddingXSmall,
-                                        Text(
-                                          TaggingHelper.convertRouteToTag(
-                                                  replyToConversation
-                                                      ?.answer) ??
-                                              "",
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                          style: LMTheme.regular.copyWith(
-                                            fontSize: 8.sp,
-                                          ),
+                                        kHorizontalPaddingMedium,
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              replyToConversation
+                                                      ?.member?.name ??
+                                                  "",
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: LMTheme.medium.copyWith(
+                                                color: kPrimaryColor,
+                                                fontSize: 9.sp,
+                                              ),
+                                            ),
+                                            kVerticalPaddingXSmall,
+                                            Text(
+                                              TaggingHelper.convertRouteToTag(
+                                                      replyToConversation
+                                                          ?.answer) ??
+                                                  "",
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: LMTheme.regular.copyWith(
+                                                fontSize: 8.sp,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                          ],
                                         ),
-                                        const SizedBox(height: 6),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
+                                replyToConversation != null
+                                    ? const SizedBox(height: 8)
+                                    : const SizedBox(),
+                                isSent
+                                    ? const SizedBox()
+                                    : Text(
+                                        widget.sender.name,
+                                        textAlign: TextAlign.left,
+                                        style: LMFonts.instance.medium.copyWith(
+                                          fontSize: 10.sp,
+                                          color: isSent
+                                              ? Colors.black.withOpacity(0.6)
+                                              : lmBranding.headerColor,
+                                        ),
+                                      ),
+                                isSent
+                                    ? const SizedBox()
+                                    : const SizedBox(height: 6),
+                                getContent(),
+                                const SizedBox(height: 8),
+                                ((widget.conversation.hasFiles == null ||
+                                            !widget.conversation.hasFiles!) ||
+                                        (widget.conversation
+                                                    .attachmentsUploaded !=
+                                                null &&
+                                            widget.conversation
+                                                .attachmentsUploaded!))
+                                    ? Text(
+                                        widget.conversation.createdAt,
+                                        textAlign: TextAlign.right,
+                                        style:
+                                            LMFonts.instance.regular.copyWith(
+                                          fontSize: 8.sp,
+                                          color: kGreyColor,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.timer_outlined,
+                                        size: 8.sp,
+                                      ),
+                              ],
                             ),
-                            replyToConversation != null
-                                ? const SizedBox(height: 8)
-                                : const SizedBox(),
-                            isSent
-                                ? const SizedBox()
-                                : Text(
-                                    widget.sender.name,
-                                    textAlign: TextAlign.left,
-                                    style: LMFonts.instance.medium.copyWith(
-                                      fontSize: 10.sp,
-                                      color: isSent
-                                          ? Colors.black.withOpacity(0.6)
-                                          : lmBranding.headerColor,
-                                    ),
-                                  ),
-                            isSent
-                                ? const SizedBox()
-                                : const SizedBox(height: 6),
-                            getContent(),
-                            const SizedBox(height: 8),
-                            ((widget.conversation.hasFiles == null ||
-                                        !widget.conversation.hasFiles!) ||
-                                    (widget.conversation.attachmentsUploaded !=
-                                            null &&
-                                        widget
-                                            .conversation.attachmentsUploaded!))
-                                ? Text(
-                                    widget.conversation.createdAt,
-                                    textAlign: TextAlign.right,
-                                    style: LMFonts.instance.regular.copyWith(
-                                      fontSize: 8.sp,
-                                      color: kGreyColor,
-                                    ),
-                                  )
-                                : Icon(
-                                    Icons.timer_outlined,
-                                    size: 8.sp,
-                                  ),
-                          ],
+                          ),
                         ),
-                      ),
+                        isSent
+                            ? CustomPaint(
+                                painter: BubbleTriangle(),
+                              )
+                            : const SizedBox(),
+                        const SizedBox(width: 6),
+                        isSent
+                            ? PictureOrInitial(
+                                fallbackText: widget.sender.name,
+                                imageUrl: widget.sender.imageUrl,
+                                size: 28.sp,
+                                fontSize: 14.sp,
+                              )
+                            : const SizedBox(),
+                      ],
                     ),
                   ),
-                  isSent
-                      ? CustomPaint(
-                          painter: BubbleTriangle(),
-                        )
-                      : const SizedBox(),
-                  const SizedBox(width: 6),
-                  isSent
-                      ? PictureOrInitial(
-                          fallbackText: widget.sender.name,
-                          imageUrl: widget.sender.imageUrl,
-                          size: 28.sp,
-                          fontSize: 14.sp,
-                        )
-                      : const SizedBox(),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

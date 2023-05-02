@@ -18,6 +18,7 @@ import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bl
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chatroom_skeleton.dart';
 
 import 'bloc/chatroom_bloc.dart';
 import 'chatroom_components/chat_bubble.dart';
@@ -41,9 +42,11 @@ class _ChatroomPageState extends State<ChatroomPage> {
   Map<int, User?> userMeta = <int, User?>{};
   ChatRoom? chatroom;
   ValueNotifier rebuildChatBar = ValueNotifier(false);
+  ValueNotifier showConversationActions = ValueNotifier(false);
   User currentUser = UserLocalPreference.instance.fetchUserData();
   bool showScrollButton = false;
   int lastConversationId = 0;
+  List<Conversation> selectedConversations = <Conversation>[];
 
   ScrollController scrollController = ScrollController();
   PagingController<int, Conversation> pagedListController =
@@ -59,7 +62,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
             getConversationRequest: (GetConversationRequestBuilder()
                   ..chatroomId(widget.chatroomId)
                   ..page(pageKey)
-                  ..pageSize(500)
+                  ..pageSize(10)
                   ..minTimestamp(0)
                   ..maxTimestamp(currentTime))
                 .build(),
@@ -224,7 +227,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
           conversationData, chatroom!.communityId!);
       if (state.getConversationResponse.conversationData == null ||
           state.getConversationResponse.conversationData!.isEmpty ||
-          state.getConversationResponse.conversationData!.length < 500) {
+          state.getConversationResponse.conversationData!.length < 10) {
         pagedListController.appendLastPage(conversationData ?? []);
       } else {
         pagedListController.appendPage(conversationData!, _page);
@@ -280,8 +283,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
             }
           },
           builder: (context, state) {
+            // return const SkeletonChatList();
             if (state is ChatroomLoading) {
-              return const Spinner();
+              return const SkeletonChatPage();
             }
 
             if (state is ChatroomLoaded) {
@@ -313,9 +317,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               height: 10,
                             ),
                             firstPageProgressIndicatorBuilder: (context) =>
-                                const Spinner(),
+                                SkeletonChatList(),
                             newPageProgressIndicatorBuilder: (context) =>
-                                const Spinner(),
+                                Padding(
+                              padding: EdgeInsets.symmetric(vertical: 1.h),
+                              child: Column(
+                                children: const [
+                                  SkeletonChatBubble(isSent: true),
+                                  SkeletonChatBubble(isSent: false),
+                                  SkeletonChatBubble(isSent: true),
+                                ],
+                              ),
+                            ),
                             animateTransitions: true,
                             transitionDuration:
                                 const Duration(milliseconds: 500),
@@ -374,6 +387,16 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                         ? conversationAttachmentsMeta[
                                             '${item.id}']
                                         : null,
+                                isSelected: (isSelected) {
+                                  if (isSelected) {
+                                    selectedConversations.add(item);
+                                  } else {
+                                    selectedConversations.remove(item);
+                                  }
+                                },
+                                onLongPress: (conversation) {
+                                  _startSelection(conversation);
+                                },
                               );
                             },
                           ),
@@ -391,24 +414,36 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         const BB.BackButton(),
-                        const SizedBox(width: 18),
+                        SizedBox(width: 4.w),
                         PictureOrInitial(
                           fallbackText: chatroom!.header,
                           imageUrl: chatroom?.chatroomImageUrl,
-                          size: 28.sp,
+                          size: 30.sp,
                           fontSize: 14.sp,
                         ),
-                        const SizedBox(
-                          width: 12,
-                        ),
+                        SizedBox(width: 4.w),
                         Expanded(
-                          child: Text(
-                            chatroom!.header,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: LMTheme.medium.copyWith(
-                              fontSize: 14.sp,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                chatroom!.header,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: LMTheme.medium.copyWith(
+                                  fontSize: 11.sp,
+                                ),
+                              ),
+                              kVerticalPaddingSmall,
+                              Text(
+                                '${chatroom!.participantCount} participants',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: LMTheme.regular.copyWith(
+                                  fontSize: 9.sp,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         kHorizontalPaddingMedium,
@@ -492,4 +527,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
       ),
     );
   }
+
+  void _startSelection(Conversation conversation) {}
 }

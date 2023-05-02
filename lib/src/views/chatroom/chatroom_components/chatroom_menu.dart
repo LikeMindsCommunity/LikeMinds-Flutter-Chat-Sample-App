@@ -1,17 +1,12 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_participants_page.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_report_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:overlay_support/overlay_support.dart';
 
@@ -57,7 +52,7 @@ class ChatroomMenu extends StatelessWidget {
           ),
         ),
         child: Icon(
-          Icons.menu,
+          Icons.more_vert_rounded,
           size: 18.sp,
           color: LMTheme.buttonColor,
         ),

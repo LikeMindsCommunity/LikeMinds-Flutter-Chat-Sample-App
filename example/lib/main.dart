@@ -22,7 +22,7 @@ Future<void> _handleNotification(RemoteMessage message) async {
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   LMChat.setupLMChat(
-    apiKey: "01c77c08-f703-483c-9b5c-fa823be2032f",
+    apiKey: "fa66d879-dd67-4d49-be44-cf008d339558",
     lmCallBack: ExampleCallback(),
   );
   setupNotifications();

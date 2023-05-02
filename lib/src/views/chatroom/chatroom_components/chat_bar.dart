@@ -156,7 +156,7 @@ class _ChatBarState extends State<ChatBar> {
             : const SizedBox(),
         Container(
           width: 100.w,
-          color: kGreyColor.withOpacity(0.3),
+          color: LMTheme.headerColor.withOpacity(0.2),
           padding: EdgeInsets.symmetric(
             horizontal: 3.w,
             vertical: 12,
