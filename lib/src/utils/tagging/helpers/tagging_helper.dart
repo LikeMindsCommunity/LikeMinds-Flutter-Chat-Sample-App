@@ -91,6 +91,36 @@ class TaggingHelper {
     }
     return userTags;
   }
+
+  static String extractHeaderText(String input) {
+    final RegExp headerRegex =
+        RegExp(r'<<([\w\s#]+)\|.*>>\s*([\w\s]+)\s*<<([\w\s#]+)\|.*>>');
+    final RegExpMatch? match = headerRegex.firstMatch(input);
+
+    final String? userName = match?.group(1);
+    final String? actionText = match?.group(2);
+    final String? communityName = match?.group(3);
+    return '$userName $actionText $communityName';
+  }
+
+  static String extractLeftChatroom(String input) {
+    final RegExp leftChatroom =
+        RegExp(r"<<([\w\s]+)\supdated\|.*>>\s*([\w\s]+)");
+    final RegExpMatch? match = leftChatroom.firstMatch(input);
+
+    final String? userName = match?.group(1);
+    final String? actionText = match?.group(2);
+    return '$userName $actionText';
+  }
+
+  static String extractTopicChat(String input) {
+    final RegExp leftChatroom = RegExp(r"<<([\w\s]+)\|.*>>\s*(.+)");
+    final RegExpMatch? match = leftChatroom.firstMatch(input);
+
+    final String? userName = match?.group(1);
+    final String? actionText = match?.group(2);
+    return '$userName $actionText';
+  }
 }
 
 List<String> extractLinkFromString(String text) {

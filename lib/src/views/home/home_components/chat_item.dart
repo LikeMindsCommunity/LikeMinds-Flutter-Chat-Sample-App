@@ -152,7 +152,10 @@ class _ChatItemState extends State<ChatItem> {
                                   ),
                                 ])
                               : Text(
-                                  _message,
+                                  conversation.state == 1
+                                      ? TaggingHelper.extractHeaderText(
+                                          _message)
+                                      : _message,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: LMBranding.instance.fonts.regular

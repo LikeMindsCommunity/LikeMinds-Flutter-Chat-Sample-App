@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
@@ -12,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
@@ -333,25 +335,47 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             transitionDuration:
                                 const Duration(milliseconds: 500),
                             itemBuilder: (context, item, index) {
-                              if (item.isTimeStamp != null &&
-                                  item.isTimeStamp!) {
+                              if ((item.isTimeStamp != null &&
+                                      item.isTimeStamp!) ||
+                                  item.state == 1 ||
+                                  item.state == 3 ||
+                                  item.state == 2 ||
+                                  item.state == 12) {
                                 return Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
+                                      width: item.state == 1 ||
+                                              item.state == 3 ||
+                                              item.state == 2 ||
+                                              item.state == 12
+                                          ? 80.w
+                                          : 35.w,
                                       margin: const EdgeInsets.symmetric(
-                                          vertical: 5),
+                                          vertical: 5, horizontal: 10),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 10,
-                                        vertical: 5,
+                                        vertical: 10,
                                       ),
                                       decoration: BoxDecoration(
                                         color: kWhiteColor,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       alignment: Alignment.center,
-                                      child: Text(
-                                        item.answer,
+                                      child: ExpandableText(
+                                        item.state == 1
+                                            ? TaggingHelper.extractHeaderText(
+                                                item.answer)
+                                            : item.state == 3
+                                                ? TaggingHelper
+                                                    .extractLeftChatroom(
+                                                        item.answer)
+                                                : item.state == 12
+                                                    ? TaggingHelper
+                                                        .extractTopicChat(
+                                                            item.answer)
+                                                    : item.answer,
+                                        expandText: "show more",
                                         textAlign: TextAlign.center,
                                       ),
                                     )
