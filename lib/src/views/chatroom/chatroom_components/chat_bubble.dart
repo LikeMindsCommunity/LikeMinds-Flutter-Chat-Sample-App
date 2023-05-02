@@ -55,13 +55,19 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   @override
   void initState() {
+    super.initState();
     emojiParser = EmojiParser();
     user = UserLocalPreference.instance.fetchUserData();
     isSent = widget.sender.id == user.id;
     _controller = CustomPopupMenuController();
     conversation = widget.conversation;
     replyToConversation = widget.replyToConversation;
-    super.initState();
+    LMAnalytics.get().track(AnalyticsKeys.imageViewed, {
+      'chatroom_id': widget.chatroom.id,
+      'community_id': widget.chatroom.communityId,
+      'chatroom_type': widget.chatroom.type,
+      'message_id': widget.conversation.id,
+    });
   }
 
   @override
@@ -334,12 +340,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       if (widget.conversationAttachments == null) {
         return expandableText;
       }
-      LMAnalytics.get().logEvent(AnalyticsKeys.imageViewed, {
-        'chatroom_id': widget.chatroom.id,
-        'community_id': widget.chatroom.communityId,
-        'chatroom_type': widget.chatroom.type,
-        'message_id': widget.conversation.id,
-      });
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

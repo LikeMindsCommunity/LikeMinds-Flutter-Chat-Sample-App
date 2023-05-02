@@ -39,14 +39,14 @@ class _ChatItemState extends State<ChatItem> {
   @override
   void initState() {
     super.initState();
-    chatroom = widget.chatroom;
-    _unreadCount = chatroom.unseenCount;
-    _muteStatus = chatroom.muteStatus ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
+    chatroom = widget.chatroom;
     Conversation conversation = widget.conversation;
+    _unreadCount = chatroom.unseenCount;
+    _muteStatus = chatroom.muteStatus ?? false;
     String _name = chatroom.header;
     String _message =
         '${widget.user?.name}: ${TaggingHelper.convertRouteToTag(conversation.answer)}';
@@ -190,18 +190,18 @@ class _ChatItemState extends State<ChatItem> {
                   Visibility(
                     visible: _unreadCount != 0,
                     child: Container(
-                      width: 24,
-                      height: 24,
+                      width: 20.sp,
+                      height: 20.sp,
                       decoration: BoxDecoration(
                         color: LMTheme.buttonColor,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20.sp),
                       ),
                       child: Center(
                         child: Text(
                           _unreadCount! > 99 ? '99+' : _unreadCount.toString(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                          style: LMTheme.regular.copyWith(
+                            color: kWhiteColor,
+                            fontSize: _unreadCount! > 99 ? 7.5.sp : 10.sp,
                           ),
                         ),
                       ),

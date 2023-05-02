@@ -12,12 +12,15 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_participants_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_report_page.dart';
+import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 class ChatroomMenu extends StatelessWidget {
   final ChatRoom chatroom;
-  final List<ChatroomAction> chatroomActions;
+  List<ChatroomAction> chatroomActions;
   final CustomPopupMenuController _controller = CustomPopupMenuController();
+  ValueNotifier<bool> rebuildChatroomMenu = ValueNotifier(false);
+  HomeBloc? homeBloc;
 
   ChatroomMenu({
     Key? key,
@@ -27,33 +30,37 @@ class ChatroomMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPopupMenu(
-      pressType: PressType.singleClick,
-      showArrow: false,
-      controller: _controller,
-      enablePassEvent: false,
-      menuBuilder: () => ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          constraints: BoxConstraints(
-            minWidth: 42.w,
-            maxWidth: 52.w,
-          ),
-          color: Colors.white,
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            itemCount: chatroomActions.length,
-            itemBuilder: (BuildContext context, int index) {
-              return getListTile(chatroomActions[index]);
-            },
+    homeBloc = BlocProvider.of<HomeBloc>(context);
+    return ValueListenableBuilder(
+      valueListenable: rebuildChatroomMenu,
+      builder: (context, _, __) => CustomPopupMenu(
+        pressType: PressType.singleClick,
+        showArrow: false,
+        controller: _controller,
+        enablePassEvent: false,
+        menuBuilder: () => ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            constraints: BoxConstraints(
+              minWidth: 42.w,
+              maxWidth: 52.w,
+            ),
+            color: Colors.white,
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemCount: chatroomActions.length,
+              itemBuilder: (BuildContext context, int index) {
+                return getListTile(chatroomActions[index]);
+              },
+            ),
           ),
         ),
-      ),
-      child: Icon(
-        Icons.menu,
-        size: 18.sp,
-        color: LMTheme.buttonColor,
+        child: Icon(
+          Icons.menu,
+          size: 18.sp,
+          color: LMTheme.buttonColor,
+        ),
       ),
     );
   }
@@ -83,9 +90,29 @@ class ChatroomMenu extends StatelessWidget {
         break;
       case 6:
         muteChatroom(action.id);
+        chatroomActions = chatroomActions.map((element) {
+          if (element.id == 6) {
+            if (element.title.toLowerCase() == "mute notifications") {
+              element.title = "Unmute notifications";
+            } else {
+              element.title = "Mute notifications";
+            }
+          }
+          return element;
+        }).toList();
         break;
       case 8:
         muteChatroom(action.id);
+        chatroomActions = chatroomActions.map((element) {
+          if (element.id == 8) {
+            if (element.title.toLowerCase() == "mute notifications") {
+              element.title = "Unmute notifications";
+            } else {
+              element.title = "Mute notifications";
+            }
+          }
+          return element;
+        }).toList();
         break;
       case 9:
         leaveChatroom();
@@ -110,6 +137,7 @@ class ChatroomMenu extends StatelessWidget {
     ));
     if (response.success) {
       Fluttertoast.showToast(msg: "Chatroom ${id == 6 ? "muted" : "unmuted"}");
+      homeBloc!.add(UpdateHomeEvent());
     } else {
       toast(response.errorMessage!);
     }

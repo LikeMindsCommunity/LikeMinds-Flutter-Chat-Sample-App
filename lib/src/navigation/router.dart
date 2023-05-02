@@ -34,15 +34,15 @@ const mediaPreviewRoute = '/media_preview';
 final router = GoRouter(
   routes: [
     GoRoute(
-      path: startRoute,
-      builder: (context, state) => BlocProvider(
-        create: (context) => HomeBloc()
-          ..add(
-            InitHomeEvent(),
-          ),
-        child: const HomePage(),
-      ),
-    ),
+        path: startRoute,
+        builder: (context, state) {
+          HomeBloc homeBloc = BlocProvider.of<HomeBloc>(context)
+            ..add(
+              InitHomeEvent(),
+            );
+
+          return const HomePage();
+        }),
     GoRoute(
       path: chatRoute,
       builder: (context, state) => MultiBlocProvider(

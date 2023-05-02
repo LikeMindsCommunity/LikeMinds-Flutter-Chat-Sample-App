@@ -17,6 +17,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handle
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
+import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:sizer/sizer.dart';
 
@@ -112,6 +113,9 @@ class LMChat extends StatelessWidget {
           providers: [
             BlocProvider<ChatActionBloc>(
               create: (context) => ChatActionBloc(),
+            ),
+            BlocProvider<HomeBloc>(
+              create: (context) => HomeBloc(),
             ),
           ],
           child: FutureBuilder(
