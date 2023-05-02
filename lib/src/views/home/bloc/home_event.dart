@@ -4,7 +4,8 @@ part of 'home_bloc.dart';
 abstract class HomeEvent {}
 
 class InitHomeEvent extends HomeEvent {
-  InitHomeEvent();
+  int page;
+  InitHomeEvent({required this.page});
 }
 
 class ReloadHomeEvent extends HomeEvent {

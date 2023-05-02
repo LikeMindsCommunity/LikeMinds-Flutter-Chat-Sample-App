@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
@@ -22,6 +21,11 @@ class _HomePageState extends State<HomePage> {
   String? userName;
   User? user;
   HomeBloc? homeBloc;
+  ValueNotifier<bool> rebuildPagedList = ValueNotifier(false);
+  PagingController<int, ChatItem> homeFeedPagingController =
+      PagingController(firstPageKey: 1);
+
+  int _pageKey = 1;
 
   @override
   void initState() {
@@ -29,11 +33,48 @@ class _HomePageState extends State<HomePage> {
     UserLocalPreference userLocalPreference = UserLocalPreference.instance;
     userName = userLocalPreference.fetchUserData().name;
     communityName = userLocalPreference.fetchCommunityData()["community_name"];
+    homeBloc = BlocProvider.of<HomeBloc>(context);
+    homeBloc!.add(
+      InitHomeEvent(
+        page: _pageKey,
+      ),
+    );
+    _addPaginationListener();
+  }
+
+  _addPaginationListener() {
+    homeFeedPagingController.addPageRequestListener(
+      (pageKey) {
+        homeBloc!.add(
+          InitHomeEvent(
+            page: pageKey,
+          ),
+        );
+      },
+    );
+  }
+
+  updatePagingControllers(HomeState state) {
+    if (state is HomeLoaded) {
+      List<ChatItem> chatItems = getChats(context, state.response);
+      _pageKey++;
+      if (state.response.chatroomsData == null ||
+          state.response.chatroomsData!.isEmpty ||
+          state.response.chatroomsData!.length < 15) {
+        homeFeedPagingController.appendLastPage(chatItems);
+      } else {
+        homeFeedPagingController.appendPage(chatItems, _pageKey);
+      }
+    } else if (state is UpdateHomeFeed) {
+      List<ChatItem> chatItems = getChats(context, state.response);
+      _pageKey = 2;
+      homeFeedPagingController.nextPageKey = _pageKey;
+      homeFeedPagingController.itemList = chatItems;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    homeBloc = BlocProvider.of<HomeBloc>(context);
     return Scaffold(
         body: Column(
       children: [
@@ -75,9 +116,13 @@ class _HomePageState extends State<HomePage> {
         Expanded(
           child: BlocConsumer<HomeBloc, HomeState>(
             bloc: homeBloc,
-            listener: (context, state) {},
+            listener: (context, state) {
+              updatePagingControllers(state);
+            },
             buildWhen: (previous, current) {
               if (previous is HomeLoaded && current is HomeLoading) {
+                return false;
+              } else if (previous is UpdateHomeFeed && current is HomeLoading) {
                 return false;
               }
               return true;
@@ -85,58 +130,59 @@ class _HomePageState extends State<HomePage> {
             builder: (context, state) {
               if (state is HomeLoading) {
                 return const SkeletonChatList();
-              }
-
-              if (state is HomeLoaded) {
-                List<ChatItem> chatItems = getChats(context, state.response);
+              } else if (state is HomeError) {
+                return Center(
+                  child: Text(state.message),
+                );
+              } else if (state is HomeLoaded || state is UpdateHomeFeed) {
                 return SafeArea(
                   top: false,
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: chatItems.length,
-                    itemBuilder: (context, index) {
-                      return chatItems[index];
-                    },
-                  ),
+                  child: ValueListenableBuilder(
+                      valueListenable: rebuildPagedList,
+                      builder: (context, _, __) {
+                        return PagedListView<int, ChatItem>(
+                          pagingController: homeFeedPagingController,
+                          padding: EdgeInsets.zero,
+                          builderDelegate: PagedChildBuilderDelegate<ChatItem>(
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const SizedBox(),
+                            itemBuilder: (context, item, index) {
+                              return item;
+                            },
+                          ),
+                        );
+                      }),
                 );
               }
-
-              return Center(
-                child: Container(),
-              );
+              return const SizedBox();
             },
           ),
         ),
       ],
     ));
   }
-}
 
-List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
-  List<ChatItem> chats = [];
-  final List<ChatRoom> chatrooms = response.chatroomsData ?? [];
-  final Map<String, Conversation> lastConversations =
-      response.conversationMeta ?? {};
-  final Map<String, User> userMeta = response.userMeta ?? {};
+  List<ChatItem> getChats(BuildContext context, GetHomeFeedResponse response) {
+    List<ChatItem> chats = [];
+    final List<ChatRoom> chatrooms = response.chatroomsData ?? [];
+    final Map<String, Conversation> lastConversations =
+        response.conversationMeta ?? {};
+    final Map<int, User> userMeta = response.userMeta ?? {};
 
-  for (int i = 0; i < chatrooms.length; i++) {
-    final Conversation conversation =
-        lastConversations[chatrooms[i].lastConversationId.toString()]!;
-    String? userId = conversation.userId == null
-        ? conversation.memberId == null
-            ? null
-            : conversation.memberId.toString()
-        : conversation.userId.toString();
-    chats.add(
-      ChatItem(
-        chatroom: chatrooms[i],
-        conversation: conversation,
-        user: conversation.member,
-      ),
-    );
+    for (int i = 0; i < chatrooms.length; i++) {
+      final Conversation conversation =
+          lastConversations[chatrooms[i].lastConversationId.toString()]!;
+      chats.add(
+        ChatItem(
+          chatroom: chatrooms[i],
+          conversation: conversation,
+          user: userMeta[conversation.member?.id ?? conversation.userId],
+        ),
+      );
+    }
+
+    return chats;
   }
-
-  return chats;
 }
 
 Widget getShimmer() => Shimmer.fromColors(

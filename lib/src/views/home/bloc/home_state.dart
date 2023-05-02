@@ -14,6 +14,12 @@ class HomeLoaded extends HomeState {
   HomeLoaded({required this.response});
 }
 
+class UpdateHomeFeed extends HomeState {
+  final GetHomeFeedResponse response;
+
+  UpdateHomeFeed({required this.response});
+}
+
 class RealTimeUpdate extends HomeState {
   final int chatroomId;
   final int conversationId;

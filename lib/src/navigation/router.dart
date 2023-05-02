@@ -1,6 +1,4 @@
 // GoRouter configuration
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -36,11 +34,10 @@ final router = GoRouter(
     GoRoute(
         path: startRoute,
         builder: (context, state) {
-          HomeBloc homeBloc = BlocProvider.of<HomeBloc>(context)
-            ..add(
-              InitHomeEvent(),
-            );
-
+          HomeBloc homeBloc = BlocProvider.of<HomeBloc>(context);
+          // ..add(
+          //   InitHomeEvent(page: 1),
+          // );
           return const HomePage();
         }),
     GoRoute(

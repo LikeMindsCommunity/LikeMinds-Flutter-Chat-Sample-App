@@ -15,11 +15,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final DatabaseReference realTime = LMRealtime.instance.homeFeed();
 
     on<HomeEvent>((event, emit) async {
-      emit(HomeLoading());
       if (event is InitHomeEvent) {
-        emit(HomeLoading());
+        if (event.page == 1) {
+          emit(HomeLoading());
+        }
         final response = await locator<LikeMindsService>().getHomeFeed(
-          GetHomeFeedRequest(),
+          GetHomeFeedRequest(
+            page: event.page,
+            pageSize: 15,
+          ),
         );
         if (response.success) {
           response.data?.conversationMeta?.forEach((key, value) {
@@ -31,7 +35,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             final user = response.data?.userMeta?[userId];
             value.member = user;
           });
-          add(ReloadHomeEvent(response: response.data!));
+          if (event.page == 1) {
+            add(ReloadHomeEvent(response: response.data!));
+          }
           emit(HomeLoaded(response: response.data!));
         } else {
           HomeError(response.errorMessage!);
@@ -56,7 +62,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             final user = response.data?.userMeta?[userId];
             value.member = user;
           });
-          emit(HomeLoaded(response: response.data!));
+          emit(UpdateHomeFeed(response: response.data!));
         } else {
           HomeError(response.errorMessage!);
         }
