@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
       _pageKey++;
       if (state.response.chatroomsData == null ||
           state.response.chatroomsData!.isEmpty ||
-          state.response.chatroomsData!.length < 15) {
+          state.response.chatroomsData!.length < 50) {
         homeFeedPagingController.appendLastPage(chatItems);
       } else {
         homeFeedPagingController.appendPage(chatItems, _pageKey);

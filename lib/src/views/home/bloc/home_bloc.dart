@@ -22,7 +22,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final response = await locator<LikeMindsService>().getHomeFeed(
           GetHomeFeedRequest(
             page: event.page,
-            pageSize: 15,
+            pageSize: 50,
           ),
         );
         if (response.success) {
