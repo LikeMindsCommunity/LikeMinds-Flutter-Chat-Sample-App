@@ -115,6 +115,7 @@ class _MediaForwardState extends State<MediaForward> {
                         height: image.height,
                         width: image.width,
                         mediaFile: file,
+                        size: fileBytes,
                       );
                       mediaList.add(media);
                     }

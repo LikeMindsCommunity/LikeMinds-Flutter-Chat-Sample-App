@@ -117,7 +117,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
                     ..index(i)
                     ..height(media.height!)
                     ..width(media.width!)
-                    ..meta("")
+                    ..meta({'size': media.size})
                     ..type("image")
                     ..url(url))
                   .build();
