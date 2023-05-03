@@ -132,6 +132,10 @@ class _ChatBubbleState extends State<ChatBubble> {
           child: Swipeable(
             key: ValueKey(conversation.id),
             onSwipe: (direction) {
+              int userId = conversation.userId ?? conversation.memberId!;
+              if (userId == user.id) {
+                conversation.member = user;
+              }
               widget.onReply(conversation);
             },
             background: Container(
@@ -347,7 +351,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   child: Container(
                                     color: kGreyColor.withOpacity(0.1),
                                     child: Row(
-                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Container(
                                           height: 6.h,
