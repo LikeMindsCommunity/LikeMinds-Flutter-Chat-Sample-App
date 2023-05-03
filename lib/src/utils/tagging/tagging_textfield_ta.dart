@@ -118,7 +118,6 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
         onTagTap: (p) {
           // print(p);
         },
-
         suggestionsBoxController: _suggestionsBoxController,
         suggestionsBoxDecoration: SuggestionsBoxDecoration(
           offsetX: -2.w,
@@ -171,6 +170,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           return await _getSuggestions(suggestion);
         },
         keepSuggestionsOnSuggestionSelected: true,
+
         itemBuilder: ((context, opt) {
           return Container(
             decoration: const BoxDecoration(

@@ -6,7 +6,9 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,7 +59,7 @@ class ExpandableText extends StatefulWidget {
   final VoidCallback? onLinkTap;
   final Color? linkColor;
   final bool linkEllipsis;
-  final TextStyle? linkStyle;
+  TextStyle? linkStyle;
   final String? prefixText;
   final TextStyle? prefixStyle;
   final VoidCallback? onPrefixTap;
@@ -98,6 +100,10 @@ class ExpandableTextState extends State<ExpandableText>
   void initState() {
     super.initState();
     _passedText = widget.text;
+    widget.linkStyle ??= LMTheme.medium.copyWith(
+      fontSize: 9.sp,
+      color: LMTheme.textLinkColor,
+    );
     _expanded = widget.expanded;
     _linkTapGestureRecognizer = TapGestureRecognizer()..onTap = _linkTapped;
     _prefixTapGestureRecognizer = TapGestureRecognizer()..onTap = _prefixTapped;
@@ -157,7 +163,8 @@ class ExpandableTextState extends State<ExpandableText>
         widget.linkStyle?.color ??
         Theme.of(context).colorScheme.secondary;
     final linkTextStyle =
-        effectiveTextStyle!.merge(widget.linkStyle).copyWith(color: linkColor);
+        LMTheme.medium.copyWith(color: LMTheme.textLinkColor, fontSize: 9.sp);
+    // effectiveTextStyle!.merge(widget.linkStyle).copyWith(color: linkColor);
 
     final prefixText =
         widget.prefixText != null && widget.prefixText!.isNotEmpty
@@ -408,7 +415,10 @@ class ExpandableTextState extends State<ExpandableText>
       // Add a TextSpan for the URL
       textSpans.add(TextSpan(
         text: isTag ? TaggingHelper.decodeString(link).keys.first : link,
-        style: widget.linkStyle ?? const TextStyle(color: Colors.blue),
+        style: LMTheme.medium.copyWith(
+          fontSize: 9.sp,
+          color: LMTheme.textLinkColor,
+        ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
             if (!isTag) {

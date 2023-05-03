@@ -442,7 +442,10 @@ class _ChatBubbleState extends State<ChatBubble> {
     Widget expandableText = ExpandableText(
       widget.conversation.answer,
       expandText: "",
-      linkStyle: LMTheme.regular.copyWith(color: LMTheme.textLinkColor),
+      linkStyle: LMTheme.regular.copyWith(
+        color: LMTheme.textLinkColor,
+        fontSize: 9.sp,
+      ),
       textAlign: TextAlign.left,
       style: LMFonts.instance.regular.copyWith(
         fontSize: 9.sp,

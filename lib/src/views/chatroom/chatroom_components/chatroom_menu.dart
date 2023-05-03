@@ -28,7 +28,7 @@ class ChatroomMenu extends StatelessWidget {
     homeBloc = BlocProvider.of<HomeBloc>(context);
     return ValueListenableBuilder(
       valueListenable: rebuildChatroomMenu,
-      builder: (context, _, __) => CustomPopupMenu(
+      builder: (context, value, __) => CustomPopupMenu(
         pressType: PressType.singleClick,
         showArrow: false,
         controller: _controller,
@@ -64,7 +64,6 @@ class ChatroomMenu extends StatelessWidget {
     return ListTile(
       onTap: () {
         _controller.hideMenu();
-        rebuildChatroomMenu.value = !rebuildChatroomMenu.value;
         performAction(action);
       },
       title: Text(
@@ -88,29 +87,9 @@ class ChatroomMenu extends StatelessWidget {
         break;
       case 6:
         muteChatroom(action);
-        chatroomActions = chatroomActions.map((element) {
-          if (element.id == 6) {
-            if (element.title.toLowerCase() == "mute notifications") {
-              element.title = "Unmute notifications";
-            } else {
-              element.title = "Mute notifications";
-            }
-          }
-          return element;
-        }).toList();
         break;
       case 8:
         muteChatroom(action);
-        chatroomActions = chatroomActions.map((element) {
-          if (element.id == 8) {
-            if (element.title.toLowerCase() == "mute notifications") {
-              element.title = "Unmute notifications";
-            } else {
-              element.title = "Mute notifications";
-            }
-          }
-          return element;
-        }).toList();
         break;
       case 9:
         leaveChatroom();
@@ -140,6 +119,16 @@ class ChatroomMenu extends StatelessWidget {
           msg: (action.title.toLowerCase() == "mute notifications")
               ? "Chatroom muted"
               : "Chatroom unmuted");
+      chatroomActions = chatroomActions.map((element) {
+        if (element.title.toLowerCase() == "mute notifications") {
+          element.title = "Unmute notifications";
+        } else if (element.title.toLowerCase() == "unmute notifications") {
+          element.title = "Mute notifications";
+        }
+
+        return element;
+      }).toList();
+      rebuildChatroomMenu.value = !rebuildChatroomMenu.value;
       homeBloc!.add(UpdateHomeEvent());
     } else {
       toast(response.errorMessage!);
