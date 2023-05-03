@@ -171,6 +171,7 @@ class _ChatBarState extends State<ChatBar> {
                   width: 80.w,
                   constraints: BoxConstraints(
                     // minHeight: 4.h,
+                    minHeight: 12.w,
                     maxHeight: 24.h,
                   ),
                   decoration: BoxDecoration(
@@ -178,9 +179,8 @@ class _ChatBarState extends State<ChatBar> {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: kPaddingSmall,
-                      vertical: 1.h,
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -518,10 +518,10 @@ class _ChatBarState extends State<ChatBar> {
                             ),
                           ),
                           pressType: PressType.singleClick,
-                          child: Padding(
+                          child: Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: 2.w,
-                              vertical: 1.h,
+                              vertical: 3.w,
                             ),
                             child: const Icon(Icons.attach_file),
                           ),
@@ -561,9 +561,15 @@ class _ChatBarState extends State<ChatBar> {
                     height: 12.w,
                     width: 12.w,
                     decoration: BoxDecoration(
-                      color: LMBranding.instance.buttonColor,
-                      borderRadius: BorderRadius.circular(6.w),
-                    ),
+                        color: LMBranding.instance.buttonColor,
+                        borderRadius: BorderRadius.circular(6.w),
+                        boxShadow: [
+                          BoxShadow(
+                            offset: const Offset(0, 4),
+                            blurRadius: 25,
+                            color: kBlackColor.withOpacity(0.3),
+                          )
+                        ]),
                     child: Center(
                       child: Icon(
                         Icons.send,

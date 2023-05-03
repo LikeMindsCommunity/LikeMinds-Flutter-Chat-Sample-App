@@ -152,6 +152,7 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
     return PagedListView(
       padding: EdgeInsets.zero,
       pagingController: _pagingController,
+      physics: const ClampingScrollPhysics(),
       builderDelegate: PagedChildBuilderDelegate<User>(
         itemBuilder: (context, item, index) {
           return ParticipantItem(
