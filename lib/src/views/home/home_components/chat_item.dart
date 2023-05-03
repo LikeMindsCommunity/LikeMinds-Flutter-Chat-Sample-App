@@ -8,6 +8,7 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
@@ -35,6 +36,7 @@ class _ChatItemState extends State<ChatItem> {
   late ChatRoom chatroom;
   late bool _muteStatus;
   int? _unreadCount;
+  final User user = UserLocalPreference.instance.fetchUserData();
 
   @override
   void initState() {
@@ -48,8 +50,11 @@ class _ChatItemState extends State<ChatItem> {
     _unreadCount = chatroom.unseenCount;
     _muteStatus = chatroom.muteStatus ?? false;
     String _name = chatroom.header;
-    String _message =
-        '${widget.user?.name}: ${TaggingHelper.convertRouteToTag(conversation.answer)}';
+    String _message = conversation.deletedByUserId == null
+        ? '${widget.user?.name}: ${TaggingHelper.convertRouteToTag(conversation.answer)}'
+        : conversation.deletedByUserId == user.id
+            ? "This message was deleted"
+            : "This message was deleted by the CM";
     String _time = conversation.lastUpdated.toString();
     bool _isSecret = chatroom.isSecret ?? false;
     bool? hasAttachments = conversation.hasFiles;
@@ -162,6 +167,9 @@ class _ChatItemState extends State<ChatItem> {
                                       .copyWith(
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.normal,
+                                    fontStyle: _message.contains("deleted")
+                                        ? FontStyle.italic
+                                        : FontStyle.normal,
                                   ),
                                 )
                     ],

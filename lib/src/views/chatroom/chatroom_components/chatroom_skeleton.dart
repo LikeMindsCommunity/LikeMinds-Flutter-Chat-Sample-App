@@ -126,13 +126,13 @@ class SkeletonChatList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> list = List.generate(
-      20,
+      3,
       (index) => SkeletonChatBubble(isSent: index % 2 == 0),
     );
 
     return Expanded(
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 1.8.h),
+        padding: EdgeInsets.symmetric(vertical: 3.h),
         child: SingleChildScrollView(
           physics: const NeverScrollableScrollPhysics(),
           child: Column(
