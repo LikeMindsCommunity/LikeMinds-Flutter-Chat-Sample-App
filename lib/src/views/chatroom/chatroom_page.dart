@@ -38,6 +38,7 @@ class ChatroomPage extends StatefulWidget {
 }
 
 class _ChatroomPageState extends State<ChatroomPage> {
+  bool? isCm;
   ChatActionBloc? chatActionBloc;
   Map<String, dynamic> conversationAttachmentsMeta = <String, dynamic>{};
   Map<String, List<Media>> mediaFiles = <String, List<Media>>{};
@@ -58,6 +59,30 @@ class _ChatroomPageState extends State<ChatroomPage> {
       PagingController<int, Conversation>(firstPageKey: 1);
 
   int _page = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    Bloc.observer = SimpleBlocObserver();
+    _addPaginationListener();
+    scrollController.addListener(() {
+      _showScrollToBottomButton();
+    });
+    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
+    conversationBloc = ConversationBloc()
+      ..add(
+        MarkReadChatroomEvent(chatroomId: widget.chatroomId),
+      );
+    isCm = UserLocalPreference.instance.fetchMemberState();
+  }
+
+  @override
+  void dispose() {
+    pagedListController.dispose();
+    scrollController.dispose();
+    lastConversationId = 0;
+    super.dispose();
+  }
 
   _addPaginationListener() {
     pagedListController.addPageRequestListener(
@@ -189,27 +214,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
     setState(() {
       showScrollButton = false;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    Bloc.observer = SimpleBlocObserver();
-    _addPaginationListener();
-    scrollController.addListener(() {
-      _showScrollToBottomButton();
-    });
-    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
-    conversationBloc = ConversationBloc()
-      ..add(
-        MarkReadChatroomEvent(chatroomId: widget.chatroomId),
-      );
-  }
-
-  @override
-  void dispose() {
-    pagedListController.dispose();
-    super.dispose();
   }
 
   void updatePagingControllers(Object? state) {
@@ -589,8 +593,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 }
                               },
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 24),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [

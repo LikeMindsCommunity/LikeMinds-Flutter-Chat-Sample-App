@@ -5,6 +5,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 abstract class ILikeMindsService {
   Future<LMResponse<InitiateUserResponse>> initiateUser(
       InitiateUserRequest request);
+  Future<LMResponse<bool>> getMemberState();
   Future<LMResponse<LogoutResponse>> logout(LogoutRequest request);
   Future<LMResponse<GetHomeFeedResponse>> getHomeFeed(
       GetHomeFeedRequest request);
@@ -62,6 +63,11 @@ class LikeMindsService implements ILikeMindsService {
     UserLocalPreference userLocalPreference = UserLocalPreference.instance;
     await userLocalPreference.initialize();
     return client.initiateUser(request);
+  }
+
+  @override
+  Future<LMResponse<bool>> getMemberState() async {
+    return client.getMemberState();
   }
 
   @override

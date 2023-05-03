@@ -21,6 +21,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? communityName;
   String? userName;
+  bool? isCm;
   User? user;
   HomeBloc? homeBloc;
   ValueNotifier<bool> rebuildPagedList = ValueNotifier(false);
@@ -36,6 +37,7 @@ class _HomePageState extends State<HomePage> {
     UserLocalPreference userLocalPreference = UserLocalPreference.instance;
     userName = userLocalPreference.fetchUserData().name;
     communityName = userLocalPreference.fetchCommunityData()["community_name"];
+    isCm = userLocalPreference.fetchMemberState();
     homeBloc = BlocProvider.of<HomeBloc>(context);
     homeBloc!.add(
       InitHomeEvent(
@@ -100,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       communityName ?? "Chatrooms",
                       style: LMBranding.instance.fonts.medium
-                          .copyWith(fontSize: 16.sp, color: kWhiteColor),
+                          .copyWith(fontSize: 14.sp, color: kWhiteColor),
                     ),
                   ),
                   //   communityName ??
@@ -117,50 +119,55 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         Expanded(
-          child: BlocConsumer<HomeBloc, HomeState>(
-            bloc: homeBloc,
-            listener: (context, state) {
-              updatePagingControllers(state);
-            },
-            buildWhen: (previous, current) {
-              if (previous is HomeLoaded && current is HomeLoading) {
-                return false;
-              } else if (previous is UpdateHomeFeed && current is HomeLoading) {
-                return false;
-              }
-              return true;
-            },
-            builder: (context, state) {
-              if (state is HomeLoading) {
-                return const SkeletonChatList();
-              } else if (state is HomeError) {
-                return Center(
-                  child: Text(state.message),
-                );
-              } else if (state is HomeLoaded ||
-                  state is UpdateHomeFeed ||
-                  state is UpdatedHomeFeed) {
-                return SafeArea(
-                  top: false,
-                  child: ValueListenableBuilder(
-                      valueListenable: rebuildPagedList,
-                      builder: (context, _, __) {
-                        return PagedListView<int, ChatItem>(
-                          pagingController: homeFeedPagingController,
-                          padding: EdgeInsets.zero,
-                          builderDelegate: PagedChildBuilderDelegate<ChatItem>(
-                            noItemsFoundIndicatorBuilder: (context) =>
-                                const SizedBox(),
-                            itemBuilder: (context, item, index) {
-                              return item;
-                            },
-                          ),
-                        );
-                      }),
-                );
-              }
-              return const SizedBox();
-            },
+          child: Padding(
+            padding: EdgeInsets.only(top: 1.h),
+            child: BlocConsumer<HomeBloc, HomeState>(
+              bloc: homeBloc,
+              listener: (context, state) {
+                updatePagingControllers(state);
+              },
+              buildWhen: (previous, current) {
+                if (previous is HomeLoaded && current is HomeLoading) {
+                  return false;
+                } else if (previous is UpdateHomeFeed &&
+                    current is HomeLoading) {
+                  return false;
+                }
+                return true;
+              },
+              builder: (context, state) {
+                if (state is HomeLoading) {
+                  return const SkeletonChatList();
+                } else if (state is HomeError) {
+                  return Center(
+                    child: Text(state.message),
+                  );
+                } else if (state is HomeLoaded ||
+                    state is UpdateHomeFeed ||
+                    state is UpdatedHomeFeed) {
+                  return SafeArea(
+                    top: false,
+                    child: ValueListenableBuilder(
+                        valueListenable: rebuildPagedList,
+                        builder: (context, _, __) {
+                          return PagedListView<int, ChatItem>(
+                            pagingController: homeFeedPagingController,
+                            padding: EdgeInsets.zero,
+                            builderDelegate:
+                                PagedChildBuilderDelegate<ChatItem>(
+                              noItemsFoundIndicatorBuilder: (context) =>
+                                  const SizedBox(),
+                              itemBuilder: (context, item, index) {
+                                return item;
+                              },
+                            ),
+                          );
+                        }),
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
           ),
         ),
       ],

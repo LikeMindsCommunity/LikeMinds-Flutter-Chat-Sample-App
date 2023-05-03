@@ -44,8 +44,11 @@ class UserLocalPreference {
     return User.fromEntity(UserEntity.fromJson(userData));
   }
 
-  void storeMemberState(bool isCm) {
-    _sharedPreferences!.setBool('isCm', isCm);
+  void storeMemberState(bool? isCm) {
+    if (isCm == null) {
+      return;
+    }
+    _sharedPreferences?.setBool('isCm', isCm);
   }
 
   bool fetchMemberState() {

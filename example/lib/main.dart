@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lm_chat_example/cred_screen.dart';
 import 'package:lm_chat_example/example_callback.dart';
 import 'package:lm_chat_example/firebase_options.dart';
+import 'package:lm_chat_example/local_preference.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
@@ -19,13 +20,14 @@ Future<void> _handleNotification(RemoteMessage message) async {
   await LMNotificationHandler.instance.handleNotification(message, true);
 }
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LMChat.setupLMChat(
     apiKey: "fa66d879-dd67-4d49-be44-cf008d339558",
     lmCallBack: ExampleCallback(),
   );
   setupNotifications();
+  await AppLocalPreference.instance.initialize();
   runApp(const MyApp());
 }
 

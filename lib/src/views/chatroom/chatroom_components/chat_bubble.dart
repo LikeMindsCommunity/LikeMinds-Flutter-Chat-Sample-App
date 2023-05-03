@@ -4,6 +4,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
@@ -54,7 +56,10 @@ class _ChatBubbleState extends State<ChatBubble> {
   late Conversation conversation;
   late Conversation? replyToConversation;
   bool isSelected = false;
+  bool isDeleted = false;
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
+  final User loggedInUser = UserLocalPreference.instance.fetchUserData();
+  final bool isCm = UserLocalPreference.instance.fetchMemberState();
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
@@ -68,6 +73,7 @@ class _ChatBubbleState extends State<ChatBubble> {
     _controller = CustomPopupMenuController();
     conversation = widget.conversation;
     replyToConversation = widget.replyToConversation;
+    isDeleted = conversation.deletedByUserId != null;
     LMAnalytics.get().track(AnalyticsKeys.imageViewed, {
       'chatroom_id': widget.chatroom.id,
       'community_id': widget.chatroom.communityId,
@@ -161,7 +167,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  width: 42.w,
+                  width: 48.w,
                   // color: Colors.white,
                   child: IntrinsicWidth(
                     child: Column(
@@ -206,6 +212,39 @@ class _ChatBubbleState extends State<ChatBubble> {
                             "Copy text",
                             style: LMTheme.regular.copyWith(
                               fontSize: 10.sp,
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: isCm || loggedInUser.id == user.id,
+                          child: ListTile(
+                            onTap: () async {
+                              final response = await locator<LikeMindsService>()
+                                  .deleteConversation(
+                                      (DeleteConversationRequestBuilder()
+                                            ..conversationIds([conversation.id])
+                                            ..reason("Delete"))
+                                          .build());
+                              if (response.success) {
+                                _controller.hideMenu();
+                                setState(() {
+                                  conversation.deletedByUserId =
+                                      loggedInUser.id;
+                                  isDeleted = true;
+                                });
+                                Fluttertoast.showToast(msg: "Message deleted");
+                              }
+                            },
+                            leading: Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                              size: 16.sp,
+                            ),
+                            title: Text(
+                              "Delete",
+                              style: LMTheme.regular.copyWith(
+                                fontSize: 10.sp,
+                              ),
                             ),
                           ),
                         ),
@@ -371,7 +410,26 @@ class _ChatBubbleState extends State<ChatBubble> {
                                 isSent
                                     ? const SizedBox()
                                     : const SizedBox(height: 6),
-                                getContent(),
+                                isDeleted
+                                    ? conversation.deletedByUserId ==
+                                            loggedInUser.id
+                                        ? Text(
+                                            "This message was deleted",
+                                            style: LMFonts.instance.regular
+                                                .copyWith(
+                                              fontSize: 9.sp,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          )
+                                        : Text(
+                                            "This message was deleted by the CM",
+                                            style: LMFonts.instance.regular
+                                                .copyWith(
+                                              fontSize: 9.sp,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          )
+                                    : getContent(),
                                 const SizedBox(height: 8),
                                 ((widget.conversation.hasFiles == null ||
                                             !widget.conversation.hasFiles!) ||

@@ -68,6 +68,9 @@ class LMChat extends StatelessWidget {
       ),
     );
     final initiateUser = response.data!.initiateUser!;
+
+    final isCm = await locator<LikeMindsService>().getMemberState();
+    UserLocalPreference.instance.storeMemberState(isCm.data);
     UserLocalPreference.instance.storeUserData(initiateUser.user);
     UserLocalPreference.instance.storeCommunityData(initiateUser.community);
     await _instance?.firebase();
