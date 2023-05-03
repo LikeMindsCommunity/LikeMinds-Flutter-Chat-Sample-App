@@ -153,6 +153,7 @@ class _HomePageState extends State<HomePage> {
                           return PagedListView<int, ChatItem>(
                             pagingController: homeFeedPagingController,
                             padding: EdgeInsets.zero,
+                            physics: const ClampingScrollPhysics(),
                             builderDelegate:
                                 PagedChildBuilderDelegate<ChatItem>(
                               noItemsFoundIndicatorBuilder: (context) =>

@@ -104,7 +104,8 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
             Media media = event.mediaFiles[i];
             String? url = await mediaService.uploadFile(
               media.mediaFile!,
-              user.userUniqueId,
+              event.postConversationRequest.chatroomId,
+              postConversationResponse.conversation!.id,
             );
             if (url == null) {
               throw 'Error uploading file';

@@ -143,6 +143,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           focusNode: _focusNode,
           minLines: 1,
           maxLines: 200,
+          enabled: widget.decoration?.enabled ?? true,
           decoration: widget.decoration ??
               InputDecoration(
                 hintText: 'Write something here...',

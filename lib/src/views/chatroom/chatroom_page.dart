@@ -361,19 +361,14 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 itemBuilder: (context, item, index) {
                                   if (item.isTimeStamp != null &&
                                           item.isTimeStamp! ||
-                                      item.state == 1 ||
-                                      item.state == 3 ||
-                                      item.state == 2 ||
-                                      item.state == 12) {
+                                      item.state != 0) {
                                     return Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         Container(
-                                          width: item.state == 1 ||
-                                                  item.state == 3 ||
-                                                  item.state == 2 ||
-                                                  item.state == 12
+                                          width: item.isTimeStamp == null ||
+                                                  !item.isTimeStamp!
                                               ? 80.w
                                               : 35.w,
                                           margin: const EdgeInsets.symmetric(
@@ -388,21 +383,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                 BorderRadius.circular(12),
                                           ),
                                           alignment: Alignment.center,
-                                          child: ExpandableText(
-                                            item.state == 1
-                                                ? TaggingHelper
-                                                    .extractHeaderText(
-                                                        item.answer)
-                                                : item.state == 3
-                                                    ? TaggingHelper
-                                                        .extractLeftChatroom(
-                                                            item.answer)
-                                                    : item.state == 12
-                                                        ? TaggingHelper
-                                                            .extractTopicChat(
-                                                                item.answer)
-                                                        : item.answer,
-                                            expandText: "show more",
+                                          child: Text(
+                                            TaggingHelper.extractStateMessage(
+                                                item.answer),
                                             textAlign: TextAlign.center,
                                           ),
                                         )

@@ -285,7 +285,7 @@ Widget getImageMessage(
                         alignment: Alignment.center,
                         color: kBlackColor.withOpacity(0.5),
                         child: Text(
-                          '+${conversationAttachments.length - 1}',
+                          '+${conversationAttachments.length - 3}',
                           style: LMTheme.medium
                               .copyWith(color: kWhiteColor, fontSize: 20.sp),
                         ),
@@ -575,7 +575,7 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
                         alignment: Alignment.center,
                         color: kBlackColor.withOpacity(0.5),
                         child: Text(
-                          '+${mediaFiles.length - 1}',
+                          '+${mediaFiles.length - 3}',
                           style: LMTheme.medium
                               .copyWith(color: kWhiteColor, fontSize: 20.sp),
                         ),

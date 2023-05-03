@@ -121,6 +121,18 @@ class TaggingHelper {
     final String? actionText = match?.group(2);
     return '$userName $actionText';
   }
+
+  static String extractStateMessage(String input) {
+    final RegExp stateRegex = RegExp(r"(?<=\<\<).+?(?=\|)");
+    final RegExp tagRegex = RegExp(r"<<(?<=\<\<).+?(?=\>\>)>>");
+    final Iterable<RegExpMatch> matches = tagRegex.allMatches(input);
+    for (RegExpMatch match in matches) {
+      final String? routeTag = match.group(0);
+      final String? userName = stateRegex.firstMatch(routeTag!)?.group(0);
+      input = input.replaceAll(routeTag, '$userName');
+    }
+    return input;
+  }
 }
 
 List<String> extractLinkFromString(String text) {

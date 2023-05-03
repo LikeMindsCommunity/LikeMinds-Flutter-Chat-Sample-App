@@ -73,7 +73,11 @@ class MediaService {
     _poolId = isProd ? CredsProd.poolId : CredsDev.poolId;
   }
 
-  Future<String?> uploadFile(File file, String userUniqueId) async {
+  Future<String?> uploadFile(
+    File file,
+    int chatroomId,
+    int conversationId,
+  ) async {
     try {
       String fileName = basenameWithoutExtension(file.path);
       String currTimeInMilli = DateTime.now().millisecondsSinceEpoch.toString();
@@ -83,7 +87,8 @@ class MediaService {
         _bucketName,
         _poolId,
         _region,
-        // s3FolderPath: "files/post/$userUniqueId/$fileName-$currTimeInMilli",
+        s3FolderPath:
+            "files/collabcard/$chatroomId/conversation/$conversationId/",
       );
       return result;
     } on SimpleS3Errors catch (e) {
