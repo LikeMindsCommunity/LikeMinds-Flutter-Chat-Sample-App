@@ -118,13 +118,13 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
         onTagTap: (p) {
           // print(p);
         },
-
         suggestionsBoxController: _suggestionsBoxController,
         suggestionsBoxDecoration: SuggestionsBoxDecoration(
-          offsetX: -1.5.w,
+          offsetX: -2.w,
           elevation: 0,
           clipBehavior: Clip.hardEdge,
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0)),
           hasScrollbar: false,
           constraints: BoxConstraints(
             maxHeight: 24.h,
@@ -170,6 +170,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           return await _getSuggestions(suggestion);
         },
         keepSuggestionsOnSuggestionSelected: true,
+
         itemBuilder: ((context, opt) {
           return Container(
             decoration: const BoxDecoration(

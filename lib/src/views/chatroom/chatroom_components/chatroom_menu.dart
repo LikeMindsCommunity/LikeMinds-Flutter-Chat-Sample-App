@@ -28,7 +28,7 @@ class ChatroomMenu extends StatelessWidget {
     homeBloc = BlocProvider.of<HomeBloc>(context);
     return ValueListenableBuilder(
       valueListenable: rebuildChatroomMenu,
-      builder: (context, _, __) => CustomPopupMenu(
+      builder: (context, value, __) => CustomPopupMenu(
         pressType: PressType.singleClick,
         showArrow: false,
         controller: _controller,
@@ -37,7 +37,7 @@ class ChatroomMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           child: Container(
             constraints: BoxConstraints(
-              minWidth: 42.w,
+              minWidth: 10.w,
               maxWidth: 52.w,
             ),
             color: Colors.white,
@@ -68,6 +68,8 @@ class ChatroomMenu extends StatelessWidget {
       },
       title: Text(
         action.title,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
         style: LMTheme.regular.copyWith(
           fontSize: 10.sp,
           fontWeight: FontWeight.w400,
@@ -84,30 +86,10 @@ class ChatroomMenu extends StatelessWidget {
         router.push("/participants", extra: chatroom);
         break;
       case 6:
-        muteChatroom(action.id);
-        chatroomActions = chatroomActions.map((element) {
-          if (element.id == 6) {
-            if (element.title.toLowerCase() == "mute notifications") {
-              element.title = "Unmute notifications";
-            } else {
-              element.title = "Mute notifications";
-            }
-          }
-          return element;
-        }).toList();
+        muteChatroom(action);
         break;
       case 8:
-        muteChatroom(action.id);
-        chatroomActions = chatroomActions.map((element) {
-          if (element.id == 8) {
-            if (element.title.toLowerCase() == "mute notifications") {
-              element.title = "Unmute notifications";
-            } else {
-              element.title = "Mute notifications";
-            }
-          }
-          return element;
-        }).toList();
+        muteChatroom(action);
         break;
       case 9:
         leaveChatroom();
@@ -124,7 +106,7 @@ class ChatroomMenu extends StatelessWidget {
     Fluttertoast.showToast(msg: "Coming Soon");
   }
 
-  void muteChatroom(int id) async {
+  void muteChatroom(ChatroomAction action) async {
     final response =
         await locator<LikeMindsService>().muteChatroom(MuteChatroomRequest(
       chatroomId: chatroom.id,
@@ -133,7 +115,20 @@ class ChatroomMenu extends StatelessWidget {
     if (response.success) {
       // _controller.hideMenu();
       // rebuildChatroomMenu.value = !rebuildChatroomMenu.value;
-      Fluttertoast.showToast(msg: "Chatroom ${id == 6 ? "muted" : "unmuted"}");
+      Fluttertoast.showToast(
+          msg: (action.title.toLowerCase() == "mute notifications")
+              ? "Chatroom muted"
+              : "Chatroom unmuted");
+      chatroomActions = chatroomActions.map((element) {
+        if (element.title.toLowerCase() == "mute notifications") {
+          element.title = "Unmute notifications";
+        } else if (element.title.toLowerCase() == "unmute notifications") {
+          element.title = "Mute notifications";
+        }
+
+        return element;
+      }).toList();
+      rebuildChatroomMenu.value = !rebuildChatroomMenu.value;
       homeBloc!.add(UpdateHomeEvent());
     } else {
       toast(response.errorMessage!);

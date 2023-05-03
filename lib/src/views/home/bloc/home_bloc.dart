@@ -62,7 +62,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             });
             emit(UpdateHomeFeed(response: response.data!));
           } else {
-            emit(HomeError(response.errorMessage!));
+            emit(HomeError(response.errorMessage ?? "An error occured"));
           }
         }
       },
