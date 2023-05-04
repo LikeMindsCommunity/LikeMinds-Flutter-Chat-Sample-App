@@ -51,7 +51,7 @@ class _ChatItemState extends State<ChatItem> {
     _muteStatus = chatroom.muteStatus ?? false;
     String _name = chatroom.header;
     String _message = conversation.deletedByUserId == null
-        ? '${widget.user?.name}: ${TaggingHelper.convertRouteToTag(conversation.answer)}'
+        ? '${widget.user?.name}: ${conversation.state != 0 ? TaggingHelper.extractStateMessage(conversation.answer) : TaggingHelper.convertRouteToTag(conversation.answer)}'
         : conversation.deletedByUserId == user.id
             ? "This message was deleted"
             : "This message was deleted by the CM";
@@ -130,7 +130,7 @@ class _ChatItemState extends State<ChatItem> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    "Attachment",
+                                    "${conversation.attachmentCount} ${conversation.attachmentCount! > 1 ? "images" : "image"}",
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: LMBranding.instance.fonts.regular
@@ -151,7 +151,7 @@ class _ChatItemState extends State<ChatItem> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
-                                          _message,
+                                          "${conversation.attachmentCount} ${conversation.attachmentCount! > 1 ? "images" : "image"}",
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: LMBranding
@@ -164,8 +164,8 @@ class _ChatItemState extends State<ChatItem> {
                                       ),
                                     ])
                                   : Text(
-                                      conversation.state == 1
-                                          ? TaggingHelper.extractHeaderText(
+                                      conversation.state != 0
+                                          ? TaggingHelper.extractStateMessage(
                                               _message)
                                           : _message,
                                       maxLines: 1,

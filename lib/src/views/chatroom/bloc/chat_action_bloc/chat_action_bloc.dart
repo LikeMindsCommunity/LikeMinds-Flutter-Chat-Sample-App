@@ -114,7 +114,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
                   await decodeImageFromList(media.mediaFile!.readAsBytesSync());
               PutMediaRequest putMediaRequest = (PutMediaRequestBuilder()
                     ..conversationId(postConversationResponse.conversation!.id)
-                    ..filesCount(event.mediaFiles.length)
+                    ..filesCount(length)
                     ..index(i)
                     ..height(media.height!)
                     ..width(media.width!)

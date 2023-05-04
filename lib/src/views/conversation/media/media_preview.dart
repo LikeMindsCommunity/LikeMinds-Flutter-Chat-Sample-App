@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:go_router/go_router.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
 
 class MediaPreview extends StatefulWidget {
   final List<dynamic>? conversationAttachments;
@@ -48,7 +49,7 @@ class _MediaPreviewState extends State<MediaPreview> {
                 initialPage: 0,
                 enlargeCenterPage: false,
                 enableInfiniteScroll: false,
-                height: 80.h,
+                height: 85.h,
                 enlargeFactor: 0.0,
                 viewportFraction: 1.0,
                 onPageChanged: (index, reason) {
@@ -62,6 +63,9 @@ class _MediaPreviewState extends State<MediaPreview> {
               child: CachedNetworkImage(
                 imageUrl: widget.conversationAttachments![index]['file_url'] ??
                     widget.conversationAttachments![index]['url'],
+                errorWidget: (context, url, error) => mediaErrorWidget(),
+                progressIndicatorBuilder: (context, url, progress) =>
+                    mediaShimmer(),
                 fit: BoxFit.contain,
               ),
             ),

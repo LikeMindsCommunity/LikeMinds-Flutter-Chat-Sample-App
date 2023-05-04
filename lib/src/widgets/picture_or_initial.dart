@@ -57,7 +57,9 @@ class PictureOrInitial extends StatelessWidget {
                     ),
                   ),
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                progressIndicatorBuilder: (context, url, progress) =>
+                    mediaShimmer(),
+                errorWidget: (context, url, error) => mediaErrorWidget(),
               )
             : Text(
                 getInitials(fallbackText),

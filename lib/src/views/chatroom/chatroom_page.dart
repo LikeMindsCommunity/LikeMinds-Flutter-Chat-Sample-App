@@ -168,6 +168,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
         attachmentCount: state.putMediaResponse.length,
         attachmentsUploaded: true,
         chatroomId: chatroom!.id,
+        state: state.postConversationResponse.conversation!.state,
         date: state.postConversationResponse.conversation!.date,
         memberId: state.postConversationResponse.conversation!.memberId,
         userId: state.postConversationResponse.conversation!.userId,
