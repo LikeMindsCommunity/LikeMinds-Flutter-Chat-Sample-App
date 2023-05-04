@@ -129,18 +129,29 @@ class _ChatBarState extends State<ChatBar> {
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                       style: LMTheme.medium.copyWith(
-                                        color: kPrimaryColor,
+                                        color: LMTheme.headerColor,
                                       ),
                                     ),
                                     kVerticalPaddingSmall,
                                     SizedBox(
                                       child: Text(
-                                        TaggingHelper.convertRouteToTag(
-                                                replyToConversation?.answer) ??
-                                            "",
+                                        replyToConversation?.answer != null &&
+                                                replyToConversation
+                                                        ?.answer.isNotEmpty ==
+                                                    true
+                                            ? TaggingHelper.convertRouteToTag(
+                                                    replyToConversation
+                                                        ?.answer) ??
+                                                ""
+                                            : replyToConversation?.hasFiles ??
+                                                    false
+                                                ? "📷 ${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
+                                                : "",
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
-                                        style: LMTheme.regular,
+                                        style: LMTheme.regular.copyWith(
+                                          fontSize: 8.sp,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -156,7 +167,7 @@ class _ChatBarState extends State<ChatBar> {
                             widget.replyToConversation = null;
                           });
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.close,
                           color: kGreyColor,
                         ),
@@ -168,7 +179,7 @@ class _ChatBarState extends State<ChatBar> {
             : const SizedBox(),
         Container(
           width: 100.w,
-          color: LMTheme.headerColor.withOpacity(0.2),
+          color: kGreyColor.withOpacity(0.2),
           padding: EdgeInsets.symmetric(
             horizontal: 3.w,
             vertical: 12,
@@ -222,7 +233,9 @@ class _ChatBarState extends State<ChatBar> {
                                 hintMaxLines: 1,
                                 hintStyle: LMTheme.medium.copyWith(
                                   color: kGreyColor,
-                                  fontSize: 7.9.sp,
+                                  fontSize: checkIfAnnouncementChannel()
+                                      ? 9.sp
+                                      : 7.8.sp,
                                 ),
                                 hintText: checkIfAnnouncementChannel()
                                     ? "Write something here"
@@ -236,17 +249,17 @@ class _ChatBarState extends State<ChatBar> {
                                 arrowColor: Colors.white,
                                 showArrow: false,
                                 menuBuilder: () => Container(
-                                  margin: const EdgeInsets.only(bottom: 25),
+                                  margin: EdgeInsets.only(bottom: 1.h),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: Container(
                                       width: 100.w,
-                                      height: 30.w,
+                                      // height: ,
                                       color: Colors.white,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                          horizontal: 16,
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 1.4.h,
+                                          horizontal: 4.w,
                                         ),
                                         child: Column(
                                           mainAxisAlignment:
@@ -298,16 +311,16 @@ class _ChatBarState extends State<ChatBar> {
                                                     }
                                                   },
                                                   child: SizedBox(
-                                                    width: 40.w,
-                                                    height: 22.w,
+                                                    width: 32.w,
+                                                    height: 9.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .center,
                                                       children: [
                                                         Container(
-                                                          width: 38.sp,
-                                                          height: 38.sp,
+                                                          width: 32.sp,
+                                                          height: 32.sp,
                                                           decoration:
                                                               BoxDecoration(
                                                             borderRadius:
@@ -322,7 +335,7 @@ class _ChatBarState extends State<ChatBar> {
                                                             Icons
                                                                 .camera_alt_outlined,
                                                             color: kWhiteColor,
-                                                            size: 24.sp,
+                                                            size: 20.sp,
                                                           ),
                                                         ),
                                                         kVerticalPaddingMedium,
@@ -398,16 +411,16 @@ class _ChatBarState extends State<ChatBar> {
                                                     }
                                                   },
                                                   child: SizedBox(
-                                                    width: 40.w,
-                                                    height: 22.w,
+                                                    width: 32.w,
+                                                    height: 9.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .center,
                                                       children: [
                                                         Container(
-                                                          width: 38.sp,
-                                                          height: 38.sp,
+                                                          width: 32.sp,
+                                                          height: 32.sp,
                                                           decoration:
                                                               BoxDecoration(
                                                             borderRadius:
@@ -422,7 +435,7 @@ class _ChatBarState extends State<ChatBar> {
                                                             Icons
                                                                 .photo_outlined,
                                                             color: kWhiteColor,
-                                                            size: 24.sp,
+                                                            size: 20.sp,
                                                           ),
                                                         ),
                                                         kVerticalPaddingMedium,

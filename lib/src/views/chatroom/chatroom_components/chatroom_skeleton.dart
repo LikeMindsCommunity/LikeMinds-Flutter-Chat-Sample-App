@@ -65,11 +65,13 @@ class SkeletonChatPage extends StatelessWidget {
         const SizedBox(height: 18),
         Expanded(
           child: Container(
-              color: LMTheme.headerColor.withOpacity(0.2),
-              child: const SkeletonChatList()),
+            color: kGreyColor.withOpacity(0.2),
+            child: const SkeletonChatList(),
+          ),
         ),
+        // const Spacer(),
         Container(
-          color: LMTheme.headerColor.withOpacity(0.2),
+          color: kGreyColor.withOpacity(0.2),
           child: Padding(
             padding: const EdgeInsets.only(
               left: 24,
@@ -126,19 +128,14 @@ class SkeletonChatList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> list = List.generate(
-      3,
+      5,
       (index) => SkeletonChatBubble(isSent: index % 2 == 0),
     );
 
-    return Expanded(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 3.h),
-        child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Column(
-            children: list,
-          ),
-        ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 3.h),
+      child: Column(
+        children: list,
       ),
     );
   }
@@ -240,8 +237,8 @@ class SkeletonAnimation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade200,
-      highlightColor: Colors.grey.shade300,
+      baseColor: Colors.grey.shade100,
+      highlightColor: Colors.grey.shade200,
       period: const Duration(seconds: 2),
       direction: ShimmerDirection.ltr,
       child: child,

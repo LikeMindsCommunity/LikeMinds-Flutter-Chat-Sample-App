@@ -122,47 +122,54 @@ class _ChatItemState extends State<ChatItem> {
                           ),
                           const SizedBox(height: 8),
                           (_message.isEmpty && (hasAttachments ?? false))
-                              ? Row(children: [
-                                  Icon(
-                                    Icons.attachment_outlined,
-                                    color: kGreyColor,
-                                    size: 12.sp,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "${conversation.attachmentCount} ${conversation.attachmentCount! > 1 ? "images" : "image"}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: LMBranding.instance.fonts.regular
-                                        .copyWith(
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.normal,
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.camera_alt,
+                                      color: kGreyColor,
+                                      size: 12.sp,
                                     ),
-                                  ),
-                                ])
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "${conversation.attachmentCount} ${conversation.attachmentCount! > 1 ? "images" : "image"}",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: LMBranding.instance.fonts.regular
+                                          .copyWith(
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                )
                               : (_message.isNotEmpty &&
                                       (hasAttachments ?? false))
-                                  ? Row(children: [
-                                      Icon(
-                                        Icons.attachment_outlined,
-                                        color: kGreyColor,
-                                        size: 12.sp,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          "${conversation.attachmentCount} ${conversation.attachmentCount! > 1 ? "images" : "image"}",
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: LMBranding
-                                              .instance.fonts.regular
-                                              .copyWith(
-                                            fontSize: 10.sp,
-                                            fontWeight: FontWeight.normal,
+                                  ? Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.camera_alt,
+                                          color: kGreyColor,
+                                          size: 12.sp,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            "${conversation.attachmentCount} ${conversation.attachmentCount! > 1 ? "images" : "image"}",
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: LMBranding
+                                                .instance.fonts.regular
+                                                .copyWith(
+                                              fontSize: 10.sp,
+                                              fontWeight: FontWeight.normal,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ])
+                                      ],
+                                    )
                                   : Text(
                                       conversation.state != 0
                                           ? TaggingHelper.extractStateMessage(

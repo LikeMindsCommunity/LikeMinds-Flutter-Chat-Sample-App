@@ -28,15 +28,19 @@ Widget mediaErrorWidget() {
   );
 }
 
-Widget mediaShimmer() {
+Widget mediaShimmer({bool? isPP}) {
   return Shimmer.fromColors(
-    baseColor: Colors.black26,
-    highlightColor: Colors.black12,
-    child: Container(
-      color: Colors.white,
-      width: 60.w,
-      height: 60.w,
-    ),
+    baseColor: Colors.grey.shade100,
+    highlightColor: Colors.grey.shade200,
+    period: const Duration(seconds: 2),
+    direction: ShimmerDirection.ltr,
+    child: isPP != null && isPP
+        ? const CircleAvatar(backgroundColor: Colors.white)
+        : Container(
+            color: Colors.white,
+            width: 60.w,
+            height: 60.w,
+          ),
   );
 }
 
