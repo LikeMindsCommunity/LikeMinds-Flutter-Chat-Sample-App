@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
@@ -40,14 +41,14 @@ class _MediaPreviewState extends State<MediaPreview> {
       ),
       body: Column(
         children: <Widget>[
-          const Spacer(),
           CarouselSlider.builder(
             options: CarouselOptions(
-                aspectRatio: 1,
                 clipBehavior: Clip.hardEdge,
                 scrollDirection: Axis.horizontal,
                 initialPage: 0,
+                enlargeCenterPage: false,
                 enableInfiniteScroll: false,
+                height: 80.h,
                 enlargeFactor: 0.0,
                 viewportFraction: 1.0,
                 onPageChanged: (index, reason) {
@@ -56,11 +57,12 @@ class _MediaPreviewState extends State<MediaPreview> {
                 }),
             itemCount: widget.conversationAttachments!.length,
             itemBuilder: (context, index, realIndex) => AspectRatio(
-              aspectRatio: 1,
-              child: Image.network(
-                widget.conversationAttachments![index]['file_url'] ??
+              aspectRatio: widget.conversationAttachments![index]["width"] /
+                  widget.conversationAttachments![index]['height'],
+              child: CachedNetworkImage(
+                imageUrl: widget.conversationAttachments![index]['file_url'] ??
                     widget.conversationAttachments![index]['url'],
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -97,7 +99,6 @@ class _MediaPreviewState extends State<MediaPreview> {
                   ],
                 );
               }),
-          const Spacer(),
         ],
       ),
     );

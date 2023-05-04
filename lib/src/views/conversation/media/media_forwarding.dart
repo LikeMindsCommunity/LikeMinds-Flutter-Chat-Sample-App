@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
@@ -39,6 +40,7 @@ class _MediaForwardState extends State<MediaForward> {
   int currPosition = 0;
   CarouselController controller = CarouselController();
   ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
+  ChatActionBloc? chatActionBloc;
 
   List<UserTag> userTags = [];
   String? result;
@@ -61,143 +63,31 @@ class _MediaForwardState extends State<MediaForward> {
 
   @override
   Widget build(BuildContext context) {
-    ChatActionBloc chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
-    return Scaffold(
-      backgroundColor: kBlackColor,
-      appBar: AppBar(
+    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
+    return WillPopScope(
+      onWillPop: () {
+        router.pop();
+        return Future.value(true);
+      },
+      child: Scaffold(
         backgroundColor: kBlackColor,
-        leading: IconButton(
-          onPressed: () {
-            context.pop();
-          },
-          icon: const Icon(
-            Icons.arrow_back,
-          ),
-        ),
-        elevation: 0,
-      ),
-      bottomSheet: Container(
-        decoration: const BoxDecoration(
-            color: kBlackColor,
-            border: Border(
-              top: BorderSide(
-                color: kGreyColor,
-                width: 0.1,
-              ),
-            )),
-        padding: const EdgeInsets.symmetric(vertical: 12.5, horizontal: 5.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            GestureDetector(
-              onTap: () async {
-                if (await handlePermissions(1)) {
-                  List<XFile>? pickedImage = await imagePicker.pickMultiImage();
-                  if (mediaList.length + pickedImage.length > 10) {
-                    Fluttertoast.showToast(
-                        msg: 'Only 10 attachments can be sent');
-                    return;
-                  }
-                  if (pickedImage.isNotEmpty) {
-                    for (XFile xImage in pickedImage) {
-                      int fileBytes = await xImage.length();
-                      if (getFileSizeInDouble(fileBytes) > 100) {
-                        Fluttertoast.showToast(
-                          msg: 'File size should be smaller than 100MB',
-                        );
-                        return;
-                      }
-                      File file = File(xImage.path);
-                      ui.Image image =
-                          await decodeImageFromList(file.readAsBytesSync());
-                      Media media = Media(
-                        mediaType: MediaType.photo,
-                        height: image.height,
-                        width: image.width,
-                        mediaFile: file,
-                        size: fileBytes,
-                      );
-                      mediaList.add(media);
-                    }
-                  }
-                  setState(() {});
-                }
-              },
-              child: SizedBox(
-                width: 10.w,
-                height: 10.w,
-                child: Icon(
-                  Icons.add_a_photo,
-                  color: kWhiteColor,
-                  size: 24.sp,
-                ),
-              ),
+        appBar: AppBar(
+          backgroundColor: kBlackColor,
+          leading: IconButton(
+            onPressed: () {
+              context.pop();
+            },
+            icon: const Icon(
+              Icons.arrow_back,
             ),
-            Expanded(
-              child: TaggingAheadTextField(
-                isDown: false,
-                chatroomId: widget.chatroomId,
-                style: LMTheme.regular.copyWith(color: kWhiteColor),
-                onTagSelected: (tag) {
-                  print(tag);
-                  userTags.add(tag);
-                },
-                onChange: (value) {
-                  print(value);
-                },
-                controller: _textEditingController,
-                focusNode: FocusNode(),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                context.pop();
-                final string = _textEditingController.text;
-                userTags = TaggingHelper.matchTags(string, userTags);
-                result = TaggingHelper.encodeString(string, userTags);
-                result = result?.trim();
-                chatActionBloc.add(
-                  PostMultiMediaConversation(
-                    (PostConversationRequestBuilder()
-                          ..attachmentCount(1)
-                          ..chatroomId(widget.chatroomId)
-                          ..temporaryId(
-                              DateTime.now().millisecondsSinceEpoch.toString())
-                          ..text(result!)
-                          ..hasFiles(true))
-                        .build(),
-                    mediaList,
-                  ),
-                );
-              },
-              child: Container(
-                width: 12.w,
-                height: 12.w,
-                decoration: BoxDecoration(
-                  color: LMTheme.buttonColor,
-                  borderRadius: BorderRadius.circular(
-                    100.0,
-                  ),
-                ),
-                child: Icon(
-                  Icons.send,
-                  color: kWhiteColor,
-                  size: 24.sp,
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-      body: Column(
-        children: <Widget>[
-          const Spacer(),
-          Align(
-            alignment: Alignment.center,
-            child: getMediaPreview(),
           ),
-          const Spacer(),
-        ],
+          elevation: 0,
+        ),
+        body: ValueListenableBuilder(
+            valueListenable: rebuildCurr,
+            builder: (context, _, __) {
+              return getMediaPreview();
+            }),
       ),
     );
   }
@@ -205,63 +95,165 @@ class _MediaForwardState extends State<MediaForward> {
   Widget getMediaPreview() {
     if (mediaList.first.mediaType == MediaType.photo) {
       return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CarouselSlider.builder(
-            options: CarouselOptions(
-              aspectRatio: 1,
-              clipBehavior: Clip.hardEdge,
-              scrollDirection: Axis.horizontal,
-              initialPage: 0,
-              enableInfiniteScroll: false,
-              enlargeFactor: 0.0,
-              viewportFraction: 1.0,
-              onPageChanged: (index, reason) {
-                currPosition = index;
-                rebuildCurr.value = !rebuildCurr.value;
-              },
-            ),
-            itemCount: mediaList.length,
-            itemBuilder: (context, index, realIndex) => AspectRatio(
-              aspectRatio: 1,
-              child: Image.file(
-                mediaList[index].mediaFile!,
-                fit: BoxFit.cover,
-              ),
-            ),
+          Expanded(
+            child: AspectRatio(
+                aspectRatio: mediaList[currPosition].width! /
+                    mediaList[currPosition].height!,
+                child: Image.file(mediaList[currPosition].mediaFile!)),
           ),
-          ValueListenableBuilder(
-              valueListenable: rebuildCurr,
-              builder: (context, _, __) {
-                return Column(
-                  children: [
-                    checkIfMultipleAttachments()
-                        ? kVerticalPaddingMedium
-                        : const SizedBox(),
-                    checkIfMultipleAttachments()
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: mediaList.map((url) {
-                              int index = mediaList.indexOf(url);
-                              return Container(
-                                width: 8.0,
-                                height: 8.0,
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 7.0, horizontal: 2.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: currPosition == index
-                                      ? const Color.fromRGBO(255, 255, 255, 0.9)
-                                      : const Color.fromRGBO(
-                                          255, 255, 255, 0.4),
-                                ),
+          Container(
+            decoration: const BoxDecoration(
+                color: kBlackColor,
+                border: Border(
+                  top: BorderSide(
+                    color: kGreyColor,
+                    width: 0.1,
+                  ),
+                )),
+            padding:
+                const EdgeInsets.symmetric(vertical: 12.5, horizontal: 5.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    GestureDetector(
+                      onTap: () async {
+                        if (await handlePermissions(1)) {
+                          List<XFile>? pickedImage =
+                              await imagePicker.pickMultiImage();
+                          if (mediaList.length + pickedImage.length > 10) {
+                            Fluttertoast.showToast(
+                                msg: 'Only 10 attachments can be sent');
+                            return;
+                          }
+                          if (pickedImage.isNotEmpty) {
+                            for (XFile xImage in pickedImage) {
+                              int fileBytes = await xImage.length();
+                              if (getFileSizeInDouble(fileBytes) > 100) {
+                                Fluttertoast.showToast(
+                                  msg: 'File size should be smaller than 100MB',
+                                );
+                                return;
+                              }
+                              File file = File(xImage.path);
+                              ui.Image image = await decodeImageFromList(
+                                  file.readAsBytesSync());
+                              Media media = Media(
+                                mediaType: MediaType.photo,
+                                height: image.height,
+                                width: image.width,
+                                mediaFile: file,
+                                size: fileBytes,
                               );
-                            }).toList())
-                        : const SizedBox(),
+                              mediaList.add(media);
+                            }
+                          }
+                          setState(() {});
+                        }
+                      },
+                      child: SizedBox(
+                        width: 10.w,
+                        height: 10.w,
+                        child: Icon(
+                          Icons.add_a_photo,
+                          color: kWhiteColor,
+                          size: 24.sp,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: TaggingAheadTextField(
+                        isDown: false,
+                        chatroomId: widget.chatroomId,
+                        style: LMTheme.regular.copyWith(color: kWhiteColor),
+                        onTagSelected: (tag) {
+                          print(tag);
+                          userTags.add(tag);
+                        },
+                        onChange: (value) {
+                          print(value);
+                        },
+                        controller: _textEditingController,
+                        focusNode: FocusNode(),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        router.pop();
+                        final string = _textEditingController.text;
+                        userTags = TaggingHelper.matchTags(string, userTags);
+                        result = TaggingHelper.encodeString(string, userTags);
+                        result = result?.trim();
+                        chatActionBloc!.add(
+                          PostMultiMediaConversation(
+                            (PostConversationRequestBuilder()
+                                  ..attachmentCount(1)
+                                  ..chatroomId(widget.chatroomId)
+                                  ..temporaryId(DateTime.now()
+                                      .millisecondsSinceEpoch
+                                      .toString())
+                                  ..text(result!)
+                                  ..hasFiles(true))
+                                .build(),
+                            mediaList,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 12.w,
+                        height: 12.w,
+                        decoration: BoxDecoration(
+                          color: LMTheme.buttonColor,
+                          borderRadius: BorderRadius.circular(
+                            100.0,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.send,
+                          color: kWhiteColor,
+                          size: 24.sp,
+                        ),
+                      ),
+                    )
                   ],
-                );
-              }),
+                ),
+                checkIfMultipleAttachments()
+                    ? SizedBox(
+                        height: 15.w,
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: mediaList.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) => GestureDetector(
+                            onTap: () {
+                              currPosition = index;
+                              rebuildCurr.value = !rebuildCurr.value;
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 6.0),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                  border: currPosition == index
+                                      ? Border.all(
+                                          color: LMTheme.buttonColor,
+                                          width: 5.0)
+                                      : null),
+                              width: 15.w,
+                              height: 15.w,
+                              child: Image.file(
+                                mediaList[index].mediaFile!,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
+              ],
+            ),
+          )
         ],
       );
     } else if (mediaList.first.mediaType == MediaType.document) {
