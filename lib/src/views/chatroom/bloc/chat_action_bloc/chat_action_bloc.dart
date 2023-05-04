@@ -76,6 +76,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         conversation: event.replyConversation,
       ));
     });
+    on<ReplyRemove>((event, emit) => emit(ReplyRemoveState()));
   }
 
   mapPostMultiMediaConversation(

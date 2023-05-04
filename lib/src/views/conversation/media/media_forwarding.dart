@@ -189,7 +189,7 @@ class _MediaForwardState extends State<MediaForward> {
                         chatActionBloc!.add(
                           PostMultiMediaConversation(
                             (PostConversationRequestBuilder()
-                                  ..attachmentCount(1)
+                                  ..attachmentCount(mediaList.length)
                                   ..chatroomId(widget.chatroomId)
                                   ..temporaryId(DateTime.now()
                                       .millisecondsSinceEpoch

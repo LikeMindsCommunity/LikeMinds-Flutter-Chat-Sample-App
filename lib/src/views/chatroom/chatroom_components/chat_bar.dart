@@ -20,10 +20,6 @@ import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.da
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
-import 'package:overlay_support/overlay_support.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:pdf_render/pdf_render.dart';
-import 'package:pdf_render/pdf_render_widgets.dart';
 
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
@@ -163,9 +159,7 @@ class _ChatBarState extends State<ChatBar> {
                       ),
                       IconButton(
                         onPressed: () {
-                          setState(() {
-                            widget.replyToConversation = null;
-                          });
+                          chatActionBloc!.add(ReplyRemove());
                         },
                         icon: const Icon(
                           Icons.close,

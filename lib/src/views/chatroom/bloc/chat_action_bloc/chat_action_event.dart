@@ -101,3 +101,8 @@ class ReplyConversation extends ChatActionEvent {
         replyConversation,
       ];
 }
+
+class ReplyRemove extends ChatActionEvent {
+  @override
+  List<Object> get props => [];
+}

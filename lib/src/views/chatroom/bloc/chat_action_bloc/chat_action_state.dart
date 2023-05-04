@@ -137,3 +137,8 @@ class ReplyConversationState extends ChatActionState {
         conversationId,
       ];
 }
+
+class ReplyRemoveState extends ChatActionState {
+  @override
+  List<Object> get props => [];
+}
