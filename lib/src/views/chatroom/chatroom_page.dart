@@ -44,7 +44,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
   Map<String, List<Media>> mediaFiles = <String, List<Media>>{};
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
-  ConversationBloc? conversationBloc;
+  final ConversationBloc conversationBloc = ConversationBloc();
   Map<int, User?> userMeta = <int, User?>{};
   ChatRoom? chatroom;
   ValueNotifier rebuildChatBar = ValueNotifier(false);
@@ -69,10 +69,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
       _showScrollToBottomButton();
     });
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
-    conversationBloc = ConversationBloc()
-      ..add(
-        MarkReadChatroomEvent(chatroomId: widget.chatroomId),
-      );
+    // conversationBloc = ConversationBloc();
     isCm = UserLocalPreference.instance.fetchMemberState();
   }
 
@@ -87,7 +84,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
   _addPaginationListener() {
     pagedListController.addPageRequestListener(
       (pageKey) {
-        conversationBloc!.add(
+        conversationBloc.add(
           GetConversation(
             getConversationRequest: (GetConversationRequestBuilder()
                   ..chatroomId(widget.chatroomId)
@@ -252,6 +249,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
       value: SystemUiOverlayStyle.dark,
       child: WillPopScope(
         onWillPop: () async {
+          conversationBloc.add(
+            MarkReadChatroomEvent(chatroomId: widget.chatroomId),
+          );
           BlocProvider.of<HomeBloc>(context).add(UpdateHomeEvent());
           context.pop();
           return false;
@@ -362,7 +362,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 itemBuilder: (context, item, index) {
                                   if (item.isTimeStamp != null &&
                                           item.isTimeStamp! ||
-                                      item.state != 0) {
+                                      item.state != 0 && item.state != null) {
                                     return Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -370,7 +370,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                         Container(
                                           width: item.isTimeStamp == null ||
                                                   !item.isTimeStamp!
-                                              ? 80.w
+                                              ? 70.w
                                               : 35.w,
                                           margin: const EdgeInsets.symmetric(
                                               vertical: 5),
@@ -636,8 +636,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       ),
                       Expanded(
                         child: Container(
-                          color:
-                              LMBranding.instance.headerColor.withOpacity(0.2),
+                          color: kGreyColor.withOpacity(0.2),
                           child: pagedListView,
                         ),
                       ),

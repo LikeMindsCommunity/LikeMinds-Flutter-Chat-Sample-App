@@ -156,6 +156,8 @@ class _HomePageState extends State<HomePage> {
                             physics: const ClampingScrollPhysics(),
                             builderDelegate:
                                 PagedChildBuilderDelegate<ChatItem>(
+                              newPageProgressIndicatorBuilder: (_) =>
+                                  const SizedBox(),
                               noItemsFoundIndicatorBuilder: (context) =>
                                   const SizedBox(),
                               itemBuilder: (context, item, index) {
