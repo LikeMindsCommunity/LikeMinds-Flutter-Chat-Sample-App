@@ -60,82 +60,68 @@ class _ChatItemState extends State<ChatItem> {
     bool? hasAttachments = conversation.hasFiles;
     String? _avatarUrl = chatroom.chatroomImageUrl;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        LMRealtime.instance.chatroomId = chatroom.id;
-        context.push("/chatroom/${chatroom.id}");
-        markRead(toast: false);
-      },
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 5.w,
-          right: 5.w,
-          // top: 1.h,
-        ),
-        child: SizedBox(
-          width: getWidth(context),
-          height: 10.h,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PictureOrInitial(
-                fallbackText: _name,
-                imageUrl: _avatarUrl,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            LMRealtime.instance.chatroomId = chatroom.id;
+            context.push("/chatroom/${chatroom.id}");
+            markRead(toast: false);
+          },
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 5.w,
+              right: 5.w,
+              // top: 1.h,
+            ),
+            child: SizedBox(
+              width: getWidth(context),
+              height: 9.5.h,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  PictureOrInitial(
+                    fallbackText: _name,
+                    imageUrl: _avatarUrl,
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Flexible(
-                            child: Text(
-                              _name,
-                              style: LMBranding.instance.fonts.medium.copyWith(
-                                fontSize: 12.sp,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Visibility(
-                            visible: _isSecret,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 3.w),
-                              child: Icon(
-                                Icons.lock_outline,
-                                color: kGreyColor,
-                                size: 16.sp,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      (_message.isEmpty && (hasAttachments ?? false))
-                          ? Row(children: [
-                              Icon(
-                                Icons.attachment_outlined,
-                                color: kGreyColor,
-                                size: 12.sp,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Attachment",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style:
-                                    LMBranding.instance.fonts.regular.copyWith(
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.normal,
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  _name,
+                                  style:
+                                      LMBranding.instance.fonts.medium.copyWith(
+                                    fontSize: 12.sp,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ])
-                          : (_message.isNotEmpty && (hasAttachments ?? false))
+                              Visibility(
+                                visible: _isSecret,
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 3.w),
+                                  child: Icon(
+                                    Icons.lock_outline,
+                                    color: kGreyColor,
+                                    size: 16.sp,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          (_message.isEmpty && (hasAttachments ?? false))
                               ? Row(children: [
                                   Icon(
                                     Icons.attachment_outlined,
@@ -143,88 +129,118 @@ class _ChatItemState extends State<ChatItem> {
                                     size: 12.sp,
                                   ),
                                   const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _message,
+                                  Text(
+                                    "Attachment",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: LMBranding.instance.fonts.regular
+                                        .copyWith(
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ])
+                              : (_message.isNotEmpty &&
+                                      (hasAttachments ?? false))
+                                  ? Row(children: [
+                                      Icon(
+                                        Icons.attachment_outlined,
+                                        color: kGreyColor,
+                                        size: 12.sp,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _message,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: LMBranding
+                                              .instance.fonts.regular
+                                              .copyWith(
+                                            fontSize: 10.sp,
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                    ])
+                                  : Text(
+                                      conversation.state == 1
+                                          ? TaggingHelper.extractHeaderText(
+                                              _message)
+                                          : _message,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: LMBranding.instance.fonts.regular
                                           .copyWith(
                                         fontSize: 10.sp,
                                         fontWeight: FontWeight.normal,
+                                        fontStyle: _message.contains("deleted")
+                                            ? FontStyle.italic
+                                            : FontStyle.normal,
                                       ),
-                                    ),
-                                  ),
-                                ])
-                              : Text(
-                                  conversation.state == 1
-                                      ? TaggingHelper.extractHeaderText(
-                                          _message)
-                                      : _message,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: LMBranding.instance.fonts.regular
-                                      .copyWith(
-                                    fontSize: 10.sp,
-                                    fontWeight: FontWeight.normal,
-                                    fontStyle: _message.contains("deleted")
-                                        ? FontStyle.italic
-                                        : FontStyle.normal,
-                                  ),
-                                )
-                    ],
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: _muteStatus,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 3.w),
-                  child: Icon(
-                    Icons.volume_off_outlined,
-                    color: kGreyColor,
-                    size: 16.sp,
-                  ),
-                ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    getTime(_time),
-                    style: LMBranding.instance.fonts.regular.copyWith(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w300,
+                                    )
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 6),
                   Visibility(
-                    visible: _unreadCount != 0,
-                    child: Container(
-                      width: 20.sp,
-                      height: 20.sp,
-                      decoration: BoxDecoration(
-                        color: LMTheme.buttonColor,
-                        borderRadius: BorderRadius.circular(20.sp),
+                    visible: _muteStatus,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 3.w),
+                      child: Icon(
+                        Icons.volume_off_outlined,
+                        color: kGreyColor,
+                        size: 16.sp,
                       ),
-                      child: Center(
-                        child: Text(
-                          _unreadCount! > 99 ? '99+' : _unreadCount.toString(),
-                          style: LMTheme.regular.copyWith(
-                            color: kWhiteColor,
-                            fontSize: _unreadCount! > 99 ? 7.5.sp : 10.sp,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        getTime(_time),
+                        style: LMBranding.instance.fonts.regular.copyWith(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Visibility(
+                        visible: _unreadCount != 0,
+                        child: Container(
+                          width: 20.sp,
+                          height: 20.sp,
+                          decoration: BoxDecoration(
+                            color: LMTheme.buttonColor,
+                            borderRadius: BorderRadius.circular(20.sp),
+                          ),
+                          child: Center(
+                            child: Text(
+                              _unreadCount! > 99
+                                  ? '99+'
+                                  : _unreadCount.toString(),
+                              style: LMTheme.regular.copyWith(
+                                color: kWhiteColor,
+                                fontSize: _unreadCount! > 99 ? 7.5.sp : 10.sp,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    ],
+                  )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
         ),
-      ),
+        Divider(
+          indent: 68.sp,
+          thickness: 0.2,
+          color: kGreyColor,
+        ),
+      ],
     );
   }
 

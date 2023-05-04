@@ -49,7 +49,6 @@ class ChatBubble extends StatefulWidget {
 
 class _ChatBubbleState extends State<ChatBubble> {
   List reactions = [];
-  late User user;
   late final EmojiParser emojiParser;
   late final CustomPopupMenuController _controller;
   late bool isSent;
@@ -68,8 +67,8 @@ class _ChatBubbleState extends State<ChatBubble> {
   void initState() {
     super.initState();
     emojiParser = EmojiParser();
-    user = UserLocalPreference.instance.fetchUserData();
-    isSent = widget.sender.id == user.id;
+    // user = UserLocalPreference.instance.fetchUserData();
+    isSent = widget.sender.id == loggedInUser.id;
     _controller = CustomPopupMenuController();
     conversation = widget.conversation;
     replyToConversation = widget.replyToConversation;
@@ -87,6 +86,17 @@ class _ChatBubbleState extends State<ChatBubble> {
     _controller.dispose();
     _isSelected.dispose();
     super.dispose();
+  }
+
+  bool checkDeletePermissions() {
+    if (isCm && conversation.deletedByUserId != null) {
+      return true;
+    } else if (loggedInUser.id == widget.sender.id &&
+        conversation.deletedByUserId != null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -133,8 +143,8 @@ class _ChatBubbleState extends State<ChatBubble> {
             key: ValueKey(conversation.id),
             onSwipe: (direction) {
               int userId = conversation.userId ?? conversation.memberId!;
-              if (userId == user.id) {
-                conversation.member = user;
+              if (userId == loggedInUser.id) {
+                conversation.member = loggedInUser;
               }
               widget.onReply(conversation);
             },
@@ -220,7 +230,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ),
                         ),
                         Visibility(
-                          visible: isCm || loggedInUser.id == user.id,
+                          visible: checkDeletePermissions(),
                           child: ListTile(
                             onTap: () async {
                               final response = await locator<LikeMindsService>()
@@ -379,10 +389,22 @@ class _ChatBubbleState extends State<ChatBubble> {
                                             ),
                                             kVerticalPaddingXSmall,
                                             Text(
-                                              TaggingHelper.convertRouteToTag(
+                                              replyToConversation?.answer !=
+                                                          null &&
                                                       replyToConversation
-                                                          ?.answer) ??
-                                                  "",
+                                                              ?.answer
+                                                              .isNotEmpty ==
+                                                          true
+                                                  ? TaggingHelper
+                                                          .convertRouteToTag(
+                                                              replyToConversation
+                                                                  ?.answer) ??
+                                                      ""
+                                                  : replyToConversation
+                                                              ?.hasFiles ??
+                                                          false
+                                                      ? "${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
+                                                      : "",
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
                                               style: LMTheme.regular.copyWith(
@@ -426,7 +448,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                             ),
                                           )
                                         : Text(
-                                            "This message was deleted by the CM",
+                                            "This message was deleted by the Community Manager",
                                             style: LMFonts.instance.regular
                                                 .copyWith(
                                               fontSize: 9.sp,
@@ -442,23 +464,13 @@ class _ChatBubbleState extends State<ChatBubble> {
                                                 null &&
                                             widget.conversation
                                                 .attachmentsUploaded!))
-                                    ? Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Text(
-                                              widget.conversation.createdAt,
-                                              style: LMFonts.instance.regular
-                                                  .copyWith(
-                                                fontSize: 8.sp,
-                                                color: kGreyColor,
-                                              ),
-                                            ),
-                                          )
-                                        ],
+                                    ? Text(
+                                        widget.conversation.createdAt,
+                                        style:
+                                            LMFonts.instance.regular.copyWith(
+                                          fontSize: 8.sp,
+                                          color: kGreyColor,
+                                        ),
                                       )
                                     : Icon(
                                         Icons.timer_outlined,

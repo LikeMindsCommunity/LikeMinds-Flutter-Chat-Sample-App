@@ -452,7 +452,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         ]),
                         child: Column(
                           children: <Widget>[
-                            kVerticalPaddingSmall,
+                            kVerticalPaddingMedium,
                             ValueListenableBuilder(
                               valueListenable: showConversationActions,
                               builder: (BuildContext context, dynamic value,
@@ -518,8 +518,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                   );
                                 } else {
                                   return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 24),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 4.w,
+                                      vertical: 0.8.h,
+                                    ),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
