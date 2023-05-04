@@ -40,70 +40,76 @@ class _MediaPreviewState extends State<MediaPreview> {
         ),
         elevation: 0,
       ),
-      body: Column(
-        children: <Widget>[
-          CarouselSlider.builder(
-            options: CarouselOptions(
-                clipBehavior: Clip.hardEdge,
-                scrollDirection: Axis.horizontal,
-                initialPage: 0,
-                enlargeCenterPage: false,
-                enableInfiniteScroll: false,
-                height: 85.h,
-                enlargeFactor: 0.0,
-                viewportFraction: 1.0,
-                onPageChanged: (index, reason) {
-                  currPosition = index;
-                  rebuildCurr.value = !rebuildCurr.value;
-                }),
-            itemCount: widget.conversationAttachments!.length,
-            itemBuilder: (context, index, realIndex) => AspectRatio(
-              aspectRatio: widget.conversationAttachments![index]["width"] /
-                  widget.conversationAttachments![index]['height'],
-              child: CachedNetworkImage(
-                imageUrl: widget.conversationAttachments![index]['file_url'] ??
-                    widget.conversationAttachments![index]['url'],
-                errorWidget: (context, url, error) => mediaErrorWidget(),
-                progressIndicatorBuilder: (context, url, progress) =>
-                    mediaShimmer(),
-                fit: BoxFit.contain,
+      body: SafeArea(
+        bottom: true,
+        top: false,
+        child: Column(
+          children: <Widget>[
+            CarouselSlider.builder(
+              options: CarouselOptions(
+                  clipBehavior: Clip.hardEdge,
+                  scrollDirection: Axis.horizontal,
+                  initialPage: 0,
+                  enlargeCenterPage: false,
+                  enableInfiniteScroll: false,
+                  height: 85.h,
+                  enlargeFactor: 0.0,
+                  viewportFraction: 1.0,
+                  onPageChanged: (index, reason) {
+                    currPosition = index;
+                    rebuildCurr.value = !rebuildCurr.value;
+                  }),
+              itemCount: widget.conversationAttachments!.length,
+              itemBuilder: (context, index, realIndex) => AspectRatio(
+                aspectRatio: widget.conversationAttachments![index]["width"] /
+                    widget.conversationAttachments![index]['height'],
+                child: CachedNetworkImage(
+                  imageUrl: widget.conversationAttachments![index]
+                          ['file_url'] ??
+                      widget.conversationAttachments![index]['url'],
+                  errorWidget: (context, url, error) => mediaErrorWidget(),
+                  progressIndicatorBuilder: (context, url, progress) =>
+                      mediaShimmer(),
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
-          ValueListenableBuilder(
-              valueListenable: rebuildCurr,
-              builder: (context, _, __) {
-                return Column(
-                  children: [
-                    checkIfMultipleAttachments()
-                        ? kVerticalPaddingMedium
-                        : const SizedBox(),
-                    checkIfMultipleAttachments()
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children:
-                                widget.conversationAttachments!.map((url) {
-                              int index =
-                                  widget.conversationAttachments!.indexOf(url);
-                              return Container(
-                                width: 8.0,
-                                height: 8.0,
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 7.0, horizontal: 2.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: currPosition == index
-                                      ? const Color.fromRGBO(255, 255, 255, 0.9)
-                                      : const Color.fromRGBO(
-                                          255, 255, 255, 0.4),
-                                ),
-                              );
-                            }).toList())
-                        : const SizedBox(),
-                  ],
-                );
-              }),
-        ],
+            ValueListenableBuilder(
+                valueListenable: rebuildCurr,
+                builder: (context, _, __) {
+                  return Column(
+                    children: [
+                      checkIfMultipleAttachments()
+                          ? kVerticalPaddingMedium
+                          : const SizedBox(),
+                      checkIfMultipleAttachments()
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children:
+                                  widget.conversationAttachments!.map((url) {
+                                int index = widget.conversationAttachments!
+                                    .indexOf(url);
+                                return Container(
+                                  width: 8.0,
+                                  height: 8.0,
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 7.0, horizontal: 2.0),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: currPosition == index
+                                        ? const Color.fromRGBO(
+                                            255, 255, 255, 0.9)
+                                        : const Color.fromRGBO(
+                                            255, 255, 255, 0.4),
+                                  ),
+                                );
+                              }).toList())
+                          : const SizedBox(),
+                    ],
+                  );
+                }),
+          ],
+        ),
       ),
     );
   }

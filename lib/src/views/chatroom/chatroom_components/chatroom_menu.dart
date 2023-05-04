@@ -147,6 +147,7 @@ class ChatroomMenu extends StatelessWidget {
         value: false,
       ));
       if (response.success) {
+        chatroom.isGuest = true;
         // _controller.hideMenu();
         Fluttertoast.showToast(msg: "Chatroom left");
         _controller.hideMenu();
@@ -162,6 +163,7 @@ class ChatroomMenu extends StatelessWidget {
                 ..isSecret(true))
               .build());
       if (response.success) {
+        chatroom.isGuest = true;
         // _controller.hideMenu();
         Fluttertoast.showToast(msg: "Chatroom left");
         _controller.hideMenu();

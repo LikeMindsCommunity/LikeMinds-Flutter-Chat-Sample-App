@@ -47,18 +47,13 @@ class PictureOrInitial extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) => Container(
-                  height: size ?? 42.sp,
-                  width: size ?? 42.sp,
+                progressIndicatorBuilder: (context, url, progress) => Container(
+                  clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
-                    color: kGreyColor,
-                    borderRadius: BorderRadius.circular(
-                      size ?? 42.sp,
-                    ),
+                    borderRadius: BorderRadius.circular(21.sp),
                   ),
+                  child: mediaShimmer(),
                 ),
-                progressIndicatorBuilder: (context, url, progress) =>
-                    mediaShimmer(),
                 errorWidget: (context, url, error) => mediaErrorWidget(),
               )
             : Text(

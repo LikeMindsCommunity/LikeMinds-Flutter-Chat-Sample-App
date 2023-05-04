@@ -605,6 +605,11 @@ class _ChatBarState extends State<ChatBar> {
                                                 .millisecondsSinceEpoch
                                                 .toString()))
                                           .build()));
+                                  if (widget.chatroom.isGuest ?? false) {
+                                    Fluttertoast.showToast(
+                                        msg: "Chatroom joined");
+                                    widget.chatroom.isGuest = false;
+                                  }
                                   _textEditingController.clear();
                                   userTags = [];
                                   result = "";
