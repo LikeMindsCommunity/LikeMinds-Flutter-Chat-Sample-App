@@ -143,8 +143,8 @@ class _ChatBubbleState extends State<ChatBubble> {
             key: ValueKey(conversation.id),
             onSwipe: (direction) {
               int userId = conversation.userId ?? conversation.memberId!;
-              if (userId == user.id) {
-                conversation.member = user;
+              if (userId == loggedInUser.id) {
+                conversation.member = loggedInUser;
               }
               widget.onReply(conversation);
             },
