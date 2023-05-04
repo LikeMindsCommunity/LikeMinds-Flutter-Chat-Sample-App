@@ -146,6 +146,9 @@ class _ChatBubbleState extends State<ChatBubble> {
               if (userId == loggedInUser.id) {
                 conversation.member = loggedInUser;
               }
+              if (conversation.deletedByUserId != null) {
+                return;
+              }
               widget.onReply(conversation);
             },
             background: Container(
