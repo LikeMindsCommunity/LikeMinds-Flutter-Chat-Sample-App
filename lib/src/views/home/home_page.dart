@@ -111,7 +111,9 @@ class _HomePageState extends State<HomePage> {
                     fallbackText: userName ?? "..",
                     size: 30.sp,
                     imageUrl: user?.imageUrl,
-                    backgroundColor: kSecondaryColor,
+                    backgroundColor: LMTheme.buttonColor == LMTheme.headerColor
+                        ? kSecondaryColor
+                        : LMTheme.buttonColor,
                   ),
                 ],
               ),

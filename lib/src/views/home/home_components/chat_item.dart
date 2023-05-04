@@ -124,7 +124,7 @@ class _ChatItemState extends State<ChatItem> {
                           (hasAttachments ?? false)
                               ? Row(children: [
                                   Icon(
-                                    Icons.attachment_outlined,
+                                    Icons.camera_alt,
                                     color: kGreyColor,
                                     size: 12.sp,
                                   ),

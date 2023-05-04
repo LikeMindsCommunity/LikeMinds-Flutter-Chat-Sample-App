@@ -30,8 +30,8 @@ class PictureOrInitial extends StatelessWidget {
       width: size ?? 42.sp,
       decoration: BoxDecoration(
         color: LMTheme.headerColor == LMTheme.buttonColor
-            ? backgroundColor ?? LMTheme.headerColor
-            : LMTheme.headerColor,
+            ? backgroundColor ?? LMTheme.buttonColor
+            : backgroundColor ?? LMTheme.headerColor,
         borderRadius: BorderRadius.circular(21.sp),
       ),
       child: Center(
