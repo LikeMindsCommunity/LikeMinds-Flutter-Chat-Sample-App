@@ -7,6 +7,7 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:overlay_support/overlay_support.dart';
 
@@ -63,7 +64,6 @@ class ChatroomMenu extends StatelessWidget {
   Widget? getListTile(ChatroomAction action) {
     return ListTile(
       onTap: () {
-        _controller.hideMenu();
         performAction(action);
       },
       title: Text(
@@ -83,6 +83,7 @@ class ChatroomMenu extends StatelessWidget {
     switch (action.id) {
       case 2:
         // _controller.hideMenu();
+        _controller.hideMenu();
         router.push("/participants", extra: chatroom);
         break;
       case 6:
@@ -129,6 +130,7 @@ class ChatroomMenu extends StatelessWidget {
         return element;
       }).toList();
       rebuildChatroomMenu.value = !rebuildChatroomMenu.value;
+      _controller.hideMenu();
       homeBloc!.add(UpdateHomeEvent());
     } else {
       toast(response.errorMessage!);
@@ -136,16 +138,20 @@ class ChatroomMenu extends StatelessWidget {
   }
 
   void leaveChatroom() async {
+    final User user = UserLocalPreference.instance.fetchUserData();
     if (!(chatroom.isSecret ?? false)) {
       final response = await locator<LikeMindsService>()
           .followChatroom(FollowChatroomRequest(
         chatroomId: chatroom.id,
+        memberId: user.id,
         value: false,
       ));
       if (response.success) {
         // _controller.hideMenu();
         Fluttertoast.showToast(msg: "Chatroom left");
-        router.pop();
+        _controller.hideMenu();
+        homeBloc?.add(UpdateHomeEvent());
+        // router.pop();
       } else {
         Fluttertoast.showToast(msg: response.errorMessage!);
       }
@@ -158,6 +164,8 @@ class ChatroomMenu extends StatelessWidget {
       if (response.success) {
         // _controller.hideMenu();
         Fluttertoast.showToast(msg: "Chatroom left");
+        _controller.hideMenu();
+        homeBloc?.add(UpdateHomeEvent());
         router.pop();
       } else {
         Fluttertoast.showToast(msg: response.errorMessage!);
