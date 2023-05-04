@@ -205,6 +205,13 @@ class _MediaForwardState extends State<MediaForward> {
                         width: 12.w,
                         height: 12.w,
                         decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: kWhiteColor.withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
                           color: LMTheme.buttonColor,
                           borderRadius: BorderRadius.circular(
                             100.0,
