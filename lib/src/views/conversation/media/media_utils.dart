@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
@@ -75,13 +77,19 @@ Widget getChatBubbleImage(String url) {
 }
 
 Widget getImageMessage(
-    BuildContext context, List<dynamic>? conversationAttachments) {
+    BuildContext context,
+    List<dynamic>? conversationAttachments,
+    ChatRoom chatroom,
+    int conversationId) {
   if (conversationAttachments!.length == 1) {
     return GestureDetector(
       onTap: () {
-        context.pushNamed(
+        router.pushNamed(
           "media_preview",
-          extra: conversationAttachments,
+          extra: [conversationAttachments, chatroom],
+          params: {
+            'messageId': conversationId.toString(),
+          },
         );
       },
       child: Container(
@@ -107,7 +115,10 @@ Widget getImageMessage(
       onTap: () {
         context.pushNamed(
           "media_preview",
-          extra: conversationAttachments,
+          extra: [conversationAttachments, chatroom],
+          params: {
+            'messageId': conversationId.toString(),
+          },
         );
       },
       child: Row(
@@ -157,7 +168,10 @@ Widget getImageMessage(
       onTap: () {
         context.pushNamed(
           "media_preview",
-          extra: conversationAttachments,
+          extra: [conversationAttachments, chatroom],
+          params: {
+            'messageId': conversationId.toString(),
+          },
         );
       },
       child: Row(
@@ -204,7 +218,10 @@ Widget getImageMessage(
       onTap: () {
         context.pushNamed(
           "media_preview",
-          extra: conversationAttachments,
+          extra: [conversationAttachments, chatroom],
+          params: {
+            'messageId': conversationId.toString(),
+          },
         );
       },
       child: Column(
@@ -244,7 +261,10 @@ Widget getImageMessage(
       onTap: () {
         context.pushNamed(
           "media_preview",
-          extra: conversationAttachments,
+          extra: [conversationAttachments, chatroom],
+          params: {
+            'messageId': conversationId.toString(),
+          },
         );
       },
       child: Column(

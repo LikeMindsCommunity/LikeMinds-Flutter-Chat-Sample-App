@@ -73,12 +73,6 @@ class _ChatBubbleState extends State<ChatBubble> {
     conversation = widget.conversation;
     replyToConversation = widget.replyToConversation;
     isDeleted = conversation.deletedByUserId != null;
-    LMAnalytics.get().track(AnalyticsKeys.imageViewed, {
-      'chatroom_id': widget.chatroom.id,
-      'community_id': widget.chatroom.communityId,
-      'chatroom_type': widget.chatroom.type,
-      'message_id': widget.conversation.id,
-    });
   }
 
   @override
@@ -365,6 +359,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                                     color: kGreyColor.withOpacity(0.1),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
                                         Container(
                                           height: 6.h,
@@ -391,27 +387,31 @@ class _ChatBubbleState extends State<ChatBubble> {
                                               ),
                                             ),
                                             kVerticalPaddingXSmall,
-                                            Text(
-                                              replyToConversation?.answer !=
-                                                          null &&
-                                                      replyToConversation
-                                                              ?.answer
-                                                              .isNotEmpty ==
-                                                          true
-                                                  ? TaggingHelper
-                                                          .convertRouteToTag(
-                                                              replyToConversation
-                                                                  ?.answer) ??
-                                                      ""
-                                                  : replyToConversation
-                                                              ?.hasFiles ??
-                                                          false
-                                                      ? "${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
-                                                      : "",
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: LMTheme.regular.copyWith(
-                                                fontSize: 8.sp,
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                  maxWidth: 48.w),
+                                              child: Text(
+                                                replyToConversation?.answer !=
+                                                            null &&
+                                                        replyToConversation
+                                                                ?.answer
+                                                                .isNotEmpty ==
+                                                            true
+                                                    ? TaggingHelper
+                                                            .convertRouteToTag(
+                                                                replyToConversation
+                                                                    ?.answer) ??
+                                                        ""
+                                                    : replyToConversation
+                                                                ?.hasFiles ??
+                                                            false
+                                                        ? "${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
+                                                        : "",
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: LMTheme.regular.copyWith(
+                                                  fontSize: 8.sp,
+                                                ),
                                               ),
                                             ),
                                             const SizedBox(height: 6),
@@ -458,7 +458,11 @@ class _ChatBubbleState extends State<ChatBubble> {
                                               fontStyle: FontStyle.italic,
                                             ),
                                           )
-                                    : getContent(),
+                                    : replyToConversation != null
+                                        ? Align(
+                                            alignment: Alignment.topLeft,
+                                            child: getContent())
+                                        : getContent(),
                                 const SizedBox(height: 8),
                                 ((widget.conversation.hasFiles == null ||
                                             !widget.conversation.hasFiles!) ||
@@ -570,7 +574,12 @@ class _ChatBubbleState extends State<ChatBubble> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           if (widget.conversationAttachments!.first['type'] == 'image')
-            getImageMessage(context, widget.conversationAttachments!),
+            getImageMessage(
+              context,
+              widget.conversationAttachments!,
+              widget.chatroom,
+              widget.conversation.id,
+            ),
           widget.conversation.answer.isEmpty
               ? const SizedBox.shrink()
               : kVerticalPaddingMedium,

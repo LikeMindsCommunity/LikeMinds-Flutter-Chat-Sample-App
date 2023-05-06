@@ -385,10 +385,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                           ),
                                           alignment: Alignment.center,
                                           child: Text(
-                                            TaggingHelper.extractStateMessage(
-                                                item.answer),
-                                            textAlign: TextAlign.center,
-                                          ),
+                                              TaggingHelper.extractStateMessage(
+                                                  item.answer),
+                                              textAlign: TextAlign.center,
+                                              style: LMTheme.medium.copyWith(
+                                                fontSize: 9.sp,
+                                              )),
                                         )
                                       ],
                                     );

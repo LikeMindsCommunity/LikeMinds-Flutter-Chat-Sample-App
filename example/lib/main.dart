@@ -2,6 +2,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lm_chat_example/cred_screen.dart';
 import 'package:lm_chat_example/example_callback.dart';
 import 'package:lm_chat_example/firebase_options.dart';
@@ -22,6 +23,8 @@ Future<void> _handleNotification(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   LMChat.setupLMChat(
     apiKey: "fa66d879-dd67-4d49-be44-cf008d339558",
     lmCallBack: ExampleCallback(),

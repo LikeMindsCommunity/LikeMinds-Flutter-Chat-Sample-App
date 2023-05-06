@@ -28,7 +28,7 @@ const exploreRoute = '/explore';
 const profileRoute = '/profile';
 const moderationRoute = '/moderation';
 const mediaForwardRoute = '/media_forward/:chatroomId';
-const mediaPreviewRoute = '/media_preview';
+const mediaPreviewRoute = '/media_preview/:messageId';
 
 final router = GoRouter(
   routes: [
@@ -95,7 +95,10 @@ final router = GoRouter(
       path: mediaPreviewRoute,
       name: "media_preview",
       builder: (context, state) => MediaPreview(
-        conversationAttachments: state.extra as List<dynamic>,
+        conversationAttachments:
+            (state.extra as List<dynamic>)[0] as List<dynamic>,
+        chatroom: (state.extra as List<dynamic>)[1],
+        messageId: int.parse(state.params['messageId']!),
       ),
     ),
   ],

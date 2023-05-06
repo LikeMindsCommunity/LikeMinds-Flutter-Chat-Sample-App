@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
@@ -8,8 +10,15 @@ import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 
 class MediaPreview extends StatefulWidget {
   final List<dynamic>? conversationAttachments;
+  final int messageId;
+  final ChatRoom chatroom;
 
-  MediaPreview({Key? key, this.conversationAttachments}) : super(key: key);
+  MediaPreview({
+    Key? key,
+    this.conversationAttachments,
+    required this.chatroom,
+    required this.messageId,
+  }) : super(key: key);
 
   @override
   State<MediaPreview> createState() => _MediaPreviewState();
@@ -23,6 +32,18 @@ class _MediaPreviewState extends State<MediaPreview> {
   bool checkIfMultipleAttachments() {
     return (widget.conversationAttachments != null &&
         widget.conversationAttachments!.length > 1);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    LMAnalytics.get().track(AnalyticsKeys.imageViewed, {
+      'chatroom_id': widget.conversationAttachments!.first,
+      'community_id': widget.chatroom.communityId,
+      'chatroom_type': widget.chatroom.type,
+      'message_id': widget.messageId,
+    });
   }
 
   @override
@@ -46,34 +67,32 @@ class _MediaPreviewState extends State<MediaPreview> {
         top: false,
         child: Column(
           children: <Widget>[
-            Expanded(
-              child: CarouselSlider.builder(
-                options: CarouselOptions(
-                    clipBehavior: Clip.hardEdge,
-                    scrollDirection: Axis.horizontal,
-                    initialPage: 0,
-                    enlargeCenterPage: false,
-                    enableInfiniteScroll: false,
-                    height: 80.h,
-                    enlargeFactor: 0.0,
-                    viewportFraction: 1.0,
-                    onPageChanged: (index, reason) {
-                      currPosition = index;
-                      rebuildCurr.value = !rebuildCurr.value;
-                    }),
-                itemCount: widget.conversationAttachments!.length,
-                itemBuilder: (context, index, realIndex) => AspectRatio(
-                  aspectRatio: widget.conversationAttachments![index]["width"] /
-                      widget.conversationAttachments![index]['height'],
-                  child: CachedNetworkImage(
-                    imageUrl: widget.conversationAttachments![index]
-                            ['file_url'] ??
-                        widget.conversationAttachments![index]['url'],
-                    errorWidget: (context, url, error) => mediaErrorWidget(),
-                    progressIndicatorBuilder: (context, url, progress) =>
-                        const Spinner(color: kWhiteColor),
-                    fit: BoxFit.contain,
-                  ),
+            CarouselSlider.builder(
+              options: CarouselOptions(
+                  clipBehavior: Clip.hardEdge,
+                  scrollDirection: Axis.horizontal,
+                  initialPage: 0,
+                  enlargeCenterPage: false,
+                  enableInfiniteScroll: false,
+                  height: 80.h,
+                  enlargeFactor: 0.0,
+                  viewportFraction: 1.0,
+                  onPageChanged: (index, reason) {
+                    currPosition = index;
+                    rebuildCurr.value = !rebuildCurr.value;
+                  }),
+              itemCount: widget.conversationAttachments!.length,
+              itemBuilder: (context, index, realIndex) => AspectRatio(
+                aspectRatio: widget.conversationAttachments![index]["width"] /
+                    widget.conversationAttachments![index]['height'],
+                child: CachedNetworkImage(
+                  imageUrl: widget.conversationAttachments![index]
+                          ['file_url'] ??
+                      widget.conversationAttachments![index]['url'],
+                  errorWidget: (context, url, error) => mediaErrorWidget(),
+                  progressIndicatorBuilder: (context, url, progress) =>
+                      mediaShimmer(),
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
