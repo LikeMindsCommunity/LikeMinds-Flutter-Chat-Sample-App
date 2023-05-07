@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lm_chat_example/cred_screen.dart';
+import 'package:lm_chat_example/environment/env.dart';
 import 'package:lm_chat_example/example_callback.dart';
 import 'package:lm_chat_example/firebase_options.dart';
 import 'package:lm_chat_example/local_preference.dart';
@@ -26,10 +27,10 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   LMChat.setupLMChat(
-    apiKey: "fa66d879-dd67-4d49-be44-cf008d339558",
+    apiKey: EnvDev.apiKey,
     lmCallBack: ExampleCallback(),
   );
-  setupNotifications();
+  await setupNotifications();
   await AppLocalPreference.instance.initialize();
   runApp(const MyApp());
 }
@@ -41,7 +42,7 @@ void main() async {
 /// 4. Register device with LM - [LMNotificationHandler]
 /// 5. Listen for FG and BG notifications
 /// 6. Handle notifications - [_handleNotification]
-void setupNotifications() async {
+Future setupNotifications() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

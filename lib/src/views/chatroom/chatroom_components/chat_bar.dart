@@ -206,6 +206,7 @@ class _ChatBarState extends State<ChatBar> {
                           child: TaggingAheadTextField(
                             isDown: false,
                             chatroomId: widget.chatroom.id,
+                            style: LMTheme.regular.copyWith(fontSize: 10.sp),
                             onTagSelected: (tag) {
                               print(tag);
                               userTags.add(tag);
@@ -217,9 +218,7 @@ class _ChatBarState extends State<ChatBar> {
                                 'tagged_user_name': tag.name,
                               });
                             },
-                            onChange: (value) {
-                              print(value);
-                            },
+                            onChange: (value) {},
                             controller: _textEditingController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,

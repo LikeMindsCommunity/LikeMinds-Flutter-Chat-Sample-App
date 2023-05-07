@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
+import 'package:lm_chat_example/environment/env.dart';
 import 'package:lm_chat_example/network_handling.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:sizer/sizer.dart';
@@ -139,223 +140,226 @@ class _CredScreenState extends State<CredScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              Row(
-                children: [
-                  DropdownMenu(
-                    enableFilter: true,
-                    width: 42.w,
-                    menuHeight: 20.h,
-                    label: Text(
-                      "Choose font",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.josefinSans(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                      ),
-                    ),
-                    textStyle: _textStyle?.copyWith(
-                          color: Colors.white,
-                          fontSize: 12.sp,
-                        ) ??
-                        GoogleFonts.josefinSans(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    DropdownMenu(
+                      enableFilter: true,
+                      width: 42.w,
+                      menuHeight: 20.h,
+                      label: Text(
+                        "Choose font",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.josefinSans(
                           color: Colors.white,
                           fontSize: 12.sp,
                         ),
-                    inputDecorationTheme: InputDecorationTheme(
-                      focusColor: Colors.white,
-                      fillColor: Colors.white,
-                      hoverColor: Colors.white,
-                      floatingLabelStyle: GoogleFonts.josefinSans(
-                        color: Colors.white,
-                        fontSize: 12.sp,
                       ),
-                      labelStyle: GoogleFonts.josefinSans(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    dropdownMenuEntries: getGoogleFontsAsMap(),
-                    onSelected: (value) {
-                      setState(() {
-                        _textStyle = GoogleFonts.asMap()[value]?.call();
-                      });
-                    },
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => showDialog(
-                      context: context,
-                      builder: (_) {
-                        return AlertDialog(
-                          contentPadding: const EdgeInsets.all(6.0),
-                          title: const Text("Choose header colour"),
-                          content: MaterialColorPicker(
-                            allowShades: false,
-                            onlyShadeSelection: false,
-                            selectedColor: _tempColor,
-                            onColorChange: (color) => setState(
-                              () => _tempColor = color,
-                            ),
-                            onMainColorChange: (color) => setState(
-                              () => _tempColor = color,
-                            ),
-                            onBack: () => print("Back button pressed"),
+                      textStyle: _textStyle?.copyWith(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                          ) ??
+                          GoogleFonts.josefinSans(
+                            color: Colors.white,
+                            fontSize: 12.sp,
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: Navigator.of(context).pop,
-                              child: Text(
-                                'CANCEL',
-                                style: GoogleFonts.josefinSans(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              child: Text(
-                                'SUBMIT',
-                                style: GoogleFonts.josefinSans(
-                                  color: credColor,
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                setState(
-                                  () => _header = _tempColor,
-                                );
-                              },
-                            ),
-                          ],
-                        );
+                      inputDecorationTheme: InputDecorationTheme(
+                        focusColor: Colors.white,
+                        fillColor: Colors.white,
+                        hoverColor: Colors.white,
+                        floatingLabelStyle: GoogleFonts.josefinSans(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                        ),
+                        labelStyle: GoogleFonts.josefinSans(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      dropdownMenuEntries: getGoogleFontsAsMap(),
+                      onSelected: (value) {
+                        setState(() {
+                          _textStyle = GoogleFonts.asMap()[value]?.call();
+                        });
                       },
                     ),
-                    child: Container(
-                      height: 6.h,
-                      width: 6.h,
-                      decoration: BoxDecoration(
-                        color: _header ?? Colors.grey,
-                        borderRadius: BorderRadius.circular(3.h),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => showDialog(
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                            contentPadding: const EdgeInsets.all(6.0),
+                            title: const Text("Choose header colour"),
+                            content: MaterialColorPicker(
+                              allowShades: false,
+                              onlyShadeSelection: false,
+                              selectedColor: _tempColor,
+                              onColorChange: (color) => setState(
+                                () => _tempColor = color,
+                              ),
+                              onMainColorChange: (color) => setState(
+                                () => _tempColor = color,
+                              ),
+                              onBack: () => print("Back button pressed"),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: Navigator.of(context).pop,
+                                child: Text(
+                                  'CANCEL',
+                                  style: GoogleFonts.josefinSans(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                child: Text(
+                                  'SUBMIT',
+                                  style: GoogleFonts.josefinSans(
+                                    color: credColor,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  setState(
+                                    () => _header = _tempColor,
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      child: Container(
+                        height: 6.h,
+                        width: 6.h,
+                        decoration: BoxDecoration(
+                          color: _header ?? Colors.grey,
+                          borderRadius: BorderRadius.circular(3.h),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  GestureDetector(
-                    onTap: () => showDialog(
-                      context: context,
-                      builder: (_) {
-                        return AlertDialog(
-                          contentPadding: const EdgeInsets.all(6.0),
-                          title: const Text("Choose button colour"),
-                          content: MaterialColorPicker(
-                            allowShades: false,
-                            onlyShadeSelection: false,
-                            selectedColor: _tempColor,
-                            onColorChange: (color) => setState(
-                              () => _tempColor = color,
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => showDialog(
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                            contentPadding: const EdgeInsets.all(6.0),
+                            title: const Text("Choose button colour"),
+                            content: MaterialColorPicker(
+                              allowShades: false,
+                              onlyShadeSelection: false,
+                              selectedColor: _tempColor,
+                              onColorChange: (color) => setState(
+                                () => _tempColor = color,
+                              ),
+                              onMainColorChange: (color) => setState(
+                                () => _tempColor = color,
+                              ),
+                              onBack: () => print("Back button pressed"),
                             ),
-                            onMainColorChange: (color) => setState(
-                              () => _tempColor = color,
-                            ),
-                            onBack: () => print("Back button pressed"),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: Navigator.of(context).pop,
-                              child: Text(
-                                'CANCEL',
-                                style: GoogleFonts.josefinSans(
-                                  color: Colors.grey,
+                            actions: [
+                              TextButton(
+                                onPressed: Navigator.of(context).pop,
+                                child: Text(
+                                  'CANCEL',
+                                  style: GoogleFonts.josefinSans(
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
-                            ),
-                            TextButton(
-                              child: Text(
-                                'SUBMIT',
-                                style: GoogleFonts.josefinSans(
-                                  color: credColor,
+                              TextButton(
+                                child: Text(
+                                  'SUBMIT',
+                                  style: GoogleFonts.josefinSans(
+                                    color: credColor,
+                                  ),
                                 ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  setState(
+                                    () => _button = _tempColor,
+                                  );
+                                },
                               ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                setState(
-                                  () => _button = _tempColor,
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    child: Container(
-                      height: 6.h,
-                      width: 6.h,
-                      decoration: BoxDecoration(
-                        color: _button ?? Colors.grey,
-                        borderRadius: BorderRadius.circular(3.h),
+                            ],
+                          );
+                        },
+                      ),
+                      child: Container(
+                        height: 6.h,
+                        width: 6.h,
+                        decoration: BoxDecoration(
+                          color: _button ?? Colors.grey,
+                          borderRadius: BorderRadius.circular(3.h),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  GestureDetector(
-                    onTap: () => showDialog(
-                      context: context,
-                      builder: (_) {
-                        return AlertDialog(
-                          contentPadding: const EdgeInsets.all(6.0),
-                          title: const Text("Choose text link colour"),
-                          content: MaterialColorPicker(
-                            allowShades: false,
-                            selectedColor: _tempColor,
-                            onColorChange: (color) => setState(
-                              () => _tempColor = color,
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => showDialog(
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                            contentPadding: const EdgeInsets.all(6.0),
+                            title: const Text("Choose text link colour"),
+                            content: MaterialColorPicker(
+                              allowShades: false,
+                              selectedColor: _tempColor,
+                              onColorChange: (color) => setState(
+                                () => _tempColor = color,
+                              ),
+                              onMainColorChange: (color) => setState(
+                                () => _tempColor = color,
+                              ),
+                              onBack: () => print("Back button pressed"),
                             ),
-                            onMainColorChange: (color) => setState(
-                              () => _tempColor = color,
-                            ),
-                            onBack: () => print("Back button pressed"),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: Navigator.of(context).pop,
-                              child: Text(
-                                'CANCEL',
-                                style: GoogleFonts.josefinSans(
-                                  color: Colors.grey,
+                            actions: [
+                              TextButton(
+                                onPressed: Navigator.of(context).pop,
+                                child: Text(
+                                  'CANCEL',
+                                  style: GoogleFonts.josefinSans(
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
-                            ),
-                            TextButton(
-                              child: Text(
-                                'SUBMIT',
-                                style: GoogleFonts.josefinSans(
-                                  color: credColor,
+                              TextButton(
+                                child: Text(
+                                  'SUBMIT',
+                                  style: GoogleFonts.josefinSans(
+                                    color: credColor,
+                                  ),
                                 ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  setState(
+                                    () => _textLink = _tempColor,
+                                  );
+                                },
                               ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                setState(
-                                  () => _textLink = _tempColor,
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    child: Container(
-                      height: 6.h,
-                      width: 6.h,
-                      decoration: BoxDecoration(
-                        color: _textLink ?? Colors.grey,
-                        borderRadius: BorderRadius.circular(3.h),
+                            ],
+                          );
+                        },
                       ),
-                    ),
-                  )
-                ],
+                      child: Container(
+                        height: 6.h,
+                        width: 6.h,
+                        decoration: BoxDecoration(
+                          color: _textLink ?? Colors.grey,
+                          borderRadius: BorderRadius.circular(3.h),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
               const SizedBox(height: 48),
               GestureDetector(
@@ -365,7 +369,7 @@ class _CredScreenState extends State<CredScreen> {
                       ? "UserName"
                       : _usernameController.text;
                   String userId = _userIdController.text.isEmpty
-                      ? "10c43c9a-6673-4f9a-b8d0-75d0d8bbbf30"
+                      ? EnvDev.botId
                       : _userIdController.text;
                   if (username.isEmpty || userId.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(

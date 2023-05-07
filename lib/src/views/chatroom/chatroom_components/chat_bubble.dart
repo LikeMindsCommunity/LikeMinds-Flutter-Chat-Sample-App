@@ -83,10 +83,10 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   bool checkDeletePermissions() {
-    if (isCm && conversation.deletedByUserId != null) {
+    if (isCm && conversation.deletedByUserId == null) {
       return true;
     } else if (loggedInUser.id == widget.sender.id &&
-        conversation.deletedByUserId != null) {
+        conversation.deletedByUserId == null) {
       return true;
     } else {
       return false;

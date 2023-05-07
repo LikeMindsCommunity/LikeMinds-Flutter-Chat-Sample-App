@@ -922,7 +922,6 @@ class AtText extends SpecialText {
   InlineSpan finishText() {
     TextStyle textStyle = this.textStyle!.copyWith(
           color: tagColor ?? Colors.blue,
-          fontSize: 16.0,
         );
 
     final String atText = toString();
