@@ -6,7 +6,9 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,7 +59,7 @@ class ExpandableText extends StatefulWidget {
   final VoidCallback? onLinkTap;
   final Color? linkColor;
   final bool linkEllipsis;
-  final TextStyle? linkStyle;
+  TextStyle? linkStyle;
   final String? prefixText;
   final TextStyle? prefixStyle;
   final VoidCallback? onPrefixTap;
@@ -98,6 +100,10 @@ class ExpandableTextState extends State<ExpandableText>
   void initState() {
     super.initState();
     _passedText = widget.text;
+    widget.linkStyle ??= LMTheme.medium.copyWith(
+      fontSize: 9.sp,
+      color: LMTheme.textLinkColor,
+    );
     _expanded = widget.expanded;
     _linkTapGestureRecognizer = TapGestureRecognizer()..onTap = _linkTapped;
     _prefixTapGestureRecognizer = TapGestureRecognizer()..onTap = _prefixTapped;
@@ -157,7 +163,8 @@ class ExpandableTextState extends State<ExpandableText>
         widget.linkStyle?.color ??
         Theme.of(context).colorScheme.secondary;
     final linkTextStyle =
-        effectiveTextStyle!.merge(widget.linkStyle).copyWith(color: linkColor);
+        LMTheme.medium.copyWith(color: LMTheme.textLinkColor, fontSize: 9.sp);
+    // effectiveTextStyle!.merge(widget.linkStyle).copyWith(color: linkColor);
 
     final prefixText =
         widget.prefixText != null && widget.prefixText!.isNotEmpty
@@ -168,7 +175,7 @@ class ExpandableTextState extends State<ExpandableText>
       children: [
         if (!_expanded)
           TextSpan(
-            text: '\u2026 ',
+            text: '\u2026see more',
             style: widget.linkEllipsis ? linkTextStyle : effectiveTextStyle,
             recognizer: widget.linkEllipsis ? _linkTapGestureRecognizer : null,
           ),
@@ -178,7 +185,7 @@ class ExpandableTextState extends State<ExpandableText>
             children: <TextSpan>[
               if (_expanded)
                 TextSpan(
-                  text: ' ',
+                  text: '',
                 ),
               TextSpan(
                 text: linkText,
@@ -216,7 +223,7 @@ class ExpandableTextState extends State<ExpandableText>
           textAlign: textAlign,
           textDirection: textDirection,
           textScaleFactor: textScaleFactor,
-          maxLines: 3,
+          maxLines: 5,
           locale: locale,
         );
         textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
@@ -248,7 +255,7 @@ class ExpandableTextState extends State<ExpandableText>
             resultText = response['text'];
             final lineCount = textPainter.computeLineMetrics().length;
             final nCount = '\n'.allMatches(resultText).length + 1;
-            if (resultText.length > 300 && nCount <= 4) {
+            if (resultText.length > 500 || nCount > 4) {
               resultText = resultText.substring(0, max(endOffset, 0));
             }
 
@@ -408,13 +415,19 @@ class ExpandableTextState extends State<ExpandableText>
       // Add a TextSpan for the URL
       textSpans.add(TextSpan(
         text: isTag ? TaggingHelper.decodeString(link).keys.first : link,
-        style: widget.linkStyle ?? const TextStyle(color: Colors.blue),
+        style: LMTheme.medium.copyWith(
+          fontSize: 9.sp,
+          color: LMTheme.textLinkColor,
+        ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
             if (!isTag) {
               String checkLink = getFirstValidLinkFromString(link ?? '');
               if (Uri.parse(checkLink).isAbsolute) {
-                launchUrl(Uri.parse(checkLink));
+                launchUrl(
+                  Uri.parse(checkLink),
+                  mode: LaunchMode.externalApplication,
+                );
               }
             } else {
               TaggingHelper.routeToProfile(

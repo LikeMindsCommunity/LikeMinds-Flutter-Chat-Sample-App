@@ -185,7 +185,7 @@ class _CredScreenState extends State<CredScreen> {
                       });
                     },
                   ),
-                  Spacer(),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () => showDialog(
                       context: context,
@@ -365,7 +365,7 @@ class _CredScreenState extends State<CredScreen> {
                       ? "UserName"
                       : _usernameController.text;
                   String userId = _userIdController.text.isEmpty
-                      ? "207be084-b38f-4c70-b1c3-7a763dae2020"
+                      ? "10c43c9a-6673-4f9a-b8d0-75d0d8bbbf30"
                       : _userIdController.text;
                   if (username.isEmpty || userId.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -406,6 +406,7 @@ class _CredScreenState extends State<CredScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 80),
             ],
           ),
         ),

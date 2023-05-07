@@ -4,7 +4,10 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 
 class TaggingHelper {
-  static final RegExp tagRegExp = RegExp(r'@([a-z\sA-Z]+)~');
+  static final RegExp tagRegExp = RegExp(r'@([a-z\sA-Z\s0-9]+)~');
+
+  static final RegExp routeRegExp = RegExp(
+      r'<<([a-z\sA-Z]+)\|route://member/([a-zA-Z\0-9]+)>>|<<([a-z\sA-Z\s0-9]+)\|route://member/([0-9]+)>>');
 
   /// Encodes the string with the user tags and returns the encoded string
   static String encodeString(String string, List<UserTag> userTags) {
@@ -24,9 +27,7 @@ class TaggingHelper {
   /// Decodes the string with the user tags and returns the decoded string
   static Map<String, String> decodeString(String string) {
     Map<String, String> result = {};
-    final Iterable<RegExpMatch> matches = RegExp(
-            r'<<([a-z\sA-Z]+)\|route://member/([a-zA-Z\0-9]+)>>|<<([a-z\sA-Z\s0-9]+)\|route://member/([0-9]+)>>')
-        .allMatches(string);
+    final Iterable<RegExpMatch> matches = routeRegExp.allMatches(string);
     for (final match in matches) {
       final String tag = match.group(1) ?? match.group(3) ?? match.group(5)!;
       final String id = match.group(2) ?? match.group(4) ?? match.group(6)!;
@@ -53,34 +54,27 @@ class TaggingHelper {
 
   static void routeToProfile(String userId) {
     print(userId);
-    // if (!locator<LikeMindsService>().isProd) {
-    //   toast('Profile call back fired');
-    // }
-    // locator<LikeMindsService>().routeToProfile(userId);
   }
 
-  static String convertRouteToTag(String text, {bool withTilde = true}) {
-    final Iterable<RegExpMatch> matches =
-        RegExp(r'<<([a-z\sA-Z]+)\|route://member/([a-zA-Z-0-9]+)>>')
-            .allMatches(text);
+  static String? convertRouteToTag(String? text) {
+    if (text == null) return null;
+    final Iterable<RegExpMatch> matches = routeRegExp.allMatches(text);
 
     for (final match in matches) {
-      final String tag = match.group(1)!;
-      final String id = match.group(2)!;
-      text = text.replaceAll('<<$tag|route://member/$id>>', '@$tag~');
+      final String tag = match.group(1) ?? match.group(3) ?? match.group(5)!;
+      final String id = match.group(2) ?? match.group(4) ?? match.group(6)!;
+      text = text!.replaceAll('<<$tag|route://member/$id>>', '@$tag');
     }
     return text;
   }
 
   static Map<String, dynamic> convertRouteToTagAndUserMap(String text,
       {bool withTilde = true}) {
-    final Iterable<RegExpMatch> matches = RegExp(
-            r'<<([a-z\sA-Z]+)\|route://member/([a-zA-Z\0-9]+)>>|<<([a-z\sA-Z\s0-9]+)\|route://member/([0-9]+)>>')
-        .allMatches(text);
+    final Iterable<RegExpMatch> matches = routeRegExp.allMatches(text);
     List<UserTag> userTags = [];
     for (final match in matches) {
-      final String tag = match.group(1)!;
-      final String id = match.group(2)!;
+      final String tag = match.group(1) ?? match.group(3) ?? match.group(5)!;
+      final String id = match.group(2) ?? match.group(4) ?? match.group(6)!;
       text = text.replaceAll('<<$tag|route://member/$id>>', '@$tag~');
       userTags.add(UserTag(userUniqueId: id, name: tag));
     }
@@ -88,16 +82,56 @@ class TaggingHelper {
   }
 
   static List<UserTag> addUserTagsIfMatched(String input) {
-    final Iterable<RegExpMatch> matches =
-        RegExp(r'<<([a-z\sA-Z]+)\|route://member/([a-zA-Z-0-9]+)>>')
-            .allMatches(input);
+    final Iterable<RegExpMatch> matches = routeRegExp.allMatches(input);
     List<UserTag> userTags = [];
     for (final match in matches) {
-      final String tag = match.group(1)!;
-      final String id = match.group(2)!;
+      final String tag = match.group(1) ?? match.group(3) ?? match.group(5)!;
+      final String id = match.group(2) ?? match.group(4) ?? match.group(6)!;
       userTags.add(UserTag(userUniqueId: id, name: tag));
     }
     return userTags;
+  }
+
+  static String extractHeaderText(String input) {
+    final RegExp headerRegex =
+        RegExp(r'<<([\w\s#]+)\|.*>>\s*([\w\s]+)\s*<<([\w\s#]+)\|.*>>');
+    final RegExpMatch? match = headerRegex.firstMatch(input);
+
+    final String? userName = match?.group(1);
+    final String? actionText = match?.group(2);
+    final String? communityName = match?.group(3);
+    return '$userName $actionText $communityName';
+  }
+
+  static String extractLeftChatroom(String input) {
+    final RegExp leftChatroom =
+        RegExp(r"<<([\w\s]+)\supdated\|.*>>\s*([\w\s]+)");
+    final RegExpMatch? match = leftChatroom.firstMatch(input);
+
+    final String? userName = match?.group(1);
+    final String? actionText = match?.group(2);
+    return '$userName $actionText';
+  }
+
+  static String extractTopicChat(String input) {
+    final RegExp leftChatroom = RegExp(r"<<([\w\s]+)\|.*>>\s*(.+)");
+    final RegExpMatch? match = leftChatroom.firstMatch(input);
+
+    final String? userName = match?.group(1);
+    final String? actionText = match?.group(2);
+    return '$userName $actionText';
+  }
+
+  static String extractStateMessage(String input) {
+    final RegExp stateRegex = RegExp(r"(?<=\<\<).+?(?=\|)");
+    final RegExp tagRegex = RegExp(r"<<(?<=\<\<).+?(?=\>\>)>>");
+    final Iterable<RegExpMatch> matches = tagRegex.allMatches(input);
+    for (RegExpMatch match in matches) {
+      final String? routeTag = match.group(0);
+      final String? userName = stateRegex.firstMatch(routeTag!)?.group(0);
+      input = input.replaceAll(routeTag, '$userName');
+    }
+    return input;
   }
 }
 

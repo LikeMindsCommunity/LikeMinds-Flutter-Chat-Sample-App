@@ -5,6 +5,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/flutter_typeahead-4.3.7/lib/flutter_typeahead.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
@@ -14,6 +15,7 @@ class TaggingAheadTextField extends StatefulWidget {
   final Function(UserTag) onTagSelected;
   final TextEditingController? controller;
   final InputDecoration? decoration;
+  final TextStyle? style;
   final Function(String)? onChange;
   final int chatroomId;
 
@@ -24,6 +26,7 @@ class TaggingAheadTextField extends StatefulWidget {
     required this.onTagSelected,
     required this.controller,
     required this.focusNode,
+    this.style,
     this.decoration,
     this.onChange,
   });
@@ -35,6 +38,7 @@ class TaggingAheadTextField extends StatefulWidget {
 class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
   late final TextEditingController _controller;
   FocusNode? _focusNode;
+  LMBranding lmBranding = LMBranding.instance;
   final ScrollController _scrollController = ScrollController();
   final SuggestionsBoxController _suggestionsBoxController =
       SuggestionsBoxController();
@@ -87,6 +91,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           (TagRequestModelBuilder()
                 ..chatroomId(widget.chatroomId)
                 ..page(page)
+                ..searchQuery(tag)
                 ..pageSize(FIXED_SIZE))
               .build(),
         ))
@@ -109,14 +114,21 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       child: TypeAheadField<UserTag>(
+        tagColor: LMTheme.textLinkColor,
         onTagTap: (p) {
           // print(p);
         },
         suggestionsBoxController: _suggestionsBoxController,
         suggestionsBoxDecoration: SuggestionsBoxDecoration(
-          elevation: 4,
+          offsetX: -2.w,
+          elevation: 0,
+          clipBehavior: Clip.hardEdge,
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0)),
+          hasScrollbar: false,
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.22,
+            maxHeight: 24.h,
+            minWidth: 80.w,
           ),
         ),
         // keepSuggestionsOnLocading: true,
@@ -127,12 +139,15 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
         textFieldConfiguration: TextFieldConfiguration(
           keyboardType: TextInputType.multiline,
           controller: _controller,
+          style: widget.style ?? LMTheme.regular,
           focusNode: _focusNode,
-          minLines: 2,
+          minLines: 1,
           maxLines: 200,
+          enabled: widget.decoration?.enabled ?? true,
           decoration: widget.decoration ??
-              const InputDecoration(
+              InputDecoration(
                 hintText: 'Write something here...',
+                hintStyle: widget.style,
                 border: InputBorder.none,
               ),
           onChanged: ((value) {
@@ -156,6 +171,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           return await _getSuggestions(suggestion);
         },
         keepSuggestionsOnSuggestionSelected: true,
+
         itemBuilder: ((context, opt) {
           return Container(
             decoration: const BoxDecoration(

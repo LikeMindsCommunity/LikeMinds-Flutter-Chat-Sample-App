@@ -2,9 +2,11 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lm_chat_example/cred_screen.dart';
 import 'package:lm_chat_example/example_callback.dart';
 import 'package:lm_chat_example/firebase_options.dart';
+import 'package:lm_chat_example/local_preference.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
@@ -19,13 +21,16 @@ Future<void> _handleNotification(RemoteMessage message) async {
   await LMNotificationHandler.instance.handleNotification(message, true);
 }
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   LMChat.setupLMChat(
-    apiKey: "d473460c-721f-4572-b7c3-3be25b68de35",
+    apiKey: "fa66d879-dd67-4d49-be44-cf008d339558",
     lmCallBack: ExampleCallback(),
   );
   setupNotifications();
+  await AppLocalPreference.instance.initialize();
   runApp(const MyApp());
 }
 

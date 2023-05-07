@@ -253,29 +253,29 @@ class _ProfilePageState extends State<ProfilePage> {
                               ],
                             ),
                             const SizedBox(height: 18),
-                            const ChatItem(
-                              name: "ManMatters design",
-                              message:
-                                  "Lorem ipsum dolor sit amet, consectetur",
-                              time: "12:00",
-                              avatarUrl: "https://picsum.photos/200/300",
-                            ),
-                            const Divider(thickness: 1),
-                            const ChatItem(
-                              name: "ManMatters engineering",
-                              message:
-                                  "Lorem ipsum dolor sit amet, consectetur",
-                              time: "12:00",
-                              avatarUrl: "https://picsum.photos/200/300",
-                            ),
-                            const Divider(thickness: 1),
-                            const ChatItem(
-                              name: "ManMatters HR",
-                              message:
-                                  "Lorem ipsum dolor sit amet, consectetur",
-                              time: "12:00",
-                              avatarUrl: "https://picsum.photos/200/300",
-                            ),
+                            // const ChatItem(
+                            //   name: "ManMatters design",
+                            //   message:
+                            //       "Lorem ipsum dolor sit amet, consectetur",
+                            //   time: "12:00",
+                            //   avatarUrl: "https://picsum.photos/200/300",
+                            // ),
+                            // const Divider(thickness: 1),
+                            // const ChatItem(
+                            //   name: "ManMatters engineering",
+                            //   message:
+                            //       "Lorem ipsum dolor sit amet, consectetur",
+                            //   time: "12:00",
+                            //   avatarUrl: "https://picsum.photos/200/300",
+                            // ),
+                            // const Divider(thickness: 1),
+                            // const ChatItem(
+                            //   name: "ManMatters HR",
+                            //   message:
+                            //       "Lorem ipsum dolor sit amet, consectetur",
+                            //   time: "12:00",
+                            //   avatarUrl: "https://picsum.photos/200/300",
+                            // ),
                           ],
                         ),
                       ),

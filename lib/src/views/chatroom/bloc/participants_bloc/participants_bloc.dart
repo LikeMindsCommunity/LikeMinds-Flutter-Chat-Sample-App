@@ -24,7 +24,7 @@ class ParticipantsBloc extends Bloc<ParticipantsEvent, ParticipantsState> {
             await locator<LikeMindsService>().getParticipants(
           event.getParticipantsRequest,
         );
-        if (response.success!) {
+        if (response.success) {
           GetParticipantsResponse getParticipantsResponse = response.data!;
           if (getParticipantsResponse.success) {
             emit(

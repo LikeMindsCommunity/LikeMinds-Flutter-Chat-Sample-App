@@ -5,6 +5,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 abstract class ILikeMindsService {
   Future<LMResponse<InitiateUserResponse>> initiateUser(
       InitiateUserRequest request);
+  Future<LMResponse<bool>> getMemberState();
   Future<LMResponse<LogoutResponse>> logout(LogoutRequest request);
   Future<LMResponse<GetHomeFeedResponse>> getHomeFeed(
       GetHomeFeedRequest request);
@@ -20,8 +21,12 @@ abstract class ILikeMindsService {
       ShareChatroomRequest request);
   Future<LMResponse<SetChatroomTopicResponse>> setChatroomTopic(
       SetChatroomTopicRequest request);
+  Future<LMResponse<DeleteParticipantResponse>> deleteParticipant(
+      DeleteParticipantRequest request);
   Future<LMResponse<GetConversationResponse>> getConversation(
       GetConversationRequest request);
+  Future<LMResponse<GetSingleConversationResponse>> getSingleConversation(
+      GetSingleConversationRequest request);
   Future<LMResponse<PostConversationResponse>> postConversation(
       PostConversationRequest request);
   Future<LMResponse<EditConversationResponse>> editConversation(
@@ -58,6 +63,11 @@ class LikeMindsService implements ILikeMindsService {
     UserLocalPreference userLocalPreference = UserLocalPreference.instance;
     await userLocalPreference.initialize();
     return client.initiateUser(request);
+  }
+
+  @override
+  Future<LMResponse<bool>> getMemberState() async {
+    return client.getMemberState();
   }
 
   @override
@@ -102,6 +112,12 @@ class LikeMindsService implements ILikeMindsService {
   }
 
   @override
+  Future<LMResponse<DeleteParticipantResponse>> deleteParticipant(
+      DeleteParticipantRequest request) {
+    return client.deleteParticipant(request);
+  }
+
+  @override
   Future<LMResponse<SetChatroomTopicResponse>> setChatroomTopic(
       SetChatroomTopicRequest request) {
     return client.setChatroomTopic(request);
@@ -111,6 +127,12 @@ class LikeMindsService implements ILikeMindsService {
   Future<LMResponse<GetConversationResponse>> getConversation(
       GetConversationRequest request) {
     return client.getConversation(request);
+  }
+
+  @override
+  Future<LMResponse<GetSingleConversationResponse>> getSingleConversation(
+      GetSingleConversationRequest request) {
+    return client.getSingleConversation(request);
   }
 
   @override

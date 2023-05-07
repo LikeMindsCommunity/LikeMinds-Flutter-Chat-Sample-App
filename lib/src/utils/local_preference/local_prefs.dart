@@ -23,14 +23,32 @@ class UserLocalPreference {
     _sharedPreferences!.setString('user', userString);
   }
 
+  void storeCommunityData(Community community) {
+    Map<String, dynamic> communityData = {
+      "community_id": community.id,
+      "community_name": community.name
+    };
+    String communityString = jsonEncode(communityData);
+    _sharedPreferences!.setString('community', communityString);
+  }
+
+  Map<String, dynamic> fetchCommunityData() {
+    Map<String, dynamic> communityData =
+        jsonDecode(_sharedPreferences!.getString('community')!);
+    return communityData;
+  }
+
   User fetchUserData() {
     Map<String, dynamic> userData =
         jsonDecode(_sharedPreferences!.getString('user')!);
     return User.fromEntity(UserEntity.fromJson(userData));
   }
 
-  void storeMemberState(bool isCm) {
-    _sharedPreferences!.setBool('isCm', isCm);
+  void storeMemberState(bool? isCm) {
+    if (isCm == null) {
+      return;
+    }
+    _sharedPreferences?.setBool('isCm', isCm);
   }
 
   bool fetchMemberState() {

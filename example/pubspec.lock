@@ -97,6 +97,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  carousel_slider:
+    dependency: transitive
+    description:
+      name: carousel_slider
+      sha256: "9c695cc963bf1d04a47bd6021f68befce8970bcd61d24938e1fb0918cf5d9c42"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.1"
   characters:
     dependency: transitive
     description:
@@ -241,6 +249,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.0"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.5"
   extended_text_field:
     dependency: transitive
     description:
@@ -281,6 +297,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.4"
+  file_picker:
+    dependency: transitive
+    description:
+      name: file_picker
+      sha256: b85eb92b175767fdaa0c543bf3b0d1f610fe966412ea72845fe5ba7801e763ff
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.10"
   firebase_core:
     dependency: "direct main"
     description:
@@ -305,6 +329,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  firebase_database:
+    dependency: transitive
+    description:
+      name: firebase_database
+      sha256: "39e4fe701ffc9e6d963018348c4bfcf989671c1eb9f29c04663a4e7130c2107c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.1.1"
+  firebase_database_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_database_platform_interface
+      sha256: "0490b234c72e84cc8b35991a7c02956e58f9fb52fd1705a5fb80d2b434d60078"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.3+1"
+  firebase_database_web:
+    dependency: transitive
+    description:
+      name: firebase_database_web
+      sha256: c3ab578fd2bf0fe6d4af61554e325b1f629c769cb61d509162f2d5942fa2c983
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2+1"
   firebase_messaging:
     dependency: "direct main"
     description:
@@ -438,6 +486,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0+2"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      sha256: "8ffe990dac54a4a5492747added38571a5ab474c8e5d196809ea08849c69b1bb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.13"
   flutter_polls:
     dependency: transitive
     description:
@@ -527,6 +583,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  image_picker:
+    dependency: transitive
+    description:
+      name: image_picker
+      sha256: "3da954c3b8906d82ecb50fd5e2b5401758f06d5678904eed6cbc06172283a263"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.7+4"
+  image_picker_android:
+    dependency: transitive
+    description:
+      name: image_picker_android
+      sha256: "4ffaf5372faee45e5df11989de0439c383b5d35e69a710b857aca689e98d6823"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.6+9"
+  image_picker_for_web:
+    dependency: transitive
+    description:
+      name: image_picker_for_web
+      sha256: "98f50d6b9f294c8ba35e25cc0d13b04bfddd25dbc8d32fa9d566a6572f2c081c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.12"
+  image_picker_ios:
+    dependency: transitive
+    description:
+      name: image_picker_ios
+      sha256: a1546ff5861fc15812953d4733b520c3d371cec3d2859a001ff04c46c4d81883
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.7+3"
+  image_picker_platform_interface:
+    dependency: transitive
+    description:
+      name: image_picker_platform_interface
+      sha256: "1991219d9dbc42a99aff77e663af8ca51ced592cd6685c9485e3458302d3d4f8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.3"
   infinite_scroll_pagination:
     dependency: transitive
     description:
@@ -576,9 +672,9 @@ packages:
     source: hosted
     version: "1.3.0"
   likeminds_chat_fl:
-    dependency: "direct main"
+    dependency: transitive
     description:
-      path: "../../LikeMinds-Flutter-Groupchat-SDK"
+      path: "../../LikeMinds-Flutter-GroupChat-SDK"
       relative: true
     source: path
     version: "1.0.0"
@@ -749,6 +845,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.5"
+  pdf_render:
+    dependency: transitive
+    description:
+      name: pdf_render
+      sha256: "3670dc6465a8d9423a16e19ed1f5e6346b117b5e2c655038211fcac865522eca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.8"
   pedantic:
     dependency: transitive
     description:
@@ -886,7 +990,7 @@ packages:
     source: hosted
     version: "3.2.1"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences
       sha256: "858aaa72d8f61637d64e776aca82e1c67e6d9ee07979123c5d17115031c1b13b"
@@ -1042,6 +1146,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  swipe_to_action:
+    dependency: "direct main"
+    description:
+      name: swipe_to_action
+      sha256: "0914f78df07a15b5fd97e800036fd63a2bcd4dbe67a4a514a597303806a361ea"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   synchronized:
     dependency: transitive
     description:

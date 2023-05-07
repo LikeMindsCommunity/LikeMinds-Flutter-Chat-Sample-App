@@ -1,9 +1,66 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:likeminds_chat_mm_fl/src/utils/credentials/credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:path/path.dart';
 
 import 'package:simple_s3/simple_s3.dart';
+
+enum MediaType { photo, video, document, audio, poll }
+
+MediaType mapIntToMediaType(int mediaType) {
+  switch (mediaType) {
+    case 1:
+      return MediaType.photo;
+    case 2:
+      return MediaType.video;
+    case 3:
+      return MediaType.document;
+    case 4:
+      return MediaType.audio;
+    case 5:
+      return MediaType.poll;
+    default:
+      return MediaType.photo;
+  }
+}
+
+int mapMediaTypeToInt(MediaType mediaType) {
+  switch (mediaType) {
+    case MediaType.photo:
+      return 1;
+    case MediaType.video:
+      return 2;
+    case MediaType.document:
+      return 3;
+    default:
+      return -1;
+  }
+}
+
+class Media {
+  File? mediaFile;
+  MediaType mediaType;
+  String? mediaUrl;
+  int? width;
+  int? height;
+  String? thumbnailUrl;
+  File? thumbnailFile;
+  int? pageCount;
+  int? size; // In bytes
+
+  Media({
+    this.mediaFile,
+    required this.mediaType,
+    this.mediaUrl,
+    this.height,
+    this.pageCount,
+    this.size,
+    this.thumbnailFile,
+    this.thumbnailUrl,
+    this.width,
+  });
+}
 
 class MediaService {
   late final String _bucketName;
@@ -16,7 +73,11 @@ class MediaService {
     _poolId = isProd ? CredsProd.poolId : CredsDev.poolId;
   }
 
-  Future<String?> uploadFile(File file, String userUniqueId) async {
+  Future<String?> uploadFile(
+    File file,
+    int chatroomId,
+    int conversationId,
+  ) async {
     try {
       String fileName = basenameWithoutExtension(file.path);
       String currTimeInMilli = DateTime.now().millisecondsSinceEpoch.toString();
@@ -26,7 +87,8 @@ class MediaService {
         _bucketName,
         _poolId,
         _region,
-        // s3FolderPath: "files/post/$userUniqueId/$fileName-$currTimeInMilli",
+        s3FolderPath:
+            "files/collabcard/$chatroomId/conversation/$conversationId/",
       );
       return result;
     } on SimpleS3Errors catch (e) {

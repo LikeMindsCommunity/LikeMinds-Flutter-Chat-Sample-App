@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 
 class PictureOrInitial extends StatelessWidget {
@@ -26,7 +29,9 @@ class PictureOrInitial extends StatelessWidget {
       height: size ?? 42.sp,
       width: size ?? 42.sp,
       decoration: BoxDecoration(
-        color: backgroundColor ?? LMBranding.instance.headerColor,
+        color: LMTheme.headerColor == LMTheme.buttonColor
+            ? backgroundColor ?? LMTheme.buttonColor
+            : backgroundColor ?? LMTheme.headerColor,
         borderRadius: BorderRadius.circular(21.sp),
       ),
       child: Center(
@@ -45,12 +50,21 @@ class PictureOrInitial extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) => const Center(
-                  child: Spinner(
-                    color: kWhiteColor,
-                  ),
+                // placeholder: (context, url) => Container(
+                //   height: size ?? 42.sp,
+                //   width: size ?? 42.sp,
+                //   decoration: BoxDecoration(
+                //     color: kGreyColor,
+                //     borderRadius: BorderRadius.circular(
+                //       size ?? 42.sp,
+                //     ),
+                //   ),
+                // ),
+                progressIndicatorBuilder: (context, url, progress) =>
+                    mediaShimmer(
+                  isPP: true,
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                errorWidget: (context, url, error) => mediaErrorWidget(),
               )
             : Text(
                 getInitials(fallbackText),
