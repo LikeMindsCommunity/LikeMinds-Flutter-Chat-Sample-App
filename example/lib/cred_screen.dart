@@ -45,6 +45,7 @@ class CredScreen extends StatefulWidget {
 class _CredScreenState extends State<CredScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _userIdController = TextEditingController();
+  final TextEditingController _chatroomController = TextEditingController();
 
   TextStyle? _textStyle;
   Color? _header;
@@ -120,6 +121,23 @@ class _CredScreenState extends State<CredScreen> {
                     labelStyle: GoogleFonts.josefinSans(
                       color: Colors.white,
                     )),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                cursorColor: Colors.white,
+                controller: _chatroomController,
+                style: GoogleFonts.josefinSans(color: Colors.white),
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  focusColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  labelText: 'Default ChatRoom ID (optional)',
+                  labelStyle: GoogleFonts.josefinSans(
+                    color: Colors.white,
+                  ),
+                ),
               ),
               const SizedBox(height: 48),
               Text(
@@ -368,9 +386,11 @@ class _CredScreenState extends State<CredScreen> {
                   String username = _usernameController.text.isEmpty
                       ? "UserName"
                       : _usernameController.text;
-                  String userId = _userIdController.text.isEmpty
+                  String userId = _userIdController.text.isEmpty &&
+                          _usernameController.text.isEmpty
                       ? EnvDev.botId
                       : _userIdController.text;
+                  int? defaultChatroom = int.tryParse(_chatroomController.text);
                   if (username.isEmpty || userId.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -381,7 +401,8 @@ class _CredScreenState extends State<CredScreen> {
                     lmChat = LMChat.instance(
                       builder: LMChatBuilder()
                         ..userId(userId)
-                        ..userName(username),
+                        ..userName(username)
+                        ..defaultChatroom(defaultChatroom),
                     );
                   }
                   setBranding();

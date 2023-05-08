@@ -1,6 +1,4 @@
-import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
 
 class SkeletonChatPage extends StatelessWidget {
   const SkeletonChatPage({Key? key}) : super(key: key);
@@ -15,16 +13,18 @@ class SkeletonChatPage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const BB.BackButton(),
-              SizedBox(width: 4.w),
+              // const BB.BackButton(),
+              // SizedBox(width: 4.w),
               SkeletonAnimation(
-                  child: Container(
-                      width: 30.sp,
-                      height: 30.sp,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: kGreyColor,
-                      ))),
+                child: Container(
+                  width: 30.sp,
+                  height: 30.sp,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: kGreyColor,
+                  ),
+                ),
+              ),
               SizedBox(width: 4.w),
               Expanded(
                 child: Column(

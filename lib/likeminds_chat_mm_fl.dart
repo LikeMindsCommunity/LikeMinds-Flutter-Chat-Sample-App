@@ -25,24 +25,30 @@ export 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handle
 class LMChat extends StatelessWidget {
   final String _userId;
   final String _userName;
+  String? _domain;
+  int? _defaultChatroom;
 
   LMChat._internal(
     this._userId,
     this._userName,
+    this._domain,
+    this._defaultChatroom,
   ) {
     debugPrint('LMChat initialized');
   }
 
   static LMChat? _instance;
   static LMChat instance({required LMChatBuilder builder}) {
-    if (builder.getUserId == null || builder.getUserName == null) {
+    if (builder.getUserId == null && builder.getUserName == null) {
       throw Exception(
-        'LMChat builder needs to be initialized with userId, and userName',
+        'LMChat builder needs to be initialized with User ID, or User Name',
       );
     } else {
       return _instance ??= LMChat._internal(
-        builder.getUserId,
-        builder.getUserName,
+        builder.getUserId!,
+        builder.getUserName!,
+        builder.getDomain,
+        builder.getDefaultChatroom,
       );
     }
   }
@@ -124,9 +130,17 @@ class LMChat extends StatelessWidget {
               if (snapshot.hasData) {
                 final user = snapshot.data!.user;
                 LMNotificationHandler.instance.registerDevice(user.id);
+                if (_defaultChatroom != null) {
+                  // router.
+                  return MaterialApp.router(
+                    routerConfig: router
+                      ..go('/chatroom/$_defaultChatroom?isRoot=true'),
+                    debugShowCheckedModeBanner: false,
+                  );
+                }
                 return MaterialApp.router(
                   routerConfig: router,
-                  debugShowCheckedModeBanner: true,
+                  debugShowCheckedModeBanner: false,
                 );
               }
               return Container(
@@ -144,17 +158,21 @@ class LMChat extends StatelessWidget {
 }
 
 class LMChatBuilder {
-  late final String _userId;
-  late final String _userName;
-  late final String _domain;
+  String? _userId;
+  String? _userName;
+  String? _domain;
+  int? _defaultChatroom;
 
   LMChatBuilder();
 
   void userId(String userId) => _userId = userId;
   void userName(String userName) => _userName = userName;
   void domain(String domain) => _domain = domain;
+  void defaultChatroom(int? defaultChatroomId) =>
+      _defaultChatroom = defaultChatroomId;
 
-  get getUserId => _userId;
-  get getUserName => _userName;
-  get getDomain => _domain;
+  String? get getUserId => _userId;
+  String? get getUserName => _userName;
+  String? get getDomain => _domain;
+  int? get getDefaultChatroom => _defaultChatroom;
 }

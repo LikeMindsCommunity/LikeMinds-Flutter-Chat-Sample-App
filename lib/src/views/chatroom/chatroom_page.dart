@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
@@ -31,7 +32,12 @@ import 'chatroom_components/chatroom_menu.dart';
 
 class ChatroomPage extends StatefulWidget {
   final int chatroomId;
-  const ChatroomPage({super.key, required this.chatroomId});
+  final bool isRoot;
+  const ChatroomPage({
+    super.key,
+    required this.chatroomId,
+    required this.isRoot,
+  });
 
   @override
   State<ChatroomPage> createState() => _ChatroomPageState();
@@ -249,6 +255,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
       value: SystemUiOverlayStyle.dark,
       child: WillPopScope(
         onWillPop: () async {
+          debugPrint(router.location);
           conversationBloc.add(
             MarkReadChatroomEvent(chatroomId: widget.chatroomId),
           );
@@ -529,11 +536,14 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        BB.BackButton(
-                                          onTap: () {
-                                            BlocProvider.of<HomeBloc>(context)
-                                                .add(UpdateHomeEvent());
-                                          },
+                                        Visibility(
+                                          visible: !widget.isRoot,
+                                          child: BB.BackButton(
+                                            onTap: () {
+                                              BlocProvider.of<HomeBloc>(context)
+                                                  .add(UpdateHomeEvent());
+                                            },
+                                          ),
                                         ),
                                         SizedBox(width: 4.w),
                                         PictureOrInitial(
@@ -704,7 +714,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                     ],
                   );
                 }
-                return Container(color: Colors.red);
+                return Container(
+                  color: kGreyColor.withOpacity(0.2),
+                );
               },
             ),
           ),
