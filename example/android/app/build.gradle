@@ -64,6 +64,13 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
+            // TODO: 
+            // The below code must be added for aws simple s3 to work in release mode
+            // 'proguard-aws-2.1.5.pro' must be added in the same directory as well
+            minifyEnabled true  
+		    shrinkResources true
+		    proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                          'proguard-aws-2.1.5.pro'
         }
     }
 }

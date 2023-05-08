@@ -14,8 +14,8 @@ dependencies:
     sdk: flutter
 
   ## LikeMinds Chat SDK
-  likeminds_chat_fl:
-    path: ../LikeMinds-Flutter-GroupChat-SDK
+  likeminds_chat_fl: 1.0.0
+    # path: ../LikeMinds-Flutter-GroupChat-SDK
 
   ## Flutter Packages
   sizer: ^2.0.15
@@ -63,6 +63,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  build_runner: 
+  envied_generator: 
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

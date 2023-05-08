@@ -11,10 +11,12 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/credentials/firebase_credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/bloc/media_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:sizer/sizer.dart';
 
@@ -25,24 +27,30 @@ export 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handle
 class LMChat extends StatelessWidget {
   final String _userId;
   final String _userName;
+  String? _domain;
+  int? _defaultChatroom;
 
   LMChat._internal(
     this._userId,
     this._userName,
+    this._domain,
+    this._defaultChatroom,
   ) {
     debugPrint('LMChat initialized');
   }
 
   static LMChat? _instance;
   static LMChat instance({required LMChatBuilder builder}) {
-    if (builder.getUserId == null || builder.getUserName == null) {
+    if (builder.getUserId == null && builder.getUserName == null) {
       throw Exception(
-        'LMChat builder needs to be initialized with userId, and userName',
+        'LMChat builder needs to be initialized with User ID, or User Name',
       );
     } else {
       return _instance ??= LMChat._internal(
-        builder.getUserId,
-        builder.getUserName,
+        builder.getUserId!,
+        builder.getUserName!,
+        builder.getDomain,
+        builder.getDefaultChatroom,
       );
     }
   }
@@ -78,25 +86,46 @@ class LMChat extends StatelessWidget {
   }
 
   firebase() async {
+    bool? isDebug = const bool.fromEnvironment('DEBUG');
+
     try {
       final clientFirebase = Firebase.app();
       final ourFirebase = await Firebase.initializeApp(
         name: 'likeminds_chat',
-        options: Platform.isIOS
-            ? const FirebaseOptions(
-                apiKey: 'AIzaSyBWjDQEiYKdQbQNvoiVvvOn_cbufQzvWuo',
-                appId: '1:983690302378:ios:00ee53e9ab9afe851b91d3',
-                messagingSenderId: '983690302378',
-                projectId: 'collabmates-beta',
-                databaseURL: "https://collabmates-beta.firebaseio.com/",
-              )
-            : const FirebaseOptions(
-                apiKey: 'AIzaSyB-9J8X0Z3Q4Z2Z3Z2Z3Z2Z3Z2Z3Z2Z3Z2',
-                appId: '1:983690302378:android:46abad58705780a81b91d3',
-                messagingSenderId: '983690302378',
-                projectId: 'collabmates-beta',
-                databaseURL: "https://collabmates-beta.firebaseio.com/",
-              ),
+        options: !isDebug
+            ?
+            //Prod Firebase options
+            Platform.isIOS
+                ? FirebaseOptions(
+                    apiKey: FbCredsProd.fbApiKey,
+                    appId: FbCredsProd.fbAppIdIOS,
+                    messagingSenderId: FbCredsProd.fbMessagingSenderId,
+                    projectId: FbCredsProd.fbProjectId,
+                    databaseURL: FbCredsProd.fbDatabaseUrl,
+                  )
+                : FirebaseOptions(
+                    apiKey: FbCredsProd.fbApiKey,
+                    appId: FbCredsProd.fbAppIdAN,
+                    messagingSenderId: FbCredsProd.fbMessagingSenderId,
+                    projectId: FbCredsProd.fbProjectId,
+                    databaseURL: FbCredsProd.fbDatabaseUrl,
+                  )
+            //Beta Firebase options
+            : Platform.isIOS
+                ? FirebaseOptions(
+                    apiKey: FbCredsDev.fbApiKey,
+                    appId: FbCredsDev.fbAppIdIOS,
+                    messagingSenderId: FbCredsDev.fbMessagingSenderId,
+                    projectId: FbCredsDev.fbProjectId,
+                    databaseURL: FbCredsDev.fbDatabaseUrl,
+                  )
+                : FirebaseOptions(
+                    apiKey: FbCredsDev.fbApiKey,
+                    appId: FbCredsDev.fbAppIdIOS,
+                    messagingSenderId: FbCredsDev.fbMessagingSenderId,
+                    projectId: FbCredsDev.fbProjectId,
+                    databaseURL: FbCredsDev.fbDatabaseUrl,
+                  ),
       );
       debugPrint("Client Firebase - ${clientFirebase.options.appId}");
       debugPrint("Our Firebase - ${ourFirebase.options.appId}");
@@ -117,6 +146,9 @@ class LMChat extends StatelessWidget {
             BlocProvider<HomeBloc>(
               create: (context) => HomeBloc(),
             ),
+            BlocProvider(
+              create: (context) => MediaBloc(),
+            )
           ],
           child: FutureBuilder(
             future: initiateUser(),
@@ -124,9 +156,17 @@ class LMChat extends StatelessWidget {
               if (snapshot.hasData) {
                 final user = snapshot.data!.user;
                 LMNotificationHandler.instance.registerDevice(user.id);
+                if (_defaultChatroom != null) {
+                  // router.
+                  return MaterialApp.router(
+                    routerConfig: router
+                      ..go('/chatroom/$_defaultChatroom?isRoot=true'),
+                    debugShowCheckedModeBanner: false,
+                  );
+                }
                 return MaterialApp.router(
                   routerConfig: router,
-                  debugShowCheckedModeBanner: true,
+                  debugShowCheckedModeBanner: false,
                 );
               }
               return Container(
@@ -144,17 +184,21 @@ class LMChat extends StatelessWidget {
 }
 
 class LMChatBuilder {
-  late final String _userId;
-  late final String _userName;
-  late final String _domain;
+  String? _userId;
+  String? _userName;
+  String? _domain;
+  int? _defaultChatroom;
 
   LMChatBuilder();
 
   void userId(String userId) => _userId = userId;
   void userName(String userName) => _userName = userName;
   void domain(String domain) => _domain = domain;
+  void defaultChatroom(int? defaultChatroomId) =>
+      _defaultChatroom = defaultChatroomId;
 
-  get getUserId => _userId;
-  get getUserName => _userName;
-  get getDomain => _domain;
+  String? get getUserId => _userId;
+  String? get getUserName => _userName;
+  String? get getDomain => _domain;
+  int? get getDefaultChatroom => _defaultChatroom;
 }

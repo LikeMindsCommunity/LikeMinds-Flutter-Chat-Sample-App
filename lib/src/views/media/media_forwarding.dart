@@ -15,7 +15,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -169,11 +169,11 @@ class _MediaForwardState extends State<MediaForward> {
                         chatroomId: widget.chatroomId,
                         style: LMTheme.regular.copyWith(color: kWhiteColor),
                         onTagSelected: (tag) {
-                          print(tag);
+                          // print(tag);
                           userTags.add(tag);
                         },
                         onChange: (value) {
-                          print(value);
+                          // print(value);
                         },
                         controller: _textEditingController,
                         focusNode: FocusNode(),

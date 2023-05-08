@@ -3,7 +3,7 @@ import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 

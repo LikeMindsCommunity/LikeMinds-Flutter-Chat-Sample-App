@@ -5,7 +5,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:go_router/go_router.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 
 class MediaPreview extends StatefulWidget {
@@ -67,32 +67,34 @@ class _MediaPreviewState extends State<MediaPreview> {
         top: false,
         child: Column(
           children: <Widget>[
-            CarouselSlider.builder(
-              options: CarouselOptions(
-                  clipBehavior: Clip.hardEdge,
-                  scrollDirection: Axis.horizontal,
-                  initialPage: 0,
-                  enlargeCenterPage: false,
-                  enableInfiniteScroll: false,
-                  height: 80.h,
-                  enlargeFactor: 0.0,
-                  viewportFraction: 1.0,
-                  onPageChanged: (index, reason) {
-                    currPosition = index;
-                    rebuildCurr.value = !rebuildCurr.value;
-                  }),
-              itemCount: widget.conversationAttachments!.length,
-              itemBuilder: (context, index, realIndex) => AspectRatio(
-                aspectRatio: widget.conversationAttachments![index]["width"] /
-                    widget.conversationAttachments![index]['height'],
-                child: CachedNetworkImage(
-                  imageUrl: widget.conversationAttachments![index]
-                          ['file_url'] ??
-                      widget.conversationAttachments![index]['url'],
-                  errorWidget: (context, url, error) => mediaErrorWidget(),
-                  progressIndicatorBuilder: (context, url, progress) =>
-                      mediaShimmer(),
-                  fit: BoxFit.contain,
+            Expanded(
+              child: CarouselSlider.builder(
+                options: CarouselOptions(
+                    clipBehavior: Clip.hardEdge,
+                    scrollDirection: Axis.horizontal,
+                    initialPage: 0,
+                    enlargeCenterPage: false,
+                    enableInfiniteScroll: false,
+                    height: 80.h,
+                    enlargeFactor: 0.0,
+                    viewportFraction: 1.0,
+                    onPageChanged: (index, reason) {
+                      currPosition = index;
+                      rebuildCurr.value = !rebuildCurr.value;
+                    }),
+                itemCount: widget.conversationAttachments!.length,
+                itemBuilder: (context, index, realIndex) => AspectRatio(
+                  aspectRatio: widget.conversationAttachments![index]["width"] /
+                      widget.conversationAttachments![index]['height'],
+                  child: CachedNetworkImage(
+                    imageUrl: widget.conversationAttachments![index]
+                            ['file_url'] ??
+                        widget.conversationAttachments![index]['url'],
+                    errorWidget: (context, url, error) => mediaErrorWidget(),
+                    progressIndicatorBuilder: (context, url, progress) =>
+                        mediaShimmer(),
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),

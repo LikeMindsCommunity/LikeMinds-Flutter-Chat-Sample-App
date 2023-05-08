@@ -1,15 +1,21 @@
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lm_chat_example/cred_screen.dart';
+import 'package:lm_chat_example/environment/env.dart';
 import 'package:lm_chat_example/example_callback.dart';
 import 'package:lm_chat_example/firebase_options.dart';
 import 'package:lm_chat_example/local_preference.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
+
+/// Flutter flavour/environment manager v0.0.1
+const isDebug = bool.fromEnvironment('DEBUG');
 
 /// First level notification handler
 /// Essential to declare it outside of any class or function as per Firebase docs
@@ -26,10 +32,10 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   LMChat.setupLMChat(
-    apiKey: "fa66d879-dd67-4d49-be44-cf008d339558",
+    apiKey: !isDebug ? EnvProd.apiKey : EnvDev.apiKey,
     lmCallBack: ExampleCallback(),
   );
-  setupNotifications();
+  await setupNotifications();
   await AppLocalPreference.instance.initialize();
   runApp(const MyApp());
 }
@@ -41,7 +47,7 @@ void main() async {
 /// 4. Register device with LM - [LMNotificationHandler]
 /// 5. Listen for FG and BG notifications
 /// 6. Handle notifications - [_handleNotification]
-void setupNotifications() async {
+Future setupNotifications() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -101,7 +107,8 @@ Future<String?> setupMessaging() async {
     sound: true,
   );
 
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+  if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+      Platform.isAndroid) {
     final token = await messaging.getToken();
     debugPrint('User granted permission: ${settings.authorizationStatus}');
     debugPrint("Token - $token");
