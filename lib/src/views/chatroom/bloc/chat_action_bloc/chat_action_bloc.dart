@@ -16,8 +16,10 @@ import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 part 'chat_action_event.dart';
 part 'chat_action_state.dart';
 
+bool isProd = true;
+
 class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
-  MediaService mediaService = MediaService(false);
+  MediaService mediaService = MediaService(isProd);
   final DatabaseReference realTime = LMRealtime.instance.chatroom();
   int? lastConversationId;
 
