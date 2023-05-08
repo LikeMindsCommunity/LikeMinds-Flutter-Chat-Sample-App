@@ -169,11 +169,11 @@ class _MediaForwardState extends State<MediaForward> {
                         chatroomId: widget.chatroomId,
                         style: LMTheme.regular.copyWith(color: kWhiteColor),
                         onTagSelected: (tag) {
-                          print(tag);
+                          // print(tag);
                           userTags.add(tag);
                         },
                         onChange: (value) {
-                          print(value);
+                          // print(value);
                         },
                         controller: _textEditingController,
                         focusNode: FocusNode(),

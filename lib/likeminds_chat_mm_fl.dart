@@ -11,6 +11,7 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/credentials/firebase_credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
@@ -95,35 +96,35 @@ class LMChat extends StatelessWidget {
             ?
             //Prod Firebase options
             Platform.isIOS
-                ? const FirebaseOptions(
-                    apiKey: 'AIzaSyCmu_u-n31x2WMQlWAciP5RDXGn2qMuXrg',
-                    appId: '1:645716458793:ios:20c306a563c4c6ebac8b38',
-                    messagingSenderId: '645716458793',
-                    projectId: 'collabmates-3d601',
-                    databaseURL: "https://collabmates-3d601.firebaseio.com/",
+                ? FirebaseOptions(
+                    apiKey: FbCredsProd.fbApiKey,
+                    appId: FbCredsProd.fbAppIdIOS,
+                    messagingSenderId: FbCredsProd.fbMessagingSenderId,
+                    projectId: FbCredsProd.fbProjectId,
+                    databaseURL: FbCredsProd.fbDatabaseUrl,
                   )
-                : const FirebaseOptions(
-                    apiKey: 'AIzaSyCmu_u-n31x2WMQlWAciP5RDXGn2qMuXrg',
-                    appId: '1:645716458793:android:b868b94b6683905e',
-                    messagingSenderId: '645716458793',
-                    projectId: 'collabmates-3d601',
-                    databaseURL: "https://collabmates-3d601.firebaseio.com/",
+                : FirebaseOptions(
+                    apiKey: FbCredsProd.fbApiKey,
+                    appId: FbCredsProd.fbAppIdAN,
+                    messagingSenderId: FbCredsProd.fbMessagingSenderId,
+                    projectId: FbCredsProd.fbProjectId,
+                    databaseURL: FbCredsProd.fbDatabaseUrl,
                   )
             //Beta Firebase options
             : Platform.isIOS
-                ? const FirebaseOptions(
-                    apiKey: 'AIzaSyBWjDQEiYKdQbQNvoiVvvOn_cbufQzvWuo',
-                    appId: '1:983690302378:ios:00ee53e9ab9afe851b91d3',
-                    messagingSenderId: '983690302378',
-                    projectId: 'collabmates-beta',
-                    databaseURL: "https://collabmates-beta.firebaseio.com/",
+                ? FirebaseOptions(
+                    apiKey: FbCredsDev.fbApiKey,
+                    appId: FbCredsDev.fbAppIdIOS,
+                    messagingSenderId: FbCredsDev.fbMessagingSenderId,
+                    projectId: FbCredsDev.fbProjectId,
+                    databaseURL: FbCredsDev.fbDatabaseUrl,
                   )
-                : const FirebaseOptions(
-                    apiKey: 'AIzaSyB-9J8X0Z3Q4Z2Z3Z2Z3Z2Z3Z2Z3Z2Z3Z2',
-                    appId: '1:983690302378:android:46abad58705780a81b91d3',
-                    messagingSenderId: '983690302378',
-                    projectId: 'collabmates-beta',
-                    databaseURL: "https://collabmates-beta.firebaseio.com/",
+                : FirebaseOptions(
+                    apiKey: FbCredsDev.fbApiKey,
+                    appId: FbCredsDev.fbAppIdIOS,
+                    messagingSenderId: FbCredsDev.fbMessagingSenderId,
+                    projectId: FbCredsDev.fbProjectId,
+                    databaseURL: FbCredsDev.fbDatabaseUrl,
                   ),
       );
       debugPrint("Client Firebase - ${clientFirebase.options.appId}");
