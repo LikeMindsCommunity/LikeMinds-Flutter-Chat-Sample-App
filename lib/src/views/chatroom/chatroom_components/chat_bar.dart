@@ -19,7 +19,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
@@ -96,80 +96,7 @@ class _ChatBarState extends State<ChatBar> {
     return Column(
       children: [
         replyToConversation != null && checkIfAnnouncementChannel()
-            ? Container(
-                height: 8.h,
-                width: 100.w,
-                color: kGreyColor.withOpacity(0.1),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 3.w),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Container(
-                            color: kGreyColor.withOpacity(0.2),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 1.w,
-                                  color: LMTheme.buttonColor,
-                                ),
-                                kHorizontalPaddingMedium,
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      replyToConversation!.member?.name ?? "",
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: LMTheme.medium.copyWith(
-                                        color: LMTheme.headerColor,
-                                      ),
-                                    ),
-                                    kVerticalPaddingSmall,
-                                    SizedBox(
-                                      child: Text(
-                                        replyToConversation?.answer != null &&
-                                                replyToConversation
-                                                        ?.answer.isNotEmpty ==
-                                                    true
-                                            ? TaggingHelper.convertRouteToTag(
-                                                    replyToConversation
-                                                        ?.answer) ??
-                                                ""
-                                            : replyToConversation?.hasFiles ??
-                                                    false
-                                                ? "📷 ${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
-                                                : "",
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                        style: LMTheme.regular.copyWith(
-                                          fontSize: 8.sp,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          chatActionBloc!.add(ReplyRemove());
-                        },
-                        icon: const Icon(
-                          Icons.close,
-                          color: kGreyColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
+            ? _getReplyConversation()
             : const SizedBox(),
         Container(
           width: 100.w,
@@ -654,6 +581,80 @@ class _ChatBarState extends State<ChatBar> {
           ),
         ),
       ],
+    );
+  }
+
+  Container _getReplyConversation() {
+    return Container(
+      height: 8.h,
+      width: 100.w,
+      color: kGreyColor.withOpacity(0.1),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 3.w),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Container(
+                  color: kGreyColor.withOpacity(0.2),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 1.w,
+                        color: LMTheme.buttonColor,
+                      ),
+                      kHorizontalPaddingMedium,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            replyToConversation!.member?.name ?? "",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: LMTheme.medium.copyWith(
+                              color: LMTheme.headerColor,
+                            ),
+                          ),
+                          kVerticalPaddingSmall,
+                          SizedBox(
+                            child: Text(
+                              replyToConversation?.answer != null &&
+                                      replyToConversation?.answer.isNotEmpty ==
+                                          true
+                                  ? TaggingHelper.convertRouteToTag(
+                                          replyToConversation?.answer) ??
+                                      ""
+                                  : replyToConversation?.hasFiles ?? false
+                                      ? "📷 ${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
+                                      : "",
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: LMTheme.regular.copyWith(
+                                fontSize: 8.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                chatActionBloc!.add(ReplyRemove());
+              },
+              icon: const Icon(
+                Icons.close,
+                color: kGreyColor,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -17,7 +17,7 @@ import 'package:likeminds_chat_mm_fl/src/widgets/bubble_triangle.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:swipe_to_action/swipe_to_action.dart';
-import '../../conversation/media/media_utils.dart';
+import '../../media/media_utils.dart';
 
 class ChatBubble extends StatefulWidget {
   final Conversation conversation;
@@ -355,72 +355,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   visible: replyToConversation != null,
                                   maintainState: true,
                                   maintainSize: false,
-                                  child: Container(
-                                    color: kGreyColor.withOpacity(0.1),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          height: 6.h,
-                                          width: 1.w,
-                                          color: LMTheme.buttonColor,
-                                        ),
-                                        kHorizontalPaddingMedium,
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              replyToConversation
-                                                      ?.member?.name ??
-                                                  "",
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: LMTheme.medium.copyWith(
-                                                color: kPrimaryColor,
-                                                fontSize: 9.sp,
-                                              ),
-                                            ),
-                                            kVerticalPaddingXSmall,
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                  maxWidth: 48.w),
-                                              child: Text(
-                                                replyToConversation?.answer !=
-                                                            null &&
-                                                        replyToConversation
-                                                                ?.answer
-                                                                .isNotEmpty ==
-                                                            true
-                                                    ? TaggingHelper
-                                                            .convertRouteToTag(
-                                                                replyToConversation
-                                                                    ?.answer) ??
-                                                        ""
-                                                    : replyToConversation
-                                                                ?.hasFiles ??
-                                                            false
-                                                        ? "${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
-                                                        : "",
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 1,
-                                                style: LMTheme.regular.copyWith(
-                                                  fontSize: 8.sp,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                          ],
-                                        ),
-                                        kHorizontalPaddingMedium,
-                                      ],
-                                    ),
-                                  ),
+                                  child: _getReplyConversation(),
                                 ),
                                 replyToConversation != null
                                     ? const SizedBox(height: 8)
@@ -513,6 +448,63 @@ class _ChatBubbleState extends State<ChatBubble> {
     );
   }
 
+  Container _getReplyConversation() {
+    return Container(
+      color: kGreyColor.withOpacity(0.1),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            height: 6.h,
+            width: 1.w,
+            color: LMTheme.buttonColor,
+          ),
+          kHorizontalPaddingMedium,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 6),
+              Text(
+                replyToConversation?.member?.name ?? "",
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: LMTheme.medium.copyWith(
+                  color: kPrimaryColor,
+                  fontSize: 9.sp,
+                ),
+              ),
+              kVerticalPaddingXSmall,
+              Container(
+                constraints: BoxConstraints(maxWidth: 48.w),
+                child: Text(
+                  _getReplyText(),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: LMTheme.regular.copyWith(
+                    fontSize: 8.sp,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
+          ),
+          kHorizontalPaddingMedium,
+        ],
+      ),
+    );
+  }
+
+  String _getReplyText() {
+    return replyToConversation?.answer != null &&
+            replyToConversation?.answer.isNotEmpty == true
+        ? TaggingHelper.convertRouteToTag(replyToConversation?.answer) ?? ""
+        : replyToConversation?.hasFiles ?? false
+            ? "${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
+            : "";
+  }
+
   void refresh() {
     setState(() {});
   }
@@ -522,13 +514,13 @@ class _ChatBubbleState extends State<ChatBubble> {
   Widget getContent() {
     Widget expandableText = ExpandableText(
       widget.conversation.answer,
-      expandText: "",
+      expandText: "see more",
       linkStyle: LMTheme.regular.copyWith(
         color: LMTheme.textLinkColor,
         fontSize: 9.sp,
       ),
       textAlign: TextAlign.left,
-      style: LMFonts.instance.regular.copyWith(
+      style: LMTheme.regular.copyWith(
         fontSize: 9.sp,
       ),
     );

@@ -11,8 +11,8 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/p
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/views/chatroom_participants_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_forwarding.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/media/media_preview.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/media_forwarding.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/media_preview.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/bloc/explore_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
