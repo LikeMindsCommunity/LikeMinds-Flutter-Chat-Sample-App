@@ -133,15 +133,19 @@ class _ChatroomPageState extends State<ChatroomPage> {
         );
       }
     }
-    conversationList.insert(0, conversation);
-    if (conversationList.length >= 500) {
-      conversationList.removeLast();
+    if (conversationList.contains(conversation)) {
+      return;
+    } else {
+      conversationList.insert(0, conversation);
+      if (conversationList.length >= 500) {
+        conversationList.removeLast();
+      }
+      if (!userMeta.containsKey(currentUser.id)) {
+        userMeta[currentUser.id] = currentUser;
+      }
+      pagedListController.itemList = conversationList;
+      rebuildConversationList.value = !rebuildConversationList.value;
     }
-    if (!userMeta.containsKey(currentUser.id)) {
-      userMeta[currentUser.id] = currentUser;
-    }
-    pagedListController.itemList = conversationList;
-    rebuildConversationList.value = !rebuildConversationList.value;
   }
 
   void addMultiMediaConversation(MultiMediaConversationPosted state) {
