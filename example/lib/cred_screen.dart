@@ -389,7 +389,7 @@ class _CredScreenState extends State<CredScreen> {
                       : _usernameController.text;
                   String userId = _userIdController.text.isEmpty &&
                           _usernameController.text.isEmpty
-                      ? isProd
+                      ? !isDebug
                           ? EnvProd.botId
                           : EnvDev.botId
                       : _userIdController.text;

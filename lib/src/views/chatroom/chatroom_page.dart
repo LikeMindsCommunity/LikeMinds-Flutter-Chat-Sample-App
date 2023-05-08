@@ -133,7 +133,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
         );
       }
     }
-    if (conversationList.contains(conversation) && conversationList.isEmpty) {
+    if (false) {
       return;
     } else {
       conversationList.insert(0, conversation);

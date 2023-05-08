@@ -85,25 +85,46 @@ class LMChat extends StatelessWidget {
   }
 
   firebase() async {
+    bool? isDebug = const bool.fromEnvironment('DEBUG');
+
     try {
       final clientFirebase = Firebase.app();
       final ourFirebase = await Firebase.initializeApp(
         name: 'likeminds_chat',
-        options: Platform.isIOS
-            ? const FirebaseOptions(
-                apiKey: 'AIzaSyBWjDQEiYKdQbQNvoiVvvOn_cbufQzvWuo',
-                appId: '1:983690302378:ios:00ee53e9ab9afe851b91d3',
-                messagingSenderId: '983690302378',
-                projectId: 'collabmates-beta',
-                databaseURL: "https://collabmates-beta.firebaseio.com/",
-              )
-            : const FirebaseOptions(
-                apiKey: 'AIzaSyB-9J8X0Z3Q4Z2Z3Z2Z3Z2Z3Z2Z3Z2Z3Z2',
-                appId: '1:983690302378:android:46abad58705780a81b91d3',
-                messagingSenderId: '983690302378',
-                projectId: 'collabmates-beta',
-                databaseURL: "https://collabmates-beta.firebaseio.com/",
-              ),
+        options: !isDebug
+            ?
+            //Prod Firebase options
+            Platform.isIOS
+                ? const FirebaseOptions(
+                    apiKey: 'AIzaSyCmu_u-n31x2WMQlWAciP5RDXGn2qMuXrg',
+                    appId: '1:645716458793:ios:20c306a563c4c6ebac8b38',
+                    messagingSenderId: '645716458793',
+                    projectId: 'collabmates-3d601',
+                    databaseURL: "https://collabmates-3d601.firebaseio.com/",
+                  )
+                : const FirebaseOptions(
+                    apiKey: 'AIzaSyCmu_u-n31x2WMQlWAciP5RDXGn2qMuXrg',
+                    appId: '1:645716458793:android:b868b94b6683905e',
+                    messagingSenderId: '645716458793',
+                    projectId: 'collabmates-3d601',
+                    databaseURL: "https://collabmates-3d601.firebaseio.com/",
+                  )
+            //Beta Firebase options
+            : Platform.isIOS
+                ? const FirebaseOptions(
+                    apiKey: 'AIzaSyBWjDQEiYKdQbQNvoiVvvOn_cbufQzvWuo',
+                    appId: '1:983690302378:ios:00ee53e9ab9afe851b91d3',
+                    messagingSenderId: '983690302378',
+                    projectId: 'collabmates-beta',
+                    databaseURL: "https://collabmates-beta.firebaseio.com/",
+                  )
+                : const FirebaseOptions(
+                    apiKey: 'AIzaSyB-9J8X0Z3Q4Z2Z3Z2Z3Z2Z3Z2Z3Z2Z3Z2',
+                    appId: '1:983690302378:android:46abad58705780a81b91d3',
+                    messagingSenderId: '983690302378',
+                    projectId: 'collabmates-beta',
+                    databaseURL: "https://collabmates-beta.firebaseio.com/",
+                  ),
       );
       debugPrint("Client Firebase - ${clientFirebase.options.appId}");
       debugPrint("Our Firebase - ${ourFirebase.options.appId}");

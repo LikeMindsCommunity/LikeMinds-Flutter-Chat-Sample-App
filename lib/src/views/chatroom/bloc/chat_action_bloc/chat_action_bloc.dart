@@ -16,10 +16,10 @@ import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 part 'chat_action_event.dart';
 part 'chat_action_state.dart';
 
-bool isProd = true;
+const bool isDebug = bool.fromEnvironment('DEBUG');
 
 class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
-  MediaService mediaService = MediaService(isProd);
+  MediaService mediaService = MediaService(!isDebug);
   final DatabaseReference realTime = LMRealtime.instance.chatroom();
   int? lastConversationId;
 
@@ -244,3 +244,21 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     }
   }
 }
+
+// realTime.onValue.listen((rtEvent) {
+//       on<NewConversation>((event, emit) {
+//         int chatroomId = event.chatroomId;
+//         lastConversationId = event.conversationId;
+//         if (rtEvent.snapshot.value != null) {
+//           final response = rtEvent.snapshot.value as Map;
+//           final conversationId = int.parse(response["collabcard"]["answer_id"]);
+//           if (lastConversationId != null &&
+//               conversationId != lastConversationId) {
+//             add(UpdateConversationList(
+//               chatroomId: chatroomId,
+//               conversationId: conversationId,
+//             ));
+//           }
+//         }
+//       });
+//     });

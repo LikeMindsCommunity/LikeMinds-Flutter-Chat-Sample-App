@@ -15,7 +15,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 
 /// Flutter flavour/environment manager v0.0.1
-const isProd = true;
+const isDebug = bool.fromEnvironment('DEBUG');
 
 /// First level notification handler
 /// Essential to declare it outside of any class or function as per Firebase docs
@@ -32,7 +32,7 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   LMChat.setupLMChat(
-    apiKey: isProd ? EnvProd.apiKey : EnvDev.apiKey,
+    apiKey: !isDebug ? EnvProd.apiKey : EnvDev.apiKey,
     lmCallBack: ExampleCallback(),
   );
   await setupNotifications();
