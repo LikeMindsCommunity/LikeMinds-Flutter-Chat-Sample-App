@@ -133,7 +133,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
         );
       }
     }
-    if (conversationList.contains(conversation)) {
+    if (conversationList.contains(conversation) && conversationList.isEmpty) {
       return;
     } else {
       conversationList.insert(0, conversation);
@@ -434,7 +434,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                 .containsKey(item.id.toString())
                                             ? conversationAttachmentsMeta[
                                                 '${item.id}']
-                                            : null,
+                                            : conversationAttachmentsMeta[
+                                                item.temporaryId],
                                     isSelected: (isSelected) {
                                       if (isSelected) {
                                         selectedConversations.add(item);
