@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -11,6 +13,9 @@ import 'package:lm_chat_example/local_preference.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
+
+/// Flutter flavour/environment manager v0.0.1
+const isProd = true;
 
 /// First level notification handler
 /// Essential to declare it outside of any class or function as per Firebase docs
@@ -27,7 +32,7 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   LMChat.setupLMChat(
-    apiKey: EnvDev.apiKey,
+    apiKey: isProd ? EnvProd.apiKey : EnvDev.apiKey,
     lmCallBack: ExampleCallback(),
   );
   await setupNotifications();
@@ -102,7 +107,8 @@ Future<String?> setupMessaging() async {
     sound: true,
   );
 
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+  if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+      Platform.isAndroid) {
     final token = await messaging.getToken();
     debugPrint('User granted permission: ${settings.authorizationStatus}');
     debugPrint("Token - $token");

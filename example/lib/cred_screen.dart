@@ -3,6 +3,7 @@ import 'package:flutter_material_color_picker/flutter_material_color_picker.dart
 import 'package:google_fonts/google_fonts.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:lm_chat_example/environment/env.dart';
+import 'package:lm_chat_example/main.dart';
 import 'package:lm_chat_example/network_handling.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:sizer/sizer.dart';
@@ -388,7 +389,9 @@ class _CredScreenState extends State<CredScreen> {
                       : _usernameController.text;
                   String userId = _userIdController.text.isEmpty &&
                           _usernameController.text.isEmpty
-                      ? EnvDev.botId
+                      ? isProd
+                          ? EnvProd.botId
+                          : EnvDev.botId
                       : _userIdController.text;
                   int? defaultChatroom = int.tryParse(_chatroomController.text);
                   if (username.isEmpty || userId.isEmpty) {
