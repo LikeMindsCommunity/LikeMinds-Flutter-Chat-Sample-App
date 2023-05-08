@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       builder: (context, orientation, deviceType) => OverlaySupport.global(
         child: MaterialApp(
           title: 'Chat App for UI + SDK package',
-          debugShowCheckedModeBanner: false,
+          debugShowCheckedModeBanner: isDebug,
           scaffoldMessengerKey: rootScaffoldMessengerKey,
           home: const CredScreen(),
         ),
