@@ -44,7 +44,6 @@ class ChatroomPage extends StatefulWidget {
 }
 
 class _ChatroomPageState extends State<ChatroomPage> {
-  bool? isCm;
   ChatActionBloc? chatActionBloc;
   Map<String, dynamic> conversationAttachmentsMeta = <String, dynamic>{};
   Map<String, List<Media>> mediaFiles = <String, List<Media>>{};
@@ -76,7 +75,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
     });
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     // conversationBloc = ConversationBloc();
-    isCm = UserLocalPreference.instance.fetchMemberState();
   }
 
   @override

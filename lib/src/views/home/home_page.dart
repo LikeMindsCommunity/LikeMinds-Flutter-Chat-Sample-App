@@ -21,7 +21,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? communityName;
   String? userName;
-  bool? isCm;
   User? user;
   HomeBloc? homeBloc;
   ValueNotifier<bool> rebuildPagedList = ValueNotifier(false);
@@ -37,7 +36,6 @@ class _HomePageState extends State<HomePage> {
     UserLocalPreference userLocalPreference = UserLocalPreference.instance;
     userName = userLocalPreference.fetchUserData().name;
     communityName = userLocalPreference.fetchCommunityData()["community_name"];
-    isCm = userLocalPreference.fetchMemberState();
     homeBloc = BlocProvider.of<HomeBloc>(context);
     homeBloc!.add(
       InitHomeEvent(

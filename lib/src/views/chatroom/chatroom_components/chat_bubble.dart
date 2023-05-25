@@ -58,7 +58,8 @@ class _ChatBubbleState extends State<ChatBubble> {
   bool isDeleted = false;
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
   final User loggedInUser = UserLocalPreference.instance.fetchUserData();
-  final bool isCm = UserLocalPreference.instance.fetchMemberState();
+  final MemberStateResponse isCm =
+      UserLocalPreference.instance.fetchMemberRights();
 
   printReactions() =>
       print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
@@ -83,7 +84,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   bool checkDeletePermissions() {
-    if (isCm && conversation.deletedByUserId == null) {
+    if (isCm.member?.state == 1 && conversation.deletedByUserId == null) {
       return true;
     } else if (loggedInUser.id == widget.sender.id &&
         conversation.deletedByUserId == null) {
@@ -207,7 +208,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                             Clipboard.setData(
                               ClipboardData(
                                 text: TaggingHelper.convertRouteToTag(
-                                    widget.conversation.answer),
+                                        widget.conversation.answer) ??
+                                    '',
                               ),
                             ).then((value) {
                               Fluttertoast.showToast(
