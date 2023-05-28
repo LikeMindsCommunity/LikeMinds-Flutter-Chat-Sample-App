@@ -148,7 +148,7 @@ class _ChatBarState extends State<ChatBar> {
                             chatroomId: widget.chatroom.id,
                             style: LMTheme.regular.copyWith(fontSize: 10.sp),
                             onTagSelected: (tag) {
-                              print(tag);
+                              debugPrint(tag.toString());
                               userTags.add(tag);
                               LMAnalytics.get()
                                   .logEvent(AnalyticsKeys.userTagsSomeone, {

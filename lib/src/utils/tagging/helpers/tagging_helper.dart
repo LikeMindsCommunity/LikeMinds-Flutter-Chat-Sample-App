@@ -1,7 +1,7 @@
+// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
-import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class TaggingHelper {
   static final RegExp tagRegExp = RegExp(r'@([a-z\sA-Z\s0-9]+)~');
@@ -53,7 +53,7 @@ class TaggingHelper {
   }
 
   static void routeToProfile(String userId) {
-    print(userId);
+    debugPrint(userId);
   }
 
   static String? convertRouteToTag(String? text) {

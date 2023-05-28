@@ -26,9 +26,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           });
           conversationResponse.conversationData!.forEach((element) {
             String? replyId = element.replyId == null
-                ? element.replyConversation == null
-                    ? null
-                    : element.replyConversation.toString()
+                ? element.replyConversation?.toString()
                 : element.replyId.toString();
             element.replyConversationObject =
                 conversationResponse.conversationMeta?[replyId];
@@ -47,12 +45,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         }
       }
       if (event is MarkReadChatroomEvent) {
-        LMResponse response =
-            await locator<LikeMindsService>().markReadChatroom(
-          MarkReadChatroomRequest(
-            chatroomId: event.chatroomId,
-          ),
-        );
+        // ignore: unused_local_variable
+        LMResponse response = await locator<LikeMindsService>()
+            .markReadChatroom((MarkReadChatroomRequestBuilder()
+                  ..chatroomId(event.chatroomId))
+                .build());
       }
     });
   }

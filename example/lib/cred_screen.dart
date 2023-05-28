@@ -225,7 +225,7 @@ class _CredScreenState extends State<CredScreen> {
                               onMainColorChange: (color) => setState(
                                 () => _tempColor = color,
                               ),
-                              onBack: () => print("Back button pressed"),
+                              onBack: () => debugPrint("Back button pressed"),
                             ),
                             actions: [
                               TextButton(
@@ -282,7 +282,7 @@ class _CredScreenState extends State<CredScreen> {
                               onMainColorChange: (color) => setState(
                                 () => _tempColor = color,
                               ),
-                              onBack: () => print("Back button pressed"),
+                              onBack: () => debugPrint("Back button pressed"),
                             ),
                             actions: [
                               TextButton(
@@ -338,7 +338,7 @@ class _CredScreenState extends State<CredScreen> {
                               onMainColorChange: (color) => setState(
                                 () => _tempColor = color,
                               ),
-                              onBack: () => print("Back button pressed"),
+                              onBack: () => debugPrint("Back button pressed"),
                             ),
                             actions: [
                               TextButton(

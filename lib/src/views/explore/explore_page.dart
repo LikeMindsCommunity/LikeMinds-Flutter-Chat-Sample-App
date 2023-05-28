@@ -128,7 +128,7 @@ class _ExplorePageState extends State<ExplorePage> {
             const Spacer(),
             GestureDetector(
               onTap: () {
-                print("Pin button tapped");
+                debugPrint("Pin button tapped");
               },
               child: Container(
                 height: 42,

@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/flutter_typeahead-4.3.7/lib/flutter_typeahead.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
@@ -167,7 +165,6 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
         ),
         direction: widget.isDown ? AxisDirection.down : AxisDirection.up,
         suggestionsCallback: (suggestion) async {
-          var str = suggestion;
           return await _getSuggestions(suggestion);
         },
         keepSuggestionsOnSuggestionSelected: true,
@@ -209,7 +206,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           );
         }),
         onSuggestionSelected: ((suggestion) {
-          print(suggestion);
+          debugPrint(suggestion.toString());
           widget.onTagSelected.call(suggestion);
           setState(() {
             tagComplete = true;

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,7 +14,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitial()) {
     final DatabaseReference realTime = LMRealtime.instance.homeFeed();
     realTime.onValue.listen((event) {
-      print(event);
+      debugPrint(event.toString());
       add(UpdateHomeEvent());
     });
     on<HomeEvent>(
@@ -23,18 +22,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         if (event is InitHomeEvent) {
           emit(HomeLoading());
 
-          final response = await locator<LikeMindsService>().getHomeFeed(
-            GetHomeFeedRequest(
-              page: event.page,
-              pageSize: 50,
-            ),
-          );
+          final response = await locator<LikeMindsService>()
+              .getHomeFeed((GetHomeFeedRequestBuilder()
+                    ..page(event.page)
+                    ..pageSize(50))
+                  .build());
           if (response.success) {
             response.data?.conversationMeta?.forEach((key, value) {
               String? userId = value.userId == null
-                  ? value.memberId == null
-                      ? null
-                      : value.memberId.toString()
+                  ? value.memberId?.toString()
                   : value.userId.toString();
               final user = response.data?.userMeta?[userId];
               value.member = user;
@@ -46,16 +42,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           }
         }
         if (event is UpdateHomeEvent) {
-          final response = await locator<LikeMindsService>().getHomeFeed(
-            GetHomeFeedRequest(page: 1, pageSize: 50),
-          );
+          final response = await locator<LikeMindsService>()
+              .getHomeFeed((GetHomeFeedRequestBuilder()
+                    ..page(1)
+                    ..pageSize(50))
+                  .build());
           if (response.success) {
             emit(UpdatedHomeFeed());
             response.data?.conversationMeta?.forEach((key, value) {
               String? userId = value.userId == null
-                  ? value.memberId == null
-                      ? null
-                      : value.memberId.toString()
+                  ? value.memberId?.toString()
                   : value.userId.toString();
               final user = response.data?.userMeta?[userId];
               value.member = user;

@@ -6,7 +6,6 @@ import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
@@ -61,8 +60,8 @@ class _ChatBubbleState extends State<ChatBubble> {
   final MemberStateResponse isCm =
       UserLocalPreference.instance.fetchMemberRights();
 
-  printReactions() =>
-      print("List contains: ${reactions.map((e) => e.toString()).join(", ")}");
+  printReactions() => debugPrint(
+      "List contains: ${reactions.map((e) => e.toString()).join(", ")}");
 
   @override
   void initState() {
@@ -146,25 +145,23 @@ class _ChatBubbleState extends State<ChatBubble> {
               }
               widget.onReply(conversation);
             },
-            background: Container(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 2.w,
-                  right: 2.w,
-                  top: 0.2.h,
-                  bottom: 0.2.h,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.reply_outlined,
-                      color: LMTheme.buttonColor,
-                      size: 18.sp,
-                    ),
-                  ],
-                ),
+            background: Padding(
+              padding: EdgeInsets.only(
+                left: 2.w,
+                right: 2.w,
+                top: 0.2.h,
+                bottom: 0.2.h,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.reply_outlined,
+                    color: LMTheme.buttonColor,
+                    size: 18.sp,
+                  ),
+                ],
               ),
             ),
             direction: SwipeDirection.startToEnd,
@@ -303,145 +300,142 @@ class _ChatBubbleState extends State<ChatBubble> {
                   ),
                 ),
               ),
-              child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(
-                        right: isSent ? 2.5.w : 0,
-                        // vertical: 0.5..h,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: isSent
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          !isSent
-                              ? PictureOrInitial(
-                                  fallbackText: widget.sender.name,
-                                  imageUrl: widget.sender.imageUrl,
-                                  size: 32.sp,
-                                  fontSize: 14.sp,
-                                )
-                              : const SizedBox(),
-                          const SizedBox(width: 6),
-                          !isSent
-                              ? Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.rotationY(3.14),
-                                  child: CustomPaint(
-                                    painter: BubbleTriangle(),
-                                  ),
-                                )
-                              : const SizedBox(),
-                          Container(
-                            constraints: BoxConstraints(
-                              minHeight: 4.h,
-                              minWidth: 10.w,
-                              maxWidth: 60.w,
-                            ),
-                            padding: const EdgeInsets.all(12.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: isSent
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
-                              children: [
-                                Visibility(
-                                  visible: replyToConversation != null,
-                                  maintainState: true,
-                                  maintainSize: false,
-                                  child: _getReplyConversation(),
-                                ),
-                                replyToConversation != null
-                                    ? const SizedBox(height: 8)
-                                    : const SizedBox(),
-                                isSent
-                                    ? const SizedBox()
-                                    : Text(
-                                        widget.sender.name,
-                                        style: LMFonts.instance.medium.copyWith(
-                                          fontSize: 10.sp,
-                                          color: isSent
-                                              ? Colors.black.withOpacity(0.6)
-                                              : LMTheme.headerColor,
-                                        ),
-                                      ),
-                                isSent
-                                    ? const SizedBox()
-                                    : const SizedBox(height: 6),
-                                isDeleted
-                                    ? conversation.deletedByUserId ==
-                                            loggedInUser.id
-                                        ? Text(
-                                            "This message was deleted",
-                                            style: LMFonts.instance.regular
-                                                .copyWith(
-                                              fontSize: 9.sp,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          )
-                                        : Text(
-                                            "This message was deleted by the Community Manager",
-                                            style: LMFonts.instance.regular
-                                                .copyWith(
-                                              fontSize: 9.sp,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          )
-                                    : replyToConversation != null
-                                        ? Align(
-                                            alignment: Alignment.topLeft,
-                                            child: getContent())
-                                        : getContent(),
-                                const SizedBox(height: 8),
-                                ((widget.conversation.hasFiles == null ||
-                                            !widget.conversation.hasFiles!) ||
-                                        (widget.conversation
-                                                    .attachmentsUploaded !=
-                                                null &&
-                                            widget.conversation
-                                                .attachmentsUploaded!))
-                                    ? Text(
-                                        widget.conversation.createdAt,
-                                        style:
-                                            LMFonts.instance.regular.copyWith(
-                                          fontSize: 8.sp,
-                                          color: kGreyColor,
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.timer_outlined,
-                                        size: 8.sp,
-                                      ),
-                              ],
-                            ),
-                          ),
-                          isSent
-                              ? CustomPaint(
-                                  painter: BubbleTriangle(),
-                                )
-                              : const SizedBox(),
-                          // const SizedBox(width: 6),
-                          // isSent
-                          //     ? PictureOrInitial(
-                          //         fallbackText: widget.sender.name,
-                          //         imageUrl: widget.sender.imageUrl,
-                          //         size: 28.sp,
-                          //         fontSize: 14.sp,
-                          //       )
-                          //     : const SizedBox(),
-                        ],
-                      ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                      right: isSent ? 2.5.w : 0,
+                      // vertical: 0.5..h,
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisAlignment: isSent
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        !isSent
+                            ? PictureOrInitial(
+                                fallbackText: widget.sender.name,
+                                imageUrl: widget.sender.imageUrl,
+                                size: 32.sp,
+                                fontSize: 14.sp,
+                              )
+                            : const SizedBox(),
+                        const SizedBox(width: 6),
+                        !isSent
+                            ? Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.rotationY(3.14),
+                                child: CustomPaint(
+                                  painter: BubbleTriangle(),
+                                ),
+                              )
+                            : const SizedBox(),
+                        Container(
+                          constraints: BoxConstraints(
+                            minHeight: 4.h,
+                            minWidth: 10.w,
+                            maxWidth: 60.w,
+                          ),
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: isSent
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Visibility(
+                                visible: replyToConversation != null,
+                                maintainState: true,
+                                maintainSize: false,
+                                child: _getReplyConversation(),
+                              ),
+                              replyToConversation != null
+                                  ? const SizedBox(height: 8)
+                                  : const SizedBox(),
+                              isSent
+                                  ? const SizedBox()
+                                  : Text(
+                                      widget.sender.name,
+                                      style: LMFonts.instance.medium.copyWith(
+                                        fontSize: 10.sp,
+                                        color: isSent
+                                            ? Colors.black.withOpacity(0.6)
+                                            : LMTheme.headerColor,
+                                      ),
+                                    ),
+                              isSent
+                                  ? const SizedBox()
+                                  : const SizedBox(height: 6),
+                              isDeleted
+                                  ? conversation.deletedByUserId ==
+                                          loggedInUser.id
+                                      ? Text(
+                                          "This message was deleted",
+                                          style:
+                                              LMFonts.instance.regular.copyWith(
+                                            fontSize: 9.sp,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        )
+                                      : Text(
+                                          "This message was deleted by the Community Manager",
+                                          style:
+                                              LMFonts.instance.regular.copyWith(
+                                            fontSize: 9.sp,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        )
+                                  : replyToConversation != null
+                                      ? Align(
+                                          alignment: Alignment.topLeft,
+                                          child: getContent())
+                                      : getContent(),
+                              const SizedBox(height: 8),
+                              ((widget.conversation.hasFiles == null ||
+                                          !widget.conversation.hasFiles!) ||
+                                      (widget.conversation
+                                                  .attachmentsUploaded !=
+                                              null &&
+                                          widget.conversation
+                                              .attachmentsUploaded!))
+                                  ? Text(
+                                      widget.conversation.createdAt,
+                                      style: LMFonts.instance.regular.copyWith(
+                                        fontSize: 8.sp,
+                                        color: kGreyColor,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.timer_outlined,
+                                      size: 8.sp,
+                                    ),
+                            ],
+                          ),
+                        ),
+                        isSent
+                            ? CustomPaint(
+                                painter: BubbleTriangle(),
+                              )
+                            : const SizedBox(),
+                        // const SizedBox(width: 6),
+                        // isSent
+                        //     ? PictureOrInitial(
+                        //         fallbackText: widget.sender.name,
+                        //         imageUrl: widget.sender.imageUrl,
+                        //         size: 28.sp,
+                        //         fontSize: 14.sp,
+                        //       )
+                        //     : const SizedBox(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

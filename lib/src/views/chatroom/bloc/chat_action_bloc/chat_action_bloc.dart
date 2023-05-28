@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:ui' as ui show Image;
-
 import 'package:firebase_database/firebase_database.dart';
 import 'package:equatable/equatable.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -8,9 +5,6 @@ import 'package:bloc/bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
-import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 
 part 'chat_action_event.dart';
@@ -101,7 +95,6 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
             ),
           );
           List<dynamic> fileLink = [];
-          User user = UserLocalPreference.instance.fetchUserData();
           int length = event.mediaFiles.length;
           for (int i = 0; i < length; i++) {
             Media media = event.mediaFiles[i];
@@ -113,8 +106,6 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
             if (url == null) {
               throw 'Error uploading file';
             } else {
-              ui.Image image =
-                  await decodeImageFromList(media.mediaFile!.readAsBytesSync());
               PutMediaRequest putMediaRequest = (PutMediaRequestBuilder()
                     ..conversationId(postConversationResponse.conversation!.id)
                     ..filesCount(length)
