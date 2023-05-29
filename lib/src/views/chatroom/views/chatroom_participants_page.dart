@@ -25,6 +25,7 @@ class ChatroomParticipantsPage extends StatefulWidget {
 
 class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
   ParticipantsBloc? participantsBloc;
+  FocusNode focusNode = FocusNode();
   String? searchTerm;
   final ValueNotifier<bool> rebuildSearchBar = ValueNotifier<bool>(false);
   final TextEditingController _searchController = TextEditingController();
@@ -48,6 +49,17 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
       ),
     );
     _addPaginationListener();
+  }
+
+  @override
+  void dispose() {
+    participantsBloc?.close();
+    focusNode.dispose();
+    _searchController.dispose();
+    rebuildSearchBar.dispose();
+    _pagingController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   int _page = 1;
@@ -95,6 +107,9 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                       rebuildSearchBar.value
                           ? Expanded(
                               child: TextField(
+                                focusNode: focusNode,
+                                keyboardType: TextInputType.text,
+                                textCapitalization: TextCapitalization.words,
                                 controller: _searchController,
                                 onChanged: (value) {
                                   if (_debounce?.isActive ?? false) {
@@ -182,6 +197,10 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                                         .build(),
                               ),
                             );
+                          } else {
+                            if (focusNode.canRequestFocus) {
+                              focusNode.requestFocus();
+                            }
                           }
                           rebuildSearchBar.value = !rebuildSearchBar.value;
                         },

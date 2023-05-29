@@ -94,7 +94,7 @@ class _ChatBarState extends State<ChatBar> {
 
   String getChatBarHintText() {
     if (getMemberState.member!.state != 1 && widget.chatroom.type == 7) {
-      return 'Only Community Manager have message here';
+      return 'Only Community Managers can respond here';
     } else if (!MemberRightCheck.checkRespondRights(getMemberState)) {
       return 'The community managers have restricted you from responding here';
     } else {

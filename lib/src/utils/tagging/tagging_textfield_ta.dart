@@ -138,6 +138,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
           keyboardType: TextInputType.multiline,
           controller: _controller,
           style: widget.style ?? LMTheme.regular,
+          textCapitalization: TextCapitalization.sentences,
           focusNode: _focusNode,
           minLines: 1,
           maxLines: 200,
