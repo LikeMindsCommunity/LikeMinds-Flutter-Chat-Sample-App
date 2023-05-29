@@ -28,6 +28,8 @@ migrate_working_dir/
 .dart_tool/
 .packages
 build/
+.env.fb-dev
+.env.fb-prod
 
 /example/lib/.env.dev
 /example/lib/.env.prod
