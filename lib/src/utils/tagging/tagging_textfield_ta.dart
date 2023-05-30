@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/packages/flutter_typeahead-4.3.7/lib/flutter_typeahead.dart';
+import 'package:flutter_typeahead_mm/flutter_typeahead.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';

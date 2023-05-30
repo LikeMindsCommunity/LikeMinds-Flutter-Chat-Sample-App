@@ -49,7 +49,7 @@ dependencies:
   envied: ^0.3.0
   extended_text_field: ^12.0.0
   equatable: 
-  flutter_typeahead: 
+  flutter_typeahead_mm: 
     path: lib/packages/flutter_typeahead-4.3.7
   image_picker: ^0.8.7+4
   file_picker: ^5.2.10
