@@ -13,9 +13,9 @@ import 'package:overlay_support/overlay_support.dart';
 
 class ChatroomMenu extends StatefulWidget {
   final ChatRoom chatroom;
-  List<ChatroomAction> chatroomActions;
+  final List<ChatroomAction> chatroomActions;
 
-  ChatroomMenu({
+  const ChatroomMenu({
     Key? key,
     required this.chatroom,
     required this.chatroomActions,
@@ -27,6 +27,7 @@ class ChatroomMenu extends StatefulWidget {
 
 class _ChatroomMenuState extends State<ChatroomMenu> {
   CustomPopupMenuController? _controller;
+  List<ChatroomAction>? chatroomActions;
 
   ValueNotifier<bool> rebuildChatroomMenu = ValueNotifier(false);
 
@@ -34,6 +35,7 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
   @override
   void initState() {
     super.initState();
+    chatroomActions = widget.chatroomActions;
     _controller = CustomPopupMenuController();
   }
 
@@ -56,9 +58,9 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
           child: ListView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
-            itemCount: widget.chatroomActions.length,
+            itemCount: chatroomActions?.length,
             itemBuilder: (BuildContext context, int index) {
-              return getListTile(widget.chatroomActions[index]);
+              return getListTile(chatroomActions![index]);
             },
           ),
         ),
@@ -118,11 +120,11 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
   }
 
   void muteChatroom(ChatroomAction action) async {
-    final response =
-        await locator<LikeMindsService>().muteChatroom(MuteChatroomRequest(
-      chatroomId: widget.chatroom.id,
-      value: !widget.chatroom.muteStatus!,
-    ));
+    final response = await locator<LikeMindsService>()
+        .muteChatroom((MuteChatroomRequestBuilder()
+              ..chatroomId(widget.chatroom.id)
+              ..value(!widget.chatroom.muteStatus!))
+            .build());
     if (response.success) {
       // _controller.hideMenu();
       // rebuildChatroomMenu.value = !rebuildChatroomMenu.value;
@@ -130,7 +132,7 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
           msg: (action.title.toLowerCase() == "mute notifications")
               ? "Chatroom muted"
               : "Chatroom unmuted");
-      widget.chatroomActions = widget.chatroomActions.map((element) {
+      chatroomActions = chatroomActions?.map((element) {
         if (element.title.toLowerCase() == "mute notifications") {
           element.title = "Unmute notifications";
         } else if (element.title.toLowerCase() == "unmute notifications") {
@@ -151,11 +153,11 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
     final User user = UserLocalPreference.instance.fetchUserData();
     if (!(widget.chatroom.isSecret ?? false)) {
       final response = await locator<LikeMindsService>()
-          .followChatroom(FollowChatroomRequest(
-        chatroomId: widget.chatroom.id,
-        memberId: user.id,
-        value: false,
-      ));
+          .followChatroom((FollowChatroomRequestBuilder()
+                ..chatroomId(widget.chatroom.id)
+                ..memberId(user.id)
+                ..value(false))
+              .build());
       if (response.success) {
         widget.chatroom.isGuest = true;
         // _controller.hideMenu();

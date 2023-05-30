@@ -1,12 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/material.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 
 class MediaPreview extends StatefulWidget {
   final List<dynamic>? conversationAttachments;

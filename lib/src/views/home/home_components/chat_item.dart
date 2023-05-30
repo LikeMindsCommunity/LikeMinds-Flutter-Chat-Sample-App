@@ -1,6 +1,4 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/gestures.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -14,7 +12,6 @@ import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.da
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
-import 'package:swipe_to_action/swipe_to_action.dart';
 
 class ChatItem extends StatefulWidget {
   final ChatRoom chatroom;
@@ -223,7 +220,7 @@ class _ChatItemState extends State<ChatItem> {
 
   void markRead({bool toast = false}) async {
     final response = await locator<LikeMindsService>().markReadChatroom(
-      MarkReadChatroomRequest(chatroomId: chatroom.id),
+      (MarkReadChatroomRequestBuilder()..chatroomId(chatroom.id)).build(),
     );
     if (response.success) {
       setState(() {
@@ -236,11 +233,11 @@ class _ChatItemState extends State<ChatItem> {
   }
 
   void muteChatroom() async {
-    final response =
-        await locator<LikeMindsService>().muteChatroom(MuteChatroomRequest(
-      chatroomId: chatroom.id,
-      value: !_muteStatus,
-    ));
+    final response = await locator<LikeMindsService>()
+        .muteChatroom((MuteChatroomRequestBuilder()
+              ..chatroomId(chatroom.id)
+              ..value(!_muteStatus))
+            .build());
     if (response.success) {
       setState(() {
         _muteStatus = !_muteStatus;
@@ -254,10 +251,10 @@ class _ChatItemState extends State<ChatItem> {
   void leaveChatroom() async {
     if (chatroom.isSecret ?? false) {
       final response = await locator<LikeMindsService>()
-          .followChatroom(FollowChatroomRequest(
-        chatroomId: chatroom.id,
-        value: false,
-      ));
+          .followChatroom((FollowChatroomRequestBuilder()
+                ..chatroomId(chatroom.id)
+                ..value(false))
+              .build());
       if (response.success) {
         Fluttertoast.showToast(msg: "Chatroom left");
       } else {

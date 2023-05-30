@@ -1,7 +1,5 @@
-import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/home/home_components/chat_item.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/big_button.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/bloc_error.dart';

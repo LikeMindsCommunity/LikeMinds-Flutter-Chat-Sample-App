@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'package:likeminds_chat_mm_fl/src/utils/credentials/credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:path/path.dart';
 
 import 'package:simple_s3/simple_s3.dart';
 
@@ -79,9 +77,6 @@ class MediaService {
     int conversationId,
   ) async {
     try {
-      String fileName = basenameWithoutExtension(file.path);
-      String currTimeInMilli = DateTime.now().millisecondsSinceEpoch.toString();
-
       String result = await _s3Client.uploadFile(
         file,
         _bucketName,

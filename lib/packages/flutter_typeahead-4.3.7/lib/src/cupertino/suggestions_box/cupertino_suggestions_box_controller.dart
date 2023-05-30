@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_typeahead/src/cupertino/suggestions_box/cupertino_suggestions_box.dart';
+import 'package:flutter_typeahead_mm/src/cupertino/suggestions_box/cupertino_suggestions_box.dart';
 
 /// Supply an instance of this class to the [TypeAhead.suggestionsBoxController]
 /// property to manually control the suggestions box
