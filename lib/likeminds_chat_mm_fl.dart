@@ -27,8 +27,9 @@ export 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handle
 class LMChat extends StatelessWidget {
   final String _userId;
   final String _userName;
-  String? _domain;
-  int? _defaultChatroom;
+  // ignore: unused_field
+  final String? _domain;
+  final int? _defaultChatroom;
 
   LMChat._internal(
     this._userId,
@@ -69,16 +70,15 @@ class LMChat extends StatelessWidget {
     String? userId,
     String? userName,
   }) async {
-    final response = await locator<LikeMindsService>().initiateUser(
-      InitiateUserRequest(
-        userId: userId ?? _instance?._userId,
-        userName: userName ?? _instance?._userName,
-      ),
-    );
+    final response = await locator<LikeMindsService>()
+        .initiateUser((InitiateUserRequestBuilder()
+              ..userId((userId ?? _instance?._userId)!)
+              ..userName((userName ?? _instance?._userName)!))
+            .build());
     final initiateUser = response.data!.initiateUser!;
 
     final isCm = await locator<LikeMindsService>().getMemberState();
-    UserLocalPreference.instance.storeMemberState(isCm.data);
+    UserLocalPreference.instance.storeMemberRights(isCm.data);
     UserLocalPreference.instance.storeUserData(initiateUser.user);
     UserLocalPreference.instance.storeCommunityData(initiateUser.community);
     await _instance?.firebase();

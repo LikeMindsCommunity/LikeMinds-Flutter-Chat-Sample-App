@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
@@ -22,8 +25,13 @@ class ChatroomParticipantsPage extends StatefulWidget {
 
 class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
   ParticipantsBloc? participantsBloc;
+  FocusNode focusNode = FocusNode();
+  String? searchTerm;
+  final ValueNotifier<bool> rebuildSearchBar = ValueNotifier<bool>(false);
+  final TextEditingController _searchController = TextEditingController();
   final PagingController<int, User> _pagingController =
       PagingController(firstPageKey: 1);
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -35,11 +43,23 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
               ..chatroomId(widget.chatroom.id)
               ..page(1)
               ..pageSize(10)
+              ..search(searchTerm)
               ..isSecret(widget.chatroom.isSecret ?? false))
             .build(),
       ),
     );
     _addPaginationListener();
+  }
+
+  @override
+  void dispose() {
+    participantsBloc?.close();
+    focusNode.dispose();
+    _searchController.dispose();
+    rebuildSearchBar.dispose();
+    _pagingController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   int _page = 1;
@@ -52,6 +72,7 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                 ..chatroomId(widget.chatroom.id)
                 ..page(pageKey)
                 ..pageSize(10)
+                ..search(searchTerm)
                 ..isSecret(widget.chatroom.isSecret ?? false))
               .build(),
         ),
@@ -63,87 +84,192 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: BlocConsumer(
-            bloc: participantsBloc,
-            listener: (context, state) {
-              if (state is ParticipantsLoaded) {
-                _page++;
-                if (state.getParticipantsResponse.participants!.isEmpty) {
-                  _pagingController.appendLastPage(
-                    state.getParticipantsResponse.participants!,
-                  );
-                } else {
-                  _pagingController.appendPage(
-                    state.getParticipantsResponse.participants!,
-                    _page,
-                  );
-                }
-              } else if (state is ParticipantsError) {
-                _pagingController.error = state.message;
-              }
-            },
-            buildWhen: (prev, curr) {
-              if (curr is ParticipantsPaginationLoading) {
-                return false;
-              }
-              return true;
-            },
-            builder: (context, state) {
-              if (state is ParticipantsLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (state is ParticipantsLoaded) {
-                LMAnalytics.get()
-                    .logEvent(AnalyticsKeys.viewChatroomParticipants, {
-                  'chatroom_id': widget.chatroom.id,
-                  'community_id': widget.chatroom.communityId,
-                  'source': 'chatroom_overflow_menu',
-                });
-                return Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 4.w,
-                        vertical: 2.h,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const BB.BackButton(),
-                          kHorizontalPaddingXLarge,
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Participants",
-                                style: LMFonts.instance.bold.copyWith(
-                                  fontSize: 12.sp,
+        child: Column(
+          children: [
+            ValueListenableBuilder(
+              valueListenable: rebuildSearchBar,
+              builder: (context, _, __) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 4.w,
+                    vertical: 2.h,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      rebuildSearchBar.value
+                          ? const BB.BackButton()
+                          : const SizedBox(),
+                      rebuildSearchBar.value
+                          ? kHorizontalPaddingXLarge
+                          : const SizedBox(),
+                      rebuildSearchBar.value
+                          ? Expanded(
+                              child: TextField(
+                                focusNode: focusNode,
+                                keyboardType: TextInputType.text,
+                                textCapitalization: TextCapitalization.words,
+                                controller: _searchController,
+                                onChanged: (value) {
+                                  if (_debounce?.isActive ?? false) {
+                                    _debounce?.cancel();
+                                  }
+                                  _debounce = Timer(
+                                    const Duration(milliseconds: 500),
+                                    () {
+                                      searchTerm = value;
+                                      _page = 1;
+                                      _pagingController.nextPageKey = 2;
+                                      _pagingController.itemList = <User>[];
+                                      participantsBloc!.add(
+                                        GetParticipants(
+                                          getParticipantsRequest:
+                                              (GetParticipantsRequestBuilder()
+                                                    ..chatroomId(
+                                                        widget.chatroom.id)
+                                                    ..page(1)
+                                                    ..pageSize(10)
+                                                    ..search(searchTerm)
+                                                    ..isSecret(widget.chatroom
+                                                            .isSecret ??
+                                                        false))
+                                                  .build(),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: "Search...",
+                                  hintStyle: LMFonts.instance.regular.copyWith(
+                                    color: kDarkGreyColor,
+                                    fontSize: 12.sp,
+                                  ),
                                 ),
                               ),
-                              kVerticalPaddingSmall,
-                              Text(
-                                "${widget.chatroom.participantCount ?? '--'} participants",
-                                style: LMFonts.instance.regular,
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const BB.BackButton(),
+                                kHorizontalPaddingXLarge,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Participants",
+                                      style: LMFonts.instance.bold.copyWith(
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                    kVerticalPaddingSmall,
+                                    Text(
+                                      "${widget.chatroom.participantCount ?? '--'} participants",
+                                      style: LMFonts.instance.regular,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 32),
+                              ],
+                            ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          if (rebuildSearchBar.value) {
+                            searchTerm = null;
+                            _searchController.clear();
+                            _page = 1;
+                            _pagingController.nextPageKey = 2;
+                            _pagingController.itemList = <User>[];
+                            participantsBloc!.add(
+                              GetParticipants(
+                                getParticipantsRequest:
+                                    (GetParticipantsRequestBuilder()
+                                          ..chatroomId(widget.chatroom.id)
+                                          ..page(1)
+                                          ..pageSize(10)
+                                          ..search(searchTerm)
+                                          ..isSecret(widget.chatroom.isSecret ??
+                                              false))
+                                        .build(),
                               ),
-                            ],
-                          ),
-                          const SizedBox(width: 32),
-                        ],
+                            );
+                          } else {
+                            if (focusNode.canRequestFocus) {
+                              focusNode.requestFocus();
+                            }
+                          }
+                          rebuildSearchBar.value = !rebuildSearchBar.value;
+                        },
+                        child: Icon(
+                          rebuildSearchBar.value
+                              ? CupertinoIcons.xmark
+                              : Icons.search,
+                          size: 20.sp,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Expanded(child: _buildParticipantsList()),
-                  ],
+                    ],
+                  ),
                 );
-              } else if (state is ParticipantsError) {
-                return Center(
-                  child: Text(state.message),
-                );
-              }
-              return const SizedBox();
-            }),
+              },
+            ),
+            Expanded(
+              child: BlocConsumer(
+                  bloc: participantsBloc,
+                  listener: (context, state) {
+                    if (state is ParticipantsLoaded) {
+                      _page++;
+                      if (state.getParticipantsResponse.participants!.isEmpty) {
+                        _pagingController.appendLastPage(
+                          state.getParticipantsResponse.participants!,
+                        );
+                      } else {
+                        _pagingController.appendPage(
+                          state.getParticipantsResponse.participants!,
+                          _page,
+                        );
+                      }
+                    } else if (state is ParticipantsError) {
+                      _pagingController.error = state.message;
+                    }
+                  },
+                  buildWhen: (prev, curr) {
+                    if (curr is ParticipantsPaginationLoading) {
+                      return false;
+                    }
+                    return true;
+                  },
+                  builder: (context, state) {
+                    if (state is ParticipantsLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is ParticipantsLoaded) {
+                      LMAnalytics.get()
+                          .logEvent(AnalyticsKeys.viewChatroomParticipants, {
+                        'chatroom_id': widget.chatroom.id,
+                        'community_id': widget.chatroom.communityId,
+                        'source': 'chatroom_overflow_menu',
+                      });
+                      return Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          Expanded(child: _buildParticipantsList()),
+                        ],
+                      );
+                    } else if (state is ParticipantsError) {
+                      return Center(
+                        child: Text(state.message),
+                      );
+                    }
+                    return const SizedBox();
+                  }),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -5,7 +5,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 abstract class ILikeMindsService {
   Future<LMResponse<InitiateUserResponse>> initiateUser(
       InitiateUserRequest request);
-  Future<LMResponse<bool>> getMemberState();
+  Future<LMResponse<MemberStateResponse>> getMemberState();
   Future<LMResponse<LogoutResponse>> logout(LogoutRequest request);
   Future<LMResponse<GetHomeFeedResponse>> getHomeFeed(
       GetHomeFeedRequest request);
@@ -50,10 +50,10 @@ class LikeMindsService implements ILikeMindsService {
     required this.apiKey,
     required this.lmCallBack,
   }) {
-    client = LMChatClient.initiateLikeMinds(
-      apiKey: apiKey,
-      sdkCallback: lmCallBack,
-    );
+    client = (LMChatClientBuilder()
+          ..apiKey(apiKey)
+          ..sdkCallback(lmCallBack))
+        .build();
     LMAnalytics.get().initialize();
   }
 
@@ -66,7 +66,7 @@ class LikeMindsService implements ILikeMindsService {
   }
 
   @override
-  Future<LMResponse<bool>> getMemberState() async {
+  Future<LMResponse<MemberStateResponse>> getMemberState() async {
     return client.getMemberState();
   }
 

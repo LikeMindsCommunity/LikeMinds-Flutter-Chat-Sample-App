@@ -1,10 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class SimpleBlocObserver extends BlocObserver {
   @override
   void onEvent(Bloc bloc, Object? event) {
     super.onEvent(bloc, event);
-    print(event);
+    debugPrint(event.toString());
   }
 
   @override
@@ -27,7 +28,7 @@ class SimpleBlocObserver extends BlocObserver {
 
   @override
   void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
-    print(error);
+    debugPrint(error.toString());
     super.onError(bloc, error, stackTrace);
   }
 }
