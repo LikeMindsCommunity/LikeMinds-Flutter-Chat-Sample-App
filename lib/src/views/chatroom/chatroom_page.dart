@@ -1,18 +1,13 @@
-import 'dart:io';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
@@ -22,7 +17,6 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chatroom_skeleton.dart';
 
@@ -44,7 +38,6 @@ class ChatroomPage extends StatefulWidget {
 }
 
 class _ChatroomPageState extends State<ChatroomPage> {
-  bool? isCm;
   ChatActionBloc? chatActionBloc;
   Map<String, dynamic> conversationAttachmentsMeta = <String, dynamic>{};
   Map<String, List<Media>> mediaFiles = <String, List<Media>>{};
@@ -76,7 +69,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
     });
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     // conversationBloc = ConversationBloc();
-    isCm = UserLocalPreference.instance.fetchMemberState();
   }
 
   @override
@@ -133,19 +125,15 @@ class _ChatroomPageState extends State<ChatroomPage> {
         );
       }
     }
-    if (false) {
-      return;
-    } else {
-      conversationList.insert(0, conversation);
-      if (conversationList.length >= 500) {
-        conversationList.removeLast();
-      }
-      if (!userMeta.containsKey(currentUser.id)) {
-        userMeta[currentUser.id] = currentUser;
-      }
-      pagedListController.itemList = conversationList;
-      rebuildConversationList.value = !rebuildConversationList.value;
+    conversationList.insert(0, conversation);
+    if (conversationList.length >= 500) {
+      conversationList.removeLast();
     }
+    if (!userMeta.containsKey(currentUser.id)) {
+      userMeta[currentUser.id] = currentUser;
+    }
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
   }
 
   void addMultiMediaConversation(MultiMediaConversationPosted state) {
@@ -355,12 +343,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                   height: 10,
                                 ),
                                 firstPageProgressIndicatorBuilder: (context) =>
-                                    SkeletonChatList(),
+                                    const SkeletonChatList(),
                                 newPageProgressIndicatorBuilder: (context) =>
                                     Padding(
                                   padding: EdgeInsets.symmetric(vertical: 1.h),
-                                  child: Column(
-                                    children: const [
+                                  child: const Column(
+                                    children: [
                                       SkeletonChatBubble(isSent: true),
                                       SkeletonChatBubble(isSent: false),
                                       SkeletonChatBubble(isSent: true),

@@ -15,7 +15,6 @@ import 'package:likeminds_chat_mm_fl/src/views/media/media_forwarding.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_preview.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/bloc/explore_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_page.dart';
-import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/profile/profile_page.dart';
@@ -46,11 +45,9 @@ final router = GoRouter(
               BlocProvider<ChatroomBloc>(
                 create: (context) => ChatroomBloc()
                   ..add(
-                    InitChatroomEvent(
-                      GetChatroomRequest(
-                        chatroomId: int.parse(state.params['id'] ?? "0"),
-                      ),
-                    ),
+                    InitChatroomEvent((GetChatroomRequestBuilder()
+                          ..chatroomId(int.parse(state.params['id'] ?? "0")))
+                        .build()),
                   ),
               ),
               BlocProvider<ConversationBloc>(

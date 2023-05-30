@@ -44,14 +44,36 @@ class UserLocalPreference {
     return User.fromEntity(UserEntity.fromJson(userData));
   }
 
-  void storeMemberState(bool? isCm) {
-    if (isCm == null) {
+  void storeMemberRights(MemberStateResponse? response) {
+    if (response == null) {
       return;
     }
-    _sharedPreferences?.setBool('isCm', isCm);
+    final entity = response.toEntity();
+    Map<String, dynamic> memberRights = entity.toJson();
+    String memberRightsString = jsonEncode(memberRights);
+    _sharedPreferences!.setString('memberRights', memberRightsString);
   }
 
-  bool fetchMemberState() {
-    return _sharedPreferences!.getBool('isCm')!;
+  MemberStateResponse fetchMemberRights() {
+    Map<String, dynamic> memberRights =
+        jsonDecode(_sharedPreferences!.getString('memberRights')!);
+    MemberStateResponseEntity memberStateResponseEntity =
+        MemberStateResponseEntity.fromJson(memberRights);
+    return MemberStateResponse.fromEntity(memberStateResponseEntity);
+  }
+
+  bool fetchMemberRight(int id) {
+    MemberStateResponse memberStateResponse = fetchMemberRights();
+    final memberRights = memberStateResponse.memberRights;
+    if (memberRights == null) {
+      return false;
+    } else {
+      final right = memberRights.where((element) => element.state == id);
+      if (right.isEmpty) {
+        return false;
+      } else {
+        return right.first.isSelected;
+      }
+    }
   }
 }

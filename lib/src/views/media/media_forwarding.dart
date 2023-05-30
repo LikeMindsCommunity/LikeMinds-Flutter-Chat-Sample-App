@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -16,8 +15,6 @@ import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.da
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
-import 'package:pdf_render/pdf_render_widgets.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 
 class MediaForward extends StatefulWidget {
@@ -34,7 +31,7 @@ class MediaForward extends StatefulWidget {
 }
 
 class _MediaForwardState extends State<MediaForward> {
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
   ImagePicker imagePicker = ImagePicker();
   List<Media> mediaList = [];
   int currPosition = 0;

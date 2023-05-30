@@ -3,6 +3,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:bloc/bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 part 'participants_event.dart';
 part 'participants_state.dart';
@@ -33,7 +34,7 @@ class ParticipantsBloc extends Bloc<ParticipantsEvent, ParticipantsState> {
               ),
             );
           } else {
-            print(getParticipantsResponse.errorMessage);
+            debugPrint(getParticipantsResponse.errorMessage);
             emit(
               ParticipantsError(
                 getParticipantsResponse.errorMessage!,
@@ -41,7 +42,7 @@ class ParticipantsBloc extends Bloc<ParticipantsEvent, ParticipantsState> {
             );
           }
         } else {
-          print(response.errorMessage);
+          debugPrint(response.errorMessage);
           emit(
             ParticipantsError(
               response.errorMessage!,
@@ -49,7 +50,7 @@ class ParticipantsBloc extends Bloc<ParticipantsEvent, ParticipantsState> {
           );
         }
       } catch (e) {
-        print(e.toString());
+        debugPrint(e.toString());
         emit(
           const ParticipantsError(
             'An error occurred',

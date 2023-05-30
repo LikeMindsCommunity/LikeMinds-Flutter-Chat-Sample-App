@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 
 class BigButton extends StatelessWidget {

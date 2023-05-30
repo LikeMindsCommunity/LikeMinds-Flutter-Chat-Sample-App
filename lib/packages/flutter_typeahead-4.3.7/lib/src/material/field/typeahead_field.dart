@@ -4,15 +4,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:flutter_typeahead/src/material/field/text_field_configuration.dart';
-import 'package:flutter_typeahead/src/keyboard_suggestion_selection_notifier.dart';
-import 'package:flutter_typeahead/src/should_refresh_suggestion_focus_index_notifier.dart';
-import 'package:flutter_typeahead/src/material/suggestions_box/suggestions_box.dart';
-import 'package:flutter_typeahead/src/material/suggestions_box/suggestions_box_controller.dart';
-import 'package:flutter_typeahead/src/material/suggestions_box/suggestions_box_decoration.dart';
-import 'package:flutter_typeahead/src/material/suggestions_box/suggestions_list.dart';
-import 'package:flutter_typeahead/src/typedef.dart';
-import 'package:flutter_typeahead/src/utils.dart';
+import 'package:flutter_typeahead_mm/src/material/field/text_field_configuration.dart';
+import 'package:flutter_typeahead_mm/src/keyboard_suggestion_selection_notifier.dart';
+import 'package:flutter_typeahead_mm/src/should_refresh_suggestion_focus_index_notifier.dart';
+import 'package:flutter_typeahead_mm/src/material/suggestions_box/suggestions_box.dart';
+import 'package:flutter_typeahead_mm/src/material/suggestions_box/suggestions_box_controller.dart';
+import 'package:flutter_typeahead_mm/src/material/suggestions_box/suggestions_box_decoration.dart';
+import 'package:flutter_typeahead_mm/src/material/suggestions_box/suggestions_list.dart';
+import 'package:flutter_typeahead_mm/src/typedef.dart';
+import 'package:flutter_typeahead_mm/src/utils.dart';
 import 'package:extended_text_field/extended_text_field.dart';
 
 /// # Flutter TypeAhead

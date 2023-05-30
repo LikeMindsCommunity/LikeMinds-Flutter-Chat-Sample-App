@@ -15,6 +15,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/member_rights/member_rights.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
@@ -47,7 +48,8 @@ class _ChatBarState extends State<ChatBar> {
   late FocusNode _focusNode;
   LMBranding lmBranding = LMBranding.instance;
   User currentUser = UserLocalPreference.instance.fetchUserData();
-  bool getMemberState = UserLocalPreference.instance.fetchMemberState();
+  MemberStateResponse getMemberState =
+      UserLocalPreference.instance.fetchMemberRights();
 
   List<UserTag> userTags = [];
   String? result;
@@ -81,12 +83,23 @@ class _ChatBarState extends State<ChatBar> {
   }
 
   bool checkIfAnnouncementChannel() {
-    if (getMemberState) {
-      return true;
-    } else if (widget.chatroom.type == 7) {
+    if (getMemberState.member!.state != 1 && widget.chatroom.type == 7) {
       return false;
+    } else if (!MemberRightCheck.checkRespondRights(getMemberState)) {
+      return false;
+    } else {
+      return true;
     }
-    return true;
+  }
+
+  String getChatBarHintText() {
+    if (getMemberState.member!.state != 1 && widget.chatroom.type == 7) {
+      return 'Only Community Managers can respond here';
+    } else if (!MemberRightCheck.checkRespondRights(getMemberState)) {
+      return 'The community managers have restricted you from responding here';
+    } else {
+      return "Write something here";
+    }
   }
 
   @override
@@ -135,7 +148,7 @@ class _ChatBarState extends State<ChatBar> {
                             chatroomId: widget.chatroom.id,
                             style: LMTheme.regular.copyWith(fontSize: 10.sp),
                             onTagSelected: (tag) {
-                              print(tag);
+                              debugPrint(tag.toString());
                               userTags.add(tag);
                               LMAnalytics.get()
                                   .logEvent(AnalyticsKeys.userTagsSomeone, {
@@ -148,18 +161,15 @@ class _ChatBarState extends State<ChatBar> {
                             onChange: (value) {},
                             controller: _textEditingController,
                             decoration: InputDecoration(
-                                border: InputBorder.none,
-                                enabled: checkIfAnnouncementChannel(),
-                                hintMaxLines: 1,
-                                hintStyle: LMTheme.medium.copyWith(
-                                  color: kGreyColor,
-                                  fontSize: checkIfAnnouncementChannel()
-                                      ? 9.sp
-                                      : 7.8.sp,
-                                ),
-                                hintText: checkIfAnnouncementChannel()
-                                    ? "Write something here"
-                                    : "Only community managers can message here"),
+                              border: InputBorder.none,
+                              enabled: checkIfAnnouncementChannel(),
+                              hintMaxLines: 2,
+                              hintStyle: LMTheme.medium.copyWith(
+                                color: kGreyColor,
+                                fontSize: 9.sp,
+                              ),
+                              hintText: getChatBarHintText(),
+                            ),
                             focusNode: _focusNode,
                           ),
                         ),
