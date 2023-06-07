@@ -15,20 +15,23 @@ String getInitials(String? name) {
   if (name == null || name == "") {
     return "";
   }
-
-  List<String> parts = name.split(' '); // Split on whitespace
-  if (parts.last.characters.first == "(") {
-    // Check if last part is a parantheses
-    parts.remove(parts.last); // Remove parantheses
+  try {
+    List<String> parts = name.split(' '); // Split on whitespace
+    if (parts.last.characters.first == "(") {
+      // Check if last part is a parantheses
+      parts.remove(parts.last); // Remove parantheses
+    }
+    var initials = parts.map((e) => e.characters.first);
+    if (initials.length > 2) {
+      initials = initials.toList().sublist(0, 2);
+    }
+    String initialString = initials
+        .reduce((_, e) => _ + e) // Reduce into single string
+        .toUpperCase(); // Capitalize
+    return initialString;
+  } catch (e) {
+    return name[0].toUpperCase();
   }
-  var initials = parts.map((e) => e.characters.first);
-  if (initials.length > 2) {
-    initials = initials.toList().sublist(0, 2);
-  }
-  String initialString = initials
-      .reduce((_, e) => _ + e) // Reduce into single string
-      .toUpperCase(); // Capitalize
-  return initialString;
 }
 
 extension StringColor on String {

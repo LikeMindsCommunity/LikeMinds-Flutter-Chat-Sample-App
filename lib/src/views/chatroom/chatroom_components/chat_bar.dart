@@ -632,6 +632,7 @@ class _ChatBarState extends State<ChatBar> {
                           ),
                           kVerticalPaddingSmall,
                           SizedBox(
+                            width: 70.w,
                             child: Text(
                               replyToConversation?.answer != null &&
                                       replyToConversation?.answer.isNotEmpty ==
