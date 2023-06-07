@@ -28,6 +28,7 @@ List<Conversation>? addTimeStampInConversationList(
           isTimeStamp: true,
           answer: key,
           communityId: communityId,
+          chatroomId: 0,
           createdAt: key,
           header: key,
           id: 0,

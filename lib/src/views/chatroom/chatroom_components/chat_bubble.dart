@@ -397,8 +397,10 @@ class _ChatBubbleState extends State<ChatBubble> {
                                           child: getContent())
                                       : getContent(),
                               const SizedBox(height: 8),
-                              ((widget.conversation.hasFiles == null ||
-                                          !widget.conversation.hasFiles!) ||
+                              (widget.conversation.createdAt.isNotEmpty &&
+                                          (widget.conversation.hasFiles ==
+                                                  null ||
+                                              !widget.conversation.hasFiles!) ||
                                       (widget.conversation
                                                   .attachmentsUploaded !=
                                               null &&
