@@ -4,8 +4,9 @@ abstract class ChatActionEvent extends Equatable {}
 
 class PostConversation extends ChatActionEvent {
   final PostConversationRequest postConversationRequest;
+  final Conversation? replyConversation;
 
-  PostConversation(this.postConversationRequest);
+  PostConversation(this.postConversationRequest, {this.replyConversation});
 
   @override
   List<Object> get props => [

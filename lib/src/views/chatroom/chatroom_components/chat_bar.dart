@@ -539,15 +539,18 @@ class _ChatBarState extends State<ChatBar> {
                                   result = TaggingHelper.encodeString(
                                       string, userTags);
                                   result = result?.trim();
-                                  chatActionBloc!.add(PostConversation(
-                                      (PostConversationRequestBuilder()
-                                            ..chatroomId(widget.chatroom.id)
-                                            ..text(result!)
-                                            ..replyId(replyToConversation?.id)
-                                            ..temporaryId(DateTime.now()
-                                                .millisecondsSinceEpoch
-                                                .toString()))
-                                          .build()));
+                                  chatActionBloc!.add(
+                                    PostConversation(
+                                        (PostConversationRequestBuilder()
+                                              ..chatroomId(widget.chatroom.id)
+                                              ..text(result!)
+                                              ..replyId(replyToConversation?.id)
+                                              ..temporaryId(DateTime.now()
+                                                  .millisecondsSinceEpoch
+                                                  .toString()))
+                                            .build(),
+                                        replyConversation: replyToConversation),
+                                  );
                                   if (widget.chatroom.isGuest ?? false) {
                                     Fluttertoast.showToast(
                                         msg: "Chatroom joined");
