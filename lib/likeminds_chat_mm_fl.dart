@@ -14,6 +14,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/credentials/firebase_credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/bloc/media_bloc.dart';
@@ -86,7 +87,7 @@ class LMChat extends StatelessWidget {
   }
 
   firebase() async {
-    bool? isDebug = const bool.fromEnvironment('DEBUG');
+    // bool? isDebug = const bool.fromEnvironment('DEBUG');
 
     try {
       final clientFirebase = Firebase.app();
@@ -157,6 +158,7 @@ class LMChat extends StatelessWidget {
                 final user = snapshot.data!.user;
                 LMNotificationHandler.instance.registerDevice(user.id);
                 if (_defaultChatroom != null) {
+                  LMRealtime.instance.chatroomId = _defaultChatroom!;
                   // router.
                   return MaterialApp.router(
                     routerConfig: router

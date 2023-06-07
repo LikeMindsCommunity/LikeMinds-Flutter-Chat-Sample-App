@@ -4,6 +4,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:bloc/bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
 
@@ -53,7 +54,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     });
     on<PostConversation>((event, emit) async {
       await mapPostConversationFunction(
-        event.postConversationRequest,
+        event,
         emit,
       );
     });
@@ -80,6 +81,27 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     Emitter<ChatActionState> emit,
   ) async {
     try {
+      DateTime dateTime = DateTime.now();
+      User user = UserLocalPreference.instance.fetchUserData();
+      Conversation conversation = Conversation(
+        answer: event.postConversationRequest.text,
+        chatroomId: event.postConversationRequest.chatroomId,
+        createdAt: "",
+        header: "",
+        date: "${dateTime.day} ${dateTime.month} ${dateTime.year}",
+        replyId: event.postConversationRequest.replyId,
+        attachmentCount: event.postConversationRequest.attachmentCount,
+        hasFiles: event.postConversationRequest.hasFiles,
+        member: user,
+        temporaryId: event.postConversationRequest.temporaryId,
+        id: 1,
+      );
+      emit(
+        MultiMediaConversationLoading(
+          conversation,
+          event.mediaFiles,
+        ),
+      );
       LMResponse<PostConversationResponse> response =
           await locator<LikeMindsService>().postConversation(
         event.postConversationRequest,
@@ -88,12 +110,6 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       if (response.success) {
         PostConversationResponse postConversationResponse = response.data!;
         if (postConversationResponse.success) {
-          emit(
-            MultiMediaConversationLoading(
-              response.data!,
-              event.mediaFiles,
-            ),
-          );
           List<dynamic> fileLink = [];
           int length = event.mediaFiles.length;
           for (int i = 0; i < length; i++) {
@@ -177,40 +193,44 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     }
   }
 
-  mapPostConversationFunction(PostConversationRequest postConversationRequest,
-      Emitter<ChatActionState> emit) async {
+  mapPostConversationFunction(
+      PostConversation event, Emitter<ChatActionState> emit) async {
     try {
+      DateTime dateTime = DateTime.now();
+      User user = UserLocalPreference.instance.fetchUserData();
+      Conversation conversation = Conversation(
+        answer: event.postConversationRequest.text,
+        chatroomId: event.postConversationRequest.chatroomId,
+        createdAt: "",
+        header: "",
+        date: "${dateTime.day} ${dateTime.month} ${dateTime.year}",
+        replyId: event.postConversationRequest.replyId,
+        attachmentCount: event.postConversationRequest.attachmentCount,
+        replyConversationObject: event.replyConversation,
+        hasFiles: event.postConversationRequest.hasFiles,
+        member: user,
+        temporaryId: event.postConversationRequest.temporaryId,
+        id: 1,
+      );
+      emit(LocalConversation(conversation));
       LMResponse<PostConversationResponse> response =
           await locator<LikeMindsService>().postConversation(
-        postConversationRequest,
+        event.postConversationRequest,
       );
 
       if (response.success) {
         if (response.data!.success) {
-          lastConversationId = response.data!.conversation!.id;
           Conversation conversation = response.data!.conversation!;
           if (conversation.replyId != null ||
               conversation.replyConversation != null) {
-            final int? replyId =
-                conversation.replyId ?? conversation.replyConversation;
-            if (replyId != null) {
-              final replyResponse = await locator<LikeMindsService>()
-                  .getSingleConversation((GetSingleConversationRequestBuilder()
-                        ..chatroomId(postConversationRequest.chatroomId)
-                        ..conversationId(replyId))
-                      .build());
-              if (replyResponse.success) {
-                conversation.replyConversationObject =
-                    replyResponse.data!.conversation;
-              }
-            }
+            conversation.replyConversationObject = event.replyConversation;
           }
           emit(ConversationPosted(response.data!));
         } else {
           emit(
             ChatActionError(
               response.data!.errorMessage!,
-              postConversationRequest.temporaryId,
+              event.postConversationRequest.temporaryId,
             ),
           );
           return false;
@@ -219,7 +239,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         emit(
           ChatActionError(
             response.errorMessage!,
-            postConversationRequest.temporaryId,
+            event.postConversationRequest.temporaryId,
           ),
         );
         return false;
@@ -228,7 +248,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       emit(
         ChatActionError(
           "An error occurred",
-          postConversationRequest.temporaryId,
+          event.postConversationRequest.temporaryId,
         ),
       );
       return false;

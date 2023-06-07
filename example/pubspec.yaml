@@ -2,7 +2,7 @@ name: lm_chat_example
 description: Example app running the combination of SDK + UI Package
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.0
+version: 1.1.1
 
 environment:
   sdk: '>=2.19.6 <3.0.0'

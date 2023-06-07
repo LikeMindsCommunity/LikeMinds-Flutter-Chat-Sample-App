@@ -20,6 +20,17 @@ class ChatActionError extends ChatActionState {
       ];
 }
 
+class LocalConversation extends ChatActionState {
+  final Conversation conversation;
+
+  LocalConversation(this.conversation);
+
+  @override
+  List<Object> get props => [
+        conversation,
+      ];
+}
+
 class ConversationPosted extends ChatActionState {
   final PostConversationResponse postConversationResponse;
 
@@ -73,17 +84,16 @@ class ConversationDelete extends ChatActionState {
 }
 
 class MultiMediaConversationLoading extends ChatActionState {
-  final PostConversationResponse postConversationResponse;
+  final Conversation postConversation;
   final List<Media> mediaFiles;
 
   MultiMediaConversationLoading(
-    this.postConversationResponse,
+    this.postConversation,
     this.mediaFiles,
   );
 
   @override
   List<Object> get props => [
-        postConversationResponse,
         mediaFiles,
       ];
 }

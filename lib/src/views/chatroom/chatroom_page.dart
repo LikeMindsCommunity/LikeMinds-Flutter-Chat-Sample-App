@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
@@ -10,6 +11,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
@@ -75,6 +77,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
   void dispose() {
     pagedListController.dispose();
     scrollController.dispose();
+    chatActionBloc!.add(ReplyRemove());
     lastConversationId = 0;
     super.dispose();
   }
@@ -97,11 +100,54 @@ class _ChatroomPageState extends State<ChatroomPage> {
     );
   }
 
+  void addLocalConversationToPagedList(Conversation conversation) {
+    List<Conversation> conversationList =
+        pagedListController.itemList ?? <Conversation>[];
+
+    // if (conversationList.isNotEmpty &&
+    //     conversationList.first.date != conversation.date) {
+    //   conversationList.insert(
+    //     0,
+    //     Conversation(
+    //       isTimeStamp: true,
+    //       id: 1,
+    //       hasFiles: false,
+    //       attachmentCount: 0,
+    //       attachmentsUploaded: false,
+    //       createdEpoch: conversation.createdEpoch,
+    //       chatroomId: chatroom!.id,
+    //       date: conversation.date,
+    //       memberId: conversation.memberId,
+    //       userId: conversation.userId,
+    //       temporaryId: conversation.temporaryId,
+    //       answer: conversation.date ?? '',
+    //       communityId: chatroom!.communityId!,
+    //       createdAt: conversation.createdAt,
+    //       header: conversation.header,
+    //     ),
+    //   );
+    // }
+    conversationList.insert(0, conversation);
+    if (conversationList.length >= 500) {
+      conversationList.removeLast();
+    }
+    if (!userMeta.containsKey(currentUser.id)) {
+      userMeta[currentUser.id] = currentUser;
+    }
+
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
+  }
+
   void addConversationToPagedList(Conversation conversation) {
     List<Conversation> conversationList =
         pagedListController.itemList ?? <Conversation>[];
 
-    if (conversationList.isNotEmpty) {
+    int index = conversationList.indexWhere(
+        (element) => element.temporaryId == conversation.temporaryId);
+    if (index != -1) {
+      conversationList[index] = conversation;
+    } else {
       if (conversationList.first.date != conversation.date) {
         conversationList.insert(
           0,
@@ -124,13 +170,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
           ),
         );
       }
-    }
-    conversationList.insert(0, conversation);
-    if (conversationList.length >= 500) {
-      conversationList.removeLast();
-    }
-    if (!userMeta.containsKey(currentUser.id)) {
-      userMeta[currentUser.id] = currentUser;
+      conversationList.insert(0, conversation);
+      if (conversationList.length >= 500) {
+        conversationList.removeLast();
+      }
+      if (!userMeta.containsKey(currentUser.id)) {
+        userMeta[currentUser.id] = currentUser;
+      }
     }
     pagedListController.itemList = conversationList;
     rebuildConversationList.value = !rebuildConversationList.value;
@@ -648,6 +694,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       BlocConsumer(
                           bloc: chatActionBloc,
                           listener: (context, state) {
+                            if (state is LocalConversation) {
+                              addLocalConversationToPagedList(
+                                  state.conversation);
+                            }
                             if (state is ConversationPosted) {
                               addConversationToPagedList(
                                 state.postConversationResponse.conversation!,
@@ -656,17 +706,15 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               if (!userMeta.containsKey(currentUser.id)) {
                                 userMeta[currentUser.id] = currentUser;
                               }
-                              mediaFiles[state
-                                  .postConversationResponse
-                                  .conversation!
-                                  .temporaryId!] = state.mediaFiles;
+                              mediaFiles[state.postConversation.temporaryId!] =
+                                  state.mediaFiles;
 
                               List<Conversation> conversationList =
                                   pagedListController.itemList ??
                                       <Conversation>[];
 
-                              conversationList.insert(0,
-                                  state.postConversationResponse.conversation!);
+                              conversationList.insert(
+                                  0, state.postConversation);
 
                               rebuildConversationList.value =
                                   !rebuildConversationList.value;
