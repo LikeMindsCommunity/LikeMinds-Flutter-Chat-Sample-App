@@ -6,3 +6,7 @@ Initial stable release v1.0.0
 
 Added search in participants list
 Added member rights
+
+## 1.1.1
+
+Fixing an issue with reply
