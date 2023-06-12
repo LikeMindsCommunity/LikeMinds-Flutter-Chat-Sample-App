@@ -40,13 +40,31 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     on<UpdateConversationList>((event, emit) async {
       if (lastConversationId != null &&
           event.conversationId != lastConversationId) {
+        int maxTimestamp = DateTime.now().millisecondsSinceEpoch;
         final response = await locator<LikeMindsService>()
-            .getSingleConversation((GetSingleConversationRequestBuilder()
+            .getConversation((GetConversationRequestBuilder()
                   ..chatroomId(event.chatroomId)
+                  ..minTimestamp(0)
+                  ..maxTimestamp(maxTimestamp)
+                  ..page(1)
+                  ..pageSize(200)
                   ..conversationId(event.conversationId))
                 .build());
         if (response.success) {
-          emit(UpdateConversation(response: response.data!.conversation!));
+          Conversation realTimeConversation =
+              response.data!.conversationData!.first;
+          if (response.data!.conversationMeta != null &&
+              realTimeConversation.replyId != null) {
+            Conversation? replyConversationObject = response.data!
+                .conversationMeta![realTimeConversation.replyId.toString()];
+            realTimeConversation.replyConversationObject =
+                replyConversationObject;
+          }
+          emit(
+            UpdateConversation(
+              response: realTimeConversation,
+            ),
+          );
 
           lastConversationId = event.conversationId;
         }
