@@ -25,6 +25,7 @@ import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
   Conversation? replyToConversation;
+  Conversation? editConversation;
   Map<int, User?>? userMeta;
   final Function() scrollToBottom;
 
@@ -32,6 +33,7 @@ class ChatBar extends StatefulWidget {
     super.key,
     required this.chatroom,
     this.replyToConversation,
+    this.editConversation,
     required this.scrollToBottom,
     this.userMeta,
   });
@@ -45,6 +47,7 @@ class _ChatBarState extends State<ChatBar> {
   ImagePicker? imagePicker;
   FilePicker? filePicker;
   Conversation? replyToConversation;
+  Conversation? editConversation;
   Map<int, User?>? userMeta;
   late CustomPopupMenuController _popupMenuController;
   late TextEditingController _textEditingController;
@@ -105,15 +108,29 @@ class _ChatBarState extends State<ChatBar> {
     }
   }
 
+  void setupEditText() {
+    if (widget.editConversation == null) {
+      return;
+    }
+    editConversation = widget.editConversation;
+    _textEditingController.value = TextEditingValue(
+      text: editConversation!.answer,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     replyToConversation = widget.replyToConversation;
+    setupEditText();
     userMeta = widget.userMeta;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Column(
       children: [
         replyToConversation != null && checkIfAnnouncementChannel()
             ? _getReplyConversation()
+            : const SizedBox(),
+        editConversation != null && checkIfAnnouncementChannel()
+            ? _getEditConversation()
             : const SizedBox(),
         Container(
           width: 100.w,
@@ -536,25 +553,37 @@ class _ChatBarState extends State<ChatBar> {
                                   Fluttertoast.showToast(
                                       msg: "Text can't be empty");
                                 } else {
-                                  // Fluttertoast.showToast(msg: "Send message");
                                   final string = _textEditingController.text;
                                   userTags =
                                       TaggingHelper.matchTags(string, userTags);
                                   result = TaggingHelper.encodeString(
                                       string, userTags);
                                   result = result?.trim();
-                                  chatActionBloc!.add(
-                                    PostConversation(
-                                        (PostConversationRequestBuilder()
-                                              ..chatroomId(widget.chatroom.id)
-                                              ..text(result!)
-                                              ..replyId(replyToConversation?.id)
-                                              ..temporaryId(DateTime.now()
-                                                  .millisecondsSinceEpoch
-                                                  .toString()))
-                                            .build(),
-                                        replyConversation: replyToConversation),
-                                  );
+                                  if (editConversation != null) {
+                                    chatActionBloc!.add(EditConversation(
+                                      (EditConversationRequestBuilder()
+                                            ..conversationId(
+                                                editConversation!.id)
+                                            ..text(result!))
+                                          .build(),
+                                    ));
+                                  } else {
+                                    // Fluttertoast.showToast(msg: "Send message");
+                                    chatActionBloc!.add(
+                                      PostConversation(
+                                          (PostConversationRequestBuilder()
+                                                ..chatroomId(widget.chatroom.id)
+                                                ..text(result!)
+                                                ..replyId(
+                                                    replyToConversation?.id)
+                                                ..temporaryId(DateTime.now()
+                                                    .millisecondsSinceEpoch
+                                                    .toString()))
+                                              .build(),
+                                          replyConversation:
+                                              replyToConversation),
+                                    );
+                                  }
                                   if (widget.chatroom.isGuest ?? false) {
                                     Fluttertoast.showToast(
                                         msg: "Chatroom joined");
@@ -563,6 +592,7 @@ class _ChatBarState extends State<ChatBar> {
                                   _textEditingController.clear();
                                   userTags = [];
                                   result = "";
+                                  editConversation = null;
                                   replyToConversation = null;
                                   widget.scrollToBottom();
                                 }
@@ -666,6 +696,81 @@ class _ChatBarState extends State<ChatBar> {
             IconButton(
               onPressed: () {
                 chatActionBloc!.add(ReplyRemove());
+              },
+              icon: const Icon(
+                Icons.close,
+                color: kGreyColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Container _getEditConversation() {
+    return Container(
+      height: 8.h,
+      width: 100.w,
+      color: kGreyColor.withOpacity(0.1),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 3.w),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Container(
+                  color: kGreyColor.withOpacity(0.2),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 1.w,
+                        color: LMTheme.buttonColor,
+                      ),
+                      kHorizontalPaddingMedium,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Edit message",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: LMTheme.medium.copyWith(
+                              color: LMTheme.headerColor,
+                            ),
+                          ),
+                          kVerticalPaddingSmall,
+                          SizedBox(
+                            width: 70.w,
+                            child: Text(
+                              editConversation?.answer != null &&
+                                      editConversation?.answer.isNotEmpty ==
+                                          true
+                                  ? TaggingHelper.convertRouteToTag(
+                                          editConversation?.answer) ??
+                                      ""
+                                  : editConversation?.hasFiles ?? false
+                                      ? "📷 ${editConversation?.attachmentCount} Image${editConversation?.attachmentCount == 1 ? "" : "s"}"
+                                      : "",
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: LMTheme.regular.copyWith(
+                                fontSize: 8.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                chatActionBloc!.add(EditRemove());
               },
               icon: const Icon(
                 Icons.close,

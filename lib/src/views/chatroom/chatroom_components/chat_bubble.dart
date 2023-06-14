@@ -27,6 +27,7 @@ class ChatBubble extends StatefulWidget {
   final Map<String, List<Media>> mediaFiles;
   final List<dynamic>? conversationAttachments;
   final Function(Conversation replyingTo) onReply;
+  final Function(Conversation editConversation) onEdit;
   final Function(Conversation conversation) onLongPress;
   final ValueChanged<bool> isSelected;
 
@@ -42,6 +43,7 @@ class ChatBubble extends StatefulWidget {
     required this.onLongPress,
     required this.isSelected,
     required this.userMeta,
+    required this.onEdit,
   });
 
   @override
@@ -53,9 +55,9 @@ class _ChatBubbleState extends State<ChatBubble> {
   late final EmojiParser emojiParser;
   late final CustomPopupMenuController _controller;
   Map<int, User?>? userMeta;
-  late bool isSent;
-  late Conversation conversation;
-  late Conversation? replyToConversation;
+  bool? isSent;
+  Conversation? conversation;
+  Conversation? replyToConversation;
   bool isSelected = false;
   bool isDeleted = false;
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
@@ -71,11 +73,7 @@ class _ChatBubbleState extends State<ChatBubble> {
     super.initState();
     emojiParser = EmojiParser();
     // user = UserLocalPreference.instance.fetchUserData();
-    isSent = widget.sender.id == loggedInUser.id;
     _controller = CustomPopupMenuController();
-    conversation = widget.conversation;
-    replyToConversation = widget.replyToConversation;
-    isDeleted = conversation.deletedByUserId != null;
   }
 
   @override
@@ -86,19 +84,37 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   bool checkDeletePermissions() {
-    if (isCm.member?.state == 1 && conversation.deletedByUserId == null) {
+    if (isCm.member?.state == 1 && conversation!.deletedByUserId == null) {
       return true;
     } else if (loggedInUser.id == widget.sender.id &&
-        conversation.deletedByUserId == null) {
+        conversation!.deletedByUserId == null) {
       return true;
     } else {
       return false;
     }
   }
 
+  bool checkEditPermissions() {
+    if (conversation!.answer.isEmpty) {
+      return false;
+    } else if (loggedInUser.id == widget.sender.id &&
+        conversation!.deletedByUserId == null) {
+      return true;
+    }
+    return false;
+  }
+
+  void setupConversation() {
+    isSent = widget.sender.id == loggedInUser.id;
+    conversation = widget.conversation;
+    replyToConversation = widget.replyToConversation;
+    isDeleted = conversation!.deletedByUserId != null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!isSent &&
+    setupConversation();
+    if (!isSent! &&
         widget.conversation.hasFiles != null &&
         widget.conversation.hasFiles! &&
         widget.conversation.attachmentsUploaded != null &&
@@ -111,7 +127,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       onLongPress: () {
         _isSelected.value = true;
         debugPrint("Long Pressed");
-        widget.onLongPress(conversation);
+        widget.onLongPress(conversation!);
         setState(() {
           _controller.showMenu();
           widget.isSelected(isSelected);
@@ -138,16 +154,16 @@ class _ChatBubbleState extends State<ChatBubble> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Swipeable(
-            key: ValueKey(conversation.id),
+            key: ValueKey(conversation!.id),
             onSwipe: (direction) {
-              int userId = conversation.userId ?? conversation.memberId!;
+              int userId = conversation!.userId ?? conversation!.memberId!;
               if (userId == loggedInUser.id) {
-                conversation.member = loggedInUser;
+                conversation!.member = loggedInUser;
               }
-              if (conversation.deletedByUserId != null) {
+              if (conversation!.deletedByUserId != null) {
                 return;
               }
-              widget.onReply(conversation);
+              widget.onReply(conversation!);
             },
             background: Padding(
               padding: EdgeInsets.only(
@@ -188,7 +204,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                       children: [
                         ListTile(
                           onTap: () {
-                            widget.onReply(conversation);
+                            widget.onReply(conversation!);
                             _controller.hideMenu();
                           },
                           leading: Icon(
@@ -236,13 +252,14 @@ class _ChatBubbleState extends State<ChatBubble> {
                               final response = await locator<LikeMindsService>()
                                   .deleteConversation(
                                       (DeleteConversationRequestBuilder()
-                                            ..conversationIds([conversation.id])
+                                            ..conversationIds(
+                                                [conversation!.id])
                                             ..reason("Delete"))
                                           .build());
                               if (response.success) {
                                 _controller.hideMenu();
                                 setState(() {
-                                  conversation.deletedByUserId =
+                                  conversation!.deletedByUserId =
                                       loggedInUser.id;
                                   isDeleted = true;
                                 });
@@ -262,7 +279,27 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           ),
                         ),
-                        kVerticalPaddingMedium
+                        kVerticalPaddingMedium,
+                        Visibility(
+                          visible: checkEditPermissions(),
+                          child: ListTile(
+                            onTap: () async {
+                              widget.onEdit(conversation!);
+                              _controller.hideMenu();
+                            },
+                            leading: Icon(
+                              Icons.edit,
+                              color: LMTheme.buttonColor,
+                              size: 16.sp,
+                            ),
+                            title: Text(
+                              "Edit",
+                              style: LMTheme.regular.copyWith(
+                                fontSize: 10.sp,
+                              ),
+                            ),
+                          ),
+                        ),
                         // ListTile(
                         //   onTap: () {
                         //     _controller.hideMenu();
@@ -310,16 +347,16 @@ class _ChatBubbleState extends State<ChatBubble> {
                 children: [
                   Padding(
                     padding: EdgeInsets.only(
-                      right: isSent ? 2.5.w : 0,
+                      right: isSent! ? 2.5.w : 0,
                       // vertical: 0.5..h,
                     ),
                     child: Row(
-                      mainAxisAlignment: isSent
+                      mainAxisAlignment: isSent!
                           ? MainAxisAlignment.end
                           : MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        !isSent
+                        !isSent!
                             ? PictureOrInitial(
                                 fallbackText: widget.sender.name,
                                 imageUrl: widget.sender.imageUrl,
@@ -328,7 +365,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                               )
                             : const SizedBox(),
                         const SizedBox(width: 6),
-                        !isSent
+                        !isSent!
                             ? Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.rotationY(3.14),
@@ -349,7 +386,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Column(
-                            crossAxisAlignment: isSent
+                            crossAxisAlignment: isSent!
                                 ? CrossAxisAlignment.end
                                 : CrossAxisAlignment.start,
                             children: [
@@ -362,22 +399,22 @@ class _ChatBubbleState extends State<ChatBubble> {
                               replyToConversation != null
                                   ? const SizedBox(height: 8)
                                   : const SizedBox(),
-                              isSent
+                              isSent!
                                   ? const SizedBox()
                                   : Text(
                                       widget.sender.name,
                                       style: LMFonts.instance.medium.copyWith(
                                         fontSize: 10.sp,
-                                        color: isSent
+                                        color: isSent!
                                             ? Colors.black.withOpacity(0.6)
                                             : LMTheme.headerColor,
                                       ),
                                     ),
-                              isSent
+                              isSent!
                                   ? const SizedBox()
                                   : const SizedBox(height: 6),
                               isDeleted
-                                  ? conversation.deletedByUserId ==
+                                  ? conversation!.deletedByUserId ==
                                           loggedInUser.id
                                       ? Text(
                                           "This message was deleted",
@@ -422,7 +459,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ],
                           ),
                         ),
-                        isSent
+                        isSent!
                             ? CustomPaint(
                                 painter: BubbleTriangle(),
                               )

@@ -152,3 +152,27 @@ class ReplyRemoveState extends ChatActionState {
   @override
   List<Object> get props => [];
 }
+
+class EditConversationState extends ChatActionState {
+  final int chatroomId;
+  final int conversationId;
+  final Conversation editConversation;
+
+  EditConversationState({
+    required this.chatroomId,
+    required this.conversationId,
+    required this.editConversation,
+  });
+
+  @override
+  List<Object> get props => [
+        chatroomId,
+        conversationId,
+        editConversation.toEntity().toJson(),
+      ];
+}
+
+class EditRemoveState extends ChatActionState {
+  @override
+  List<Object> get props => [];
+}

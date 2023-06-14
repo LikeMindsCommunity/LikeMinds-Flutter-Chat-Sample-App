@@ -286,6 +286,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
     }
   }
 
+  void updateEditedConversation(Conversation editedConversation) {
+    List<Conversation> conversationList =
+        pagedListController.itemList ?? <Conversation>[];
+    int index = conversationList
+        .indexWhere((element) => element.id == editedConversation.id);
+    if (index != -1) {
+      conversationList[index] = editedConversation;
+    }
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
+  }
+
   @override
   Widget build(BuildContext context) {
     // conversationBloc = BlocProvider.of<ConversationBloc>(context);
@@ -444,6 +456,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                   return ChatBubble(
                                     key: Key(item.id.toString()),
                                     userMeta: userMeta,
+                                    onEdit: (conversation) {
+                                      if (chatActionBloc == null) {
+                                        return;
+                                      }
+                                      chatActionBloc?.add(
+                                        EditingConversation(
+                                          chatroomId: chatroom!.id,
+                                          conversationId: conversation.id,
+                                          editConversation: conversation,
+                                        ),
+                                      );
+                                    },
                                     onReply: (replyingTo) {
                                       if (chatActionBloc == null) {
                                         return;
@@ -699,6 +723,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               addLocalConversationToPagedList(
                                   state.conversation);
                             }
+                            if (state is ConversationEdited) {
+                              updateEditedConversation(
+                                  state.editConversationResponse.conversation!);
+                            }
                             if (state is ConversationPosted) {
                               addConversationToPagedList(
                                 state.postConversationResponse.conversation!,
@@ -740,6 +768,14 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             return ValueListenableBuilder(
                                 valueListenable: rebuildChatBar,
                                 builder: (context, _, __) {
+                                  if (state is EditConversationState) {
+                                    return ChatBar(
+                                      chatroom: chatroom!,
+                                      editConversation: state.editConversation,
+                                      scrollToBottom: _scrollToBottom,
+                                      userMeta: userMeta,
+                                    );
+                                  }
                                   if (state is ReplyConversationState) {
                                     return ChatBar(
                                       chatroom: chatroom!,
