@@ -4,7 +4,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class TaggingHelper {
-  static final RegExp tagRegExp = RegExp(r'@([a-z\sA-Z\s0-9]+)~');
+  static final RegExp tagRegExp = RegExp(r'@([^<>]+)~');
   static RegExp routeRegExp =
       RegExp(r'<<([^<>]+)\|route://([^<>]+)/([a-zA-Z-0-9]+)>>');
   static const String linkRoute =
