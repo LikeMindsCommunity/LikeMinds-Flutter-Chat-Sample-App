@@ -763,6 +763,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             if (state is ReplyConversationState) {
                               rebuildChatBar.value = !rebuildChatBar.value;
                             }
+                            if (state is EditConversationState) {
+                              rebuildChatBar.value = !rebuildChatBar.value;
+                            }
                           },
                           builder: (context, state) {
                             return ValueListenableBuilder(

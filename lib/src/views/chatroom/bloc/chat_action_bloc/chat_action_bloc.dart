@@ -114,6 +114,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
 
   mapEditConversation(
       EditConversation event, Emitter<ChatActionState> emit) async {
+    emit(EditRemoveState());
     try {
       LMResponse<EditConversationResponse> response =
           await locator<LikeMindsService>().editConversation(

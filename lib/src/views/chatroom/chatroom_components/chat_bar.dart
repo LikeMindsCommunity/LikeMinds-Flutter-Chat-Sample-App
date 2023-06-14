@@ -109,13 +109,18 @@ class _ChatBarState extends State<ChatBar> {
   }
 
   void setupEditText() {
+    editConversation = widget.editConversation;
+    String? convertedMsgText =
+        TaggingHelper.convertRouteToTag(editConversation?.answer);
     if (widget.editConversation == null) {
       return;
     }
-    editConversation = widget.editConversation;
-    _textEditingController.value = TextEditingValue(
-      text: editConversation!.answer,
-    );
+    _textEditingController.value =
+        TextEditingValue(text: convertedMsgText ?? '');
+    _textEditingController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _textEditingController.text.length));
+    userTags =
+        TaggingHelper.addUserTagsIfMatched(editConversation?.answer ?? '');
   }
 
   @override
@@ -674,7 +679,8 @@ class _ChatBarState extends State<ChatBar> {
                                       replyToConversation?.answer.isNotEmpty ==
                                           true
                                   ? TaggingHelper.convertRouteToTag(
-                                          replyToConversation?.answer) ??
+                                          replyToConversation?.answer,
+                                          withTilde: false) ??
                                       ""
                                   : replyToConversation?.hasFiles ?? false
                                       ? "📷 ${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
@@ -745,15 +751,9 @@ class _ChatBarState extends State<ChatBar> {
                           SizedBox(
                             width: 70.w,
                             child: Text(
-                              editConversation?.answer != null &&
-                                      editConversation?.answer.isNotEmpty ==
-                                          true
-                                  ? TaggingHelper.convertRouteToTag(
-                                          editConversation?.answer) ??
-                                      ""
-                                  : editConversation?.hasFiles ?? false
-                                      ? "📷 ${editConversation?.attachmentCount} Image${editConversation?.attachmentCount == 1 ? "" : "s"}"
-                                      : "",
+                              TaggingHelper.convertRouteToTag(
+                                  editConversation?.answer,
+                                  withTilde: false)!,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: LMTheme.regular.copyWith(
@@ -771,6 +771,7 @@ class _ChatBarState extends State<ChatBar> {
             IconButton(
               onPressed: () {
                 chatActionBloc!.add(EditRemove());
+                _textEditingController.clear();
               },
               icon: const Icon(
                 Icons.close,
