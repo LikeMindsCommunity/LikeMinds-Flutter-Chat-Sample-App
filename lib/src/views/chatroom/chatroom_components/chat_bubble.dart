@@ -23,6 +23,7 @@ class ChatBubble extends StatefulWidget {
   final Conversation? replyToConversation;
   final ChatRoom chatroom;
   final User sender;
+  final Map<int, User?> userMeta;
   final Map<String, List<Media>> mediaFiles;
   final List<dynamic>? conversationAttachments;
   final Function(Conversation replyingTo) onReply;
@@ -40,6 +41,7 @@ class ChatBubble extends StatefulWidget {
     required this.onReply,
     required this.onLongPress,
     required this.isSelected,
+    required this.userMeta,
   });
 
   @override
@@ -50,6 +52,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   List reactions = [];
   late final EmojiParser emojiParser;
   late final CustomPopupMenuController _controller;
+  Map<int, User?>? userMeta;
   late bool isSent;
   late Conversation conversation;
   late Conversation? replyToConversation;
@@ -102,6 +105,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         !widget.conversation.attachmentsUploaded!) {
       return const SizedBox.shrink();
     }
+    userMeta = widget.userMeta;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () {
@@ -397,10 +401,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                                           child: getContent())
                                       : getContent(),
                               const SizedBox(height: 8),
-                              (widget.conversation.createdAt.isNotEmpty &&
-                                          (widget.conversation.hasFiles ==
-                                                  null ||
-                                              !widget.conversation.hasFiles!) ||
+                              ((widget.conversation.hasFiles == null ||
+                                          !widget.conversation.hasFiles!) ||
                                       (widget.conversation
                                                   .attachmentsUploaded !=
                                               null &&
@@ -459,34 +461,38 @@ class _ChatBubbleState extends State<ChatBubble> {
             color: LMTheme.buttonColor,
           ),
           kHorizontalPaddingMedium,
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 6),
-              Text(
-                replyToConversation?.member?.name ?? "",
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: LMTheme.medium.copyWith(
-                  color: kPrimaryColor,
-                  fontSize: 9.sp,
-                ),
-              ),
-              kVerticalPaddingXSmall,
-              Container(
-                constraints: BoxConstraints(maxWidth: 48.w),
-                child: Text(
-                  _getReplyText(),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 6),
+                Text(
+                  replyToConversation?.member?.name ??
+                      userMeta?[replyToConversation?.userId]?.name ??
+                      '',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: LMTheme.regular.copyWith(
-                    fontSize: 8.sp,
+                  style: LMTheme.medium.copyWith(
+                    color: kPrimaryColor,
+                    fontSize: 9.sp,
                   ),
                 ),
-              ),
-              const SizedBox(height: 6),
-            ],
+                kVerticalPaddingXSmall,
+                Container(
+                  width: 35.w,
+                  child: Text(
+                    _getReplyText(),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: LMTheme.regular.copyWith(
+                      fontSize: 8.sp,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ],
+            ),
           ),
           kHorizontalPaddingMedium,
         ],

@@ -443,6 +443,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                   // item.
                                   return ChatBubble(
                                     key: Key(item.id.toString()),
+                                    userMeta: userMeta,
                                     onReply: (replyingTo) {
                                       if (chatActionBloc == null) {
                                         return;
@@ -744,11 +745,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                       chatroom: chatroom!,
                                       replyToConversation: state.conversation,
                                       scrollToBottom: _scrollToBottom,
+                                      userMeta: userMeta,
                                     );
                                   }
                                   return ChatBar(
                                     chatroom: chatroom!,
                                     scrollToBottom: _scrollToBottom,
+                                    userMeta: userMeta,
                                   );
                                 });
                           }),

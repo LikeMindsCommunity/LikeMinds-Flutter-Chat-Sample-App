@@ -25,6 +25,7 @@ import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
   Conversation? replyToConversation;
+  Map<int, User?>? userMeta;
   final Function() scrollToBottom;
 
   ChatBar({
@@ -32,6 +33,7 @@ class ChatBar extends StatefulWidget {
     required this.chatroom,
     this.replyToConversation,
     required this.scrollToBottom,
+    this.userMeta,
   });
 
   @override
@@ -43,6 +45,7 @@ class _ChatBarState extends State<ChatBar> {
   ImagePicker? imagePicker;
   FilePicker? filePicker;
   Conversation? replyToConversation;
+  Map<int, User?>? userMeta;
   late CustomPopupMenuController _popupMenuController;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
@@ -105,6 +108,7 @@ class _ChatBarState extends State<ChatBar> {
   @override
   Widget build(BuildContext context) {
     replyToConversation = widget.replyToConversation;
+    userMeta = widget.userMeta;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Column(
       children: [
@@ -623,7 +627,9 @@ class _ChatBarState extends State<ChatBar> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            replyToConversation!.member?.name ?? "",
+                            replyToConversation!.member?.name ??
+                                userMeta?[replyToConversation?.userId]?.name ??
+                                '',
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: LMTheme.medium.copyWith(
