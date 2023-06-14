@@ -84,6 +84,24 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         );
       },
     );
+    on<EditConversation>(
+      (event, emit) async {
+        await mapEditConversation(
+          event,
+          emit,
+        );
+      },
+    );
+    on<EditingConversation>(
+      (event, emit) async {
+        emit(EditConversationState(
+          chatroomId: event.chatroomId,
+          conversationId: event.conversationId,
+          editConversation: event.editConversation,
+        ));
+      },
+    );
+    on<EditRemove>((event, emit) => emit(EditRemoveState()));
     on<ReplyConversation>((event, emit) async {
       emit(ReplyConversationState(
         chatroomId: event.chatroomId,
@@ -92,6 +110,54 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       ));
     });
     on<ReplyRemove>((event, emit) => emit(ReplyRemoveState()));
+  }
+
+  mapEditConversation(
+      EditConversation event, Emitter<ChatActionState> emit) async {
+    emit(EditRemoveState());
+    try {
+      LMResponse<EditConversationResponse> response =
+          await locator<LikeMindsService>().editConversation(
+        event.editConversationRequest,
+      );
+
+      if (response.success) {
+        if (response.data!.success) {
+          Conversation conversation = response.data!.conversation!;
+          if (conversation.replyId != null ||
+              conversation.replyConversation != null) {
+            conversation.replyConversationObject = event.replyConversation;
+          }
+          emit(
+            ConversationEdited(response.data!),
+          );
+        } else {
+          emit(
+            ChatActionError(
+              response.data!.errorMessage!,
+              event.editConversationRequest.conversationId.toString(),
+            ),
+          );
+          return false;
+        }
+      } else {
+        emit(
+          ChatActionError(
+            response.errorMessage!,
+            event.editConversationRequest.conversationId.toString(),
+          ),
+        );
+        return false;
+      }
+    } catch (e) {
+      emit(
+        ChatActionError(
+          "An error occurred while editing the message",
+          event.editConversationRequest.conversationId.toString(),
+        ),
+      );
+      return false;
+    }
   }
 
   mapPostMultiMediaConversation(

@@ -48,7 +48,12 @@ class _ChatItemState extends State<ChatItem> {
     _muteStatus = chatroom.muteStatus ?? false;
     String _name = chatroom.header;
     String _message = conversation.deletedByUserId == null
-        ? '${widget.user?.name}: ${conversation.state != 0 ? TaggingHelper.extractStateMessage(conversation.answer) : TaggingHelper.convertRouteToTag(conversation.answer)}'
+        ? '${widget.user?.name}: ${conversation.state != 0 ? TaggingHelper.extractStateMessage(
+            conversation.answer,
+          ) : TaggingHelper.convertRouteToTag(
+            conversation.answer,
+            withTilde: false,
+          )}'
         : conversation.deletedByUserId == user.id
             ? "This message was deleted"
             : "This message was deleted by the CM";
