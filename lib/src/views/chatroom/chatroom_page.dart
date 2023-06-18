@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
@@ -10,8 +9,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart'
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
@@ -19,7 +17,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as bb;
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chatroom_skeleton.dart';
 
 import 'bloc/chatroom_bloc.dart';
@@ -453,6 +451,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                     );
                                   }
                                   // item.
+
                                   return ChatBubble(
                                     key: Key(item.id.toString()),
                                     userMeta: userMeta,
@@ -495,6 +494,15 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                 '${item.id}']
                                             : conversationAttachmentsMeta[
                                                 item.temporaryId],
+                                    replyConversationAttachments:
+                                        item.replyId != null
+                                            ? conversationAttachmentsMeta
+                                                    .containsKey(
+                                                        item.replyId.toString())
+                                                ? conversationAttachmentsMeta[
+                                                    item.replyId.toString()]
+                                                : null
+                                            : null,
                                     isSelected: (isSelected) {
                                       if (isSelected) {
                                         selectedConversations.add(item);
@@ -602,7 +610,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                       children: [
                                         Visibility(
                                           visible: !widget.isRoot,
-                                          child: BB.BackButton(
+                                          child: bb.BackButton(
                                             onTap: () {
                                               BlocProvider.of<HomeBloc>(context)
                                                   .add(UpdateHomeEvent());
@@ -662,7 +670,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    const BB.BackButton(),
+                                    const bb.BackButton(),
                                     SizedBox(width: 4.w),
                                     PictureOrInitial(
                                       fallbackText: chatroom!.header,

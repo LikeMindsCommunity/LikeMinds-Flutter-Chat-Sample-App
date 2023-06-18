@@ -16,12 +16,14 @@ import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 class ChatItem extends StatefulWidget {
   final ChatRoom chatroom;
   final Conversation conversation;
+  final Map<dynamic, dynamic>? attachmentsMeta;
   final User? user;
 
   const ChatItem({
     super.key,
     required this.chatroom,
     required this.conversation,
+    this.attachmentsMeta,
     required this.user,
   });
 
@@ -33,6 +35,7 @@ class _ChatItemState extends State<ChatItem> {
   late ChatRoom chatroom;
   late bool _muteStatus;
   int? _unreadCount;
+  Conversation? conversation;
   final User user = UserLocalPreference.instance.fetchUserData();
 
   @override
@@ -40,26 +43,41 @@ class _ChatItemState extends State<ChatItem> {
     super.initState();
   }
 
+  String getAttachmentText() {
+    if (widget.attachmentsMeta != null &&
+        widget.attachmentsMeta![conversation!.id]?.first.type == 'pdf') {
+      return "${conversation!.attachmentCount} ${conversation!.attachmentCount! > 1 ? "Documents" : "Document"}";
+    }
+    return "${conversation!.attachmentCount} ${conversation!.attachmentCount! > 1 ? "Images" : "Image"}";
+  }
+
+  IconData getAttachmentIcon() {
+    if (conversation!.attachments?.first.type == 'pdf') {
+      return Icons.insert_drive_file;
+    }
+    return Icons.camera_alt;
+  }
+
   @override
   Widget build(BuildContext context) {
     chatroom = widget.chatroom;
-    Conversation conversation = widget.conversation;
+    conversation = widget.conversation;
     _unreadCount = chatroom.unseenCount;
     _muteStatus = chatroom.muteStatus ?? false;
     String _name = chatroom.header;
-    String _message = conversation.deletedByUserId == null
-        ? '${widget.user?.name}: ${conversation.state != 0 ? TaggingHelper.extractStateMessage(
-            conversation.answer,
+    String _message = conversation!.deletedByUserId == null
+        ? '${widget.user?.name}: ${conversation!.state != 0 ? TaggingHelper.extractStateMessage(
+            conversation!.answer,
           ) : TaggingHelper.convertRouteToTag(
-            conversation.answer,
+            conversation!.answer,
             withTilde: false,
           )}'
-        : conversation.deletedByUserId == user.id
+        : conversation!.deletedByUserId == user.id
             ? "This message was deleted"
             : "This message was deleted by the CM";
-    String _time = conversation.lastUpdated.toString();
+    String _time = conversation!.lastUpdated.toString();
     bool _isSecret = chatroom.isSecret ?? false;
-    bool? hasAttachments = conversation.hasFiles;
+    bool? hasAttachments = conversation!.hasFiles;
     String? _avatarUrl = chatroom.chatroomImageUrl;
 
     return Column(
@@ -126,13 +144,13 @@ class _ChatItemState extends State<ChatItem> {
                           (hasAttachments ?? false)
                               ? Row(children: [
                                   Icon(
-                                    Icons.camera_alt,
+                                    getAttachmentIcon(),
                                     color: kGreyColor,
                                     size: 12.sp,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    "${conversation.attachmentCount} ${conversation.attachmentCount! > 1 ? "images" : "image"}",
+                                    getAttachmentText(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: LMBranding.instance.fonts.regular
@@ -143,7 +161,7 @@ class _ChatItemState extends State<ChatItem> {
                                   ),
                                 ])
                               : Text(
-                                  conversation.state != 0
+                                  conversation!.state != 0
                                       ? TaggingHelper.extractStateMessage(
                                           _message)
                                       : _message,
