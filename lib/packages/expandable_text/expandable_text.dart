@@ -124,8 +124,9 @@ class ExpandableTextState extends State<ExpandableText>
   void dispose() {
     _linkTapGestureRecognizer.dispose();
     _prefixTapGestureRecognizer.dispose();
-    _textSegmentsTapGestureRecognizers
-        .forEach((recognizer) => recognizer.dispose());
+    for (var recognizer in _textSegmentsTapGestureRecognizers) {
+      recognizer.dispose();
+    }
     super.dispose();
   }
 
@@ -320,8 +321,9 @@ class ExpandableTextState extends State<ExpandableText>
   }
 
   void _updateText() {
-    _textSegmentsTapGestureRecognizers
-        .forEach((recognizer) => recognizer.dispose());
+    for (var recognizer in _textSegmentsTapGestureRecognizers) {
+      recognizer.dispose();
+    }
     _textSegmentsTapGestureRecognizers.clear();
 
     if (widget.onUrlTap == null &&
@@ -333,7 +335,7 @@ class ExpandableTextState extends State<ExpandableText>
 
     _textSegments = parseText(widget.text);
 
-    _textSegments.forEach((element) {
+    for (var element in _textSegments) {
       if (element.isUrl && widget.onUrlTap != null) {
         final recognizer = TapGestureRecognizer()
           ..onTap = () {
@@ -356,7 +358,7 @@ class ExpandableTextState extends State<ExpandableText>
 
         _textSegmentsTapGestureRecognizers.add(recognizer);
       }
-    });
+    }
   }
 
   List<TextSpan> _buildTextSpans(List<TextSegment> segments,

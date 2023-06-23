@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flick_video_player/flick_video_player.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/credentials/credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 

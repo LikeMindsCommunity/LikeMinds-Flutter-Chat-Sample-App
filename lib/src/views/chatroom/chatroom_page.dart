@@ -796,8 +796,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                   .containsKey(state
                                                       .conversation.id
                                                       .toString())
-                                              ? conversationAttachmentsMeta[
-                                                  '${state.conversation.id}']
+                                              ? (conversationAttachmentsMeta[
+                                                          '${state.conversation.id}']
+                                                      as List<dynamic>?)
+                                                  ?.map(
+                                                      (e) => Media.fromJson(e))
+                                                  .toList()
                                               : null,
                                       scrollToBottom: _scrollToBottom,
                                       userMeta: userMeta,

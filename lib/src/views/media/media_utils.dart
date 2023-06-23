@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -69,15 +68,36 @@ Widget getChatBubbleImage(Media mediaFile, {double? width, double? height}) {
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(6.0),
     ),
-    child: CachedNetworkImage(
-      imageUrl: mediaFile.mediaType == MediaType.photo
-          ? mediaFile.mediaUrl ?? ''
-          : mediaFile.thumbnailUrl ?? '',
-      fit: BoxFit.cover,
-      height: height,
-      width: width,
-      errorWidget: (context, url, error) => mediaErrorWidget(),
-      progressIndicatorBuilder: (context, url, progress) => mediaShimmer(),
+    child: Stack(
+      children: [
+        CachedNetworkImage(
+          imageUrl: mediaFile.mediaType == MediaType.photo
+              ? mediaFile.mediaUrl ?? ''
+              : mediaFile.thumbnailUrl ?? '',
+          fit: BoxFit.cover,
+          height: height,
+          width: width,
+          errorWidget: (context, url, error) => mediaErrorWidget(),
+          progressIndicatorBuilder: (context, url, progress) => mediaShimmer(),
+        ),
+        mediaFile.mediaType == MediaType.video && mediaFile.thumbnailUrl != null
+            ? Center(
+                child: Container(
+                  width: 8.w,
+                  height: 8.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: kWhiteColor.withOpacity(0.7)),
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: kBlackColor,
+                    size: 5.w,
+                  ),
+                ),
+              )
+            : const SizedBox(),
+      ],
     ),
   );
 }
@@ -308,63 +328,72 @@ Widget getFileImageTile(Media mediaFile, {double? width, double? height}) {
   if (mediaFile.mediaFile == null && mediaFile.thumbnailFile == null) {
     return mediaErrorWidget();
   }
-  return Image.file(
-    mediaFile.mediaType == MediaType.photo
-        ? mediaFile.mediaFile!
-        : mediaFile.thumbnailFile!,
-    fit: BoxFit.cover,
-    errorBuilder: (context, error, stackTrace) => mediaErrorWidget(),
-    height: width,
-    width: height,
+  return Container(
+    height: height,
+    width: width,
+    clipBehavior: Clip.hardEdge,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(3.0),
+    ),
+    child: Stack(
+      children: [
+        Image.file(
+          mediaFile.mediaType == MediaType.photo
+              ? mediaFile.mediaFile!
+              : mediaFile.thumbnailFile!,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => mediaErrorWidget(),
+          height: height,
+          width: width,
+        ),
+        mediaFile.mediaType == MediaType.video &&
+                mediaFile.thumbnailFile != null
+            ? Center(
+                child: Container(
+                  width: 8.w,
+                  height: 8.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: kWhiteColor.withOpacity(0.7),
+                  ),
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: kBlackColor,
+                    size: 5.w,
+                  ),
+                ),
+              )
+            : const SizedBox(),
+      ],
+    ),
   );
 }
 
 Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
   if (mediaFiles.length == 1) {
     return GestureDetector(
-      child: Container(
+      child: getFileImageTile(
+        mediaFiles.first,
         height: 55.w,
         width: 55.w,
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(3.0),
-        ),
-        child: getFileImageTile(
-          mediaFiles.first,
-          height: 55.w,
-          width: 55.w,
-        ),
       ),
     );
   } else if (mediaFiles.length == 2) {
     return GestureDetector(
       child: Row(
         children: <Widget>[
-          Container(
-              height: 26.w,
-              width: 26.w,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: getFileImageTile(
-                mediaFiles[0],
-                height: 26.w,
-                width: 26.w,
-              )),
+          getFileImageTile(
+            mediaFiles[0],
+            height: 26.w,
+            width: 26.w,
+          ),
           kHorizontalPaddingSmall,
-          Container(
-              height: 26.w,
-              width: 26.w,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: getFileImageTile(
-                mediaFiles[2],
-                height: 26.w,
-                width: 26.w,
-              ))
+          getFileImageTile(
+            mediaFiles[1],
+            height: 26.w,
+            width: 26.w,
+          )
         ],
       ),
     );
@@ -372,18 +401,11 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
     return GestureDetector(
       child: Row(
         children: <Widget>[
-          Container(
-              height: 26.w,
-              width: 26.w,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: getFileImageTile(
-                mediaFiles[0],
-                height: 26.w,
-                width: 26.w,
-              )),
+          getFileImageTile(
+            mediaFiles[0],
+            height: 26.w,
+            width: 26.w,
+          ),
           kHorizontalPaddingSmall,
           Container(
             height: 26.w,
@@ -394,18 +416,11 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
             ),
             child: Stack(
               children: [
-                Container(
-                    height: 26.w,
-                    width: 26.w,
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    child: getFileImageTile(
-                      mediaFiles[1],
-                      height: 26.w,
-                      width: 26.w,
-                    )),
+                getFileImageTile(
+                  mediaFiles[1],
+                  height: 26.w,
+                  width: 26.w,
+                ),
                 Positioned(
                   child: Container(
                     height: 26.w,
@@ -431,62 +446,33 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
         children: [
           Row(
             children: <Widget>[
-              Container(
+              getFileImageTile(
+                mediaFiles[0],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: getFileImageTile(
-                  mediaFiles[0],
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
               kHorizontalPaddingSmall,
-              Container(
-                  height: 26.w,
-                  width: 26.w,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
-                  child: getFileImageTile(
-                    mediaFiles[1],
-                    height: 26.w,
-                    width: 26.w,
-                  )),
+              getFileImageTile(
+                mediaFiles[1],
+                height: 26.w,
+                width: 26.w,
+              ),
             ],
           ),
           kVerticalPaddingSmall,
           Row(
             children: <Widget>[
-              Container(
-                  height: 26.w,
-                  width: 26.w,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
-                  child: getFileImageTile(
-                    mediaFiles[2],
-                    height: 26.w,
-                    width: 26.w,
-                  )),
+              getFileImageTile(
+                mediaFiles[2],
+                height: 26.w,
+                width: 26.w,
+              ),
               kHorizontalPaddingSmall,
-              Container(
-                  height: 26.w,
-                  width: 26.w,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
-                  child: getFileImageTile(
-                    mediaFiles[3],
-                    height: 26.w,
-                    width: 26.w,
-                  )),
+              getFileImageTile(
+                mediaFiles[3],
+                height: 26.w,
+                width: 26.w,
+              ),
             ],
           ),
         ],
@@ -498,50 +484,26 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
         children: [
           Row(
             children: <Widget>[
-              Container(
+              getFileImageTile(
+                mediaFiles[0],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: getFileImageTile(
-                  mediaFiles[0],
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
               kHorizontalPaddingSmall,
-              Container(
+              getFileImageTile(
+                mediaFiles[1],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: getFileImageTile(
-                  mediaFiles[1],
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
             ],
           ),
           kVerticalPaddingSmall,
           Row(
             children: <Widget>[
-              Container(
+              getFileImageTile(
+                mediaFiles[2],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: getFileImageTile(
-                  mediaFiles[2],
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
               kHorizontalPaddingSmall,
               Container(
@@ -552,18 +514,10 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
                     BoxDecoration(borderRadius: BorderRadius.circular(6.0)),
                 child: Stack(
                   children: [
-                    Container(
+                    getFileImageTile(
+                      mediaFiles[3],
                       height: 26.w,
                       width: 26.w,
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      child: getFileImageTile(
-                        mediaFiles[3],
-                        height: 26.w,
-                        width: 26.w,
-                      ),
                     ),
                     Positioned(
                       child: Container(

@@ -1,12 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -91,7 +89,7 @@ Future<List<Media>> pickDocumentFiles() async {
     return [];
   }
   List<Media> mediaList = <Media>[];
-  if (pickedFiles != null && pickedFiles.files.isNotEmpty) {
+  if (pickedFiles.files.isNotEmpty) {
     for (int i = 0; i < pickedFiles.files.length; i++) {
       File file = File(pickedFiles.paths[i]!);
 

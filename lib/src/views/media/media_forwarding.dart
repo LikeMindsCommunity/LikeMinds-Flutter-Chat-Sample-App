@@ -15,7 +15,6 @@ import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/document/document_factory.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/multimedia/video/chat_video_factory.dart';
@@ -192,7 +191,9 @@ class _MediaForwardState extends State<MediaForward> {
                         width: 10.w,
                         height: 10.w,
                         child: Icon(
-                          Icons.add_a_photo,
+                          mediaList.first.mediaType == MediaType.photo
+                              ? Icons.add_a_photo
+                              : Icons.video_camera_back,
                           color: kWhiteColor,
                           size: 24.sp,
                         ),

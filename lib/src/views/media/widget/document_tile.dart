@@ -32,8 +32,6 @@ class DocumentThumbnailFile extends StatefulWidget {
 
 class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
   String? _fileName;
-  String? _fileExtension;
-  String? _fileSize;
   String? url;
   File? file;
   Future? loadedFile;
@@ -46,8 +44,6 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
     } else {
       file = widget.docFile!;
     }
-    _fileExtension = widget.type;
-    _fileSize = widget.size;
     _fileName = basenameWithoutExtension(file!.path);
     documentFile = PdfDocumentLoader.openFile(
       file!.path,

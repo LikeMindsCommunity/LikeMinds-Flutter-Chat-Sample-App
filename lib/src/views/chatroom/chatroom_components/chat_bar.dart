@@ -50,6 +50,7 @@ class _ChatBarState extends State<ChatBar> {
   ImagePicker? imagePicker;
   FilePicker? filePicker;
   Conversation? replyToConversation;
+  List<Media>? replyConversationAttachments;
   Conversation? editConversation;
   Map<int, User?>? userMeta;
   late CustomPopupMenuController _popupMenuController;
@@ -129,6 +130,7 @@ class _ChatBarState extends State<ChatBar> {
   @override
   Widget build(BuildContext context) {
     replyToConversation = widget.replyToConversation;
+    replyConversationAttachments = widget.replyConversationAttachments;
     setupEditText();
     userMeta = widget.userMeta;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
@@ -676,6 +678,33 @@ class _ChatBarState extends State<ChatBar> {
     );
   }
 
+  String _getReplyText() {
+    String attachmentText = "";
+    if (replyToConversation?.hasFiles != null &&
+        replyToConversation!.hasFiles! &&
+        replyConversationAttachments?.first.mediaType == MediaType.document) {
+      attachmentText =
+          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Documents" : "Document"}";
+    } else if (replyToConversation?.hasFiles != null &&
+        replyToConversation!.hasFiles! &&
+        replyConversationAttachments?.first.mediaType == MediaType.photo) {
+      attachmentText =
+          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Images" : "Image"}";
+    } else if (replyToConversation?.hasFiles != null &&
+        replyToConversation!.hasFiles! &&
+        replyConversationAttachments?.first.mediaType == MediaType.video) {
+      attachmentText =
+          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Videos" : "Video"}";
+    }
+
+    return replyToConversation?.answer != null &&
+            replyToConversation?.answer.isNotEmpty == true
+        ? TaggingHelper.convertRouteToTag(replyToConversation?.answer,
+                withTilde: false) ??
+            ""
+        : attachmentText;
+  }
+
   Container _getReplyConversation() {
     return Container(
       height: 8.h,
@@ -715,16 +744,7 @@ class _ChatBarState extends State<ChatBar> {
                           SizedBox(
                             width: 70.w,
                             child: Text(
-                              replyToConversation?.answer != null &&
-                                      replyToConversation?.answer.isNotEmpty ==
-                                          true
-                                  ? TaggingHelper.convertRouteToTag(
-                                          replyToConversation?.answer,
-                                          withTilde: false) ??
-                                      ""
-                                  : replyToConversation?.hasFiles ?? false
-                                      ? "📷 ${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
-                                      : "",
+                              _getReplyText(),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: LMTheme.regular.copyWith(
