@@ -7,6 +7,7 @@ import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 
 part 'chat_action_event.dart';
 part 'chat_action_state.dart';
@@ -203,6 +204,20 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
               event.postConversationRequest.chatroomId,
               postConversationResponse.conversation!.id,
             );
+            String? thumbnailUrl;
+            if (media.mediaType == MediaType.video) {
+              // If the thumbnail file is not present in media object
+              // then generate the thumbnail and upload it to the server
+              if (media.thumbnailFile == null) {
+                await getVideoThumbnail(media);
+              }
+              thumbnailUrl = await mediaService.uploadFile(
+                media.thumbnailFile!,
+                event.postConversationRequest.chatroomId,
+                postConversationResponse.conversation!.id,
+              );
+            }
+
             if (url == null) {
               throw 'Error uploading file';
             } else {
@@ -215,6 +230,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
                     ..width(media.width)
                     ..meta({'size': media.size})
                     ..type(attachmentType)
+                    ..thumbnailUrl(thumbnailUrl)
                     ..url(url))
                   .build();
               LMResponse<PutMediaResponse> uploadFileResponse =

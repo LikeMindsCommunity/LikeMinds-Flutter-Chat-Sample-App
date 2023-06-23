@@ -607,7 +607,9 @@ class _ChatBubbleState extends State<ChatBubble> {
       }
       Widget mediaWidget;
       if (widget.mediaFiles[widget.conversation.temporaryId]!.first.mediaType ==
-          MediaType.photo) {
+              MediaType.photo ||
+          widget.mediaFiles[widget.conversation.temporaryId]!.first.mediaType ==
+              MediaType.video) {
         mediaWidget = getImageFileMessage(
             context, widget.mediaFiles[widget.conversation.temporaryId]!);
       } else if (widget
@@ -650,7 +652,8 @@ class _ChatBubbleState extends State<ChatBubble> {
       }
 
       Widget mediaWidget;
-      if (conversationAttachments!.first.mediaType == MediaType.photo) {
+      if (conversationAttachments!.first.mediaType == MediaType.photo ||
+          conversationAttachments!.first.mediaType == MediaType.video) {
         mediaWidget = getImageMessage(
           context,
           conversationAttachments!,

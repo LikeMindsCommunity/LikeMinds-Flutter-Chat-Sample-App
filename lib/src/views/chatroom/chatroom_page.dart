@@ -791,6 +791,14 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                     return ChatBar(
                                       chatroom: chatroom!,
                                       replyToConversation: state.conversation,
+                                      replyConversationAttachments:
+                                          conversationAttachmentsMeta
+                                                  .containsKey(state
+                                                      .conversation.id
+                                                      .toString())
+                                              ? conversationAttachmentsMeta[
+                                                  '${state.conversation.id}']
+                                              : null,
                                       scrollToBottom: _scrollToBottom,
                                       userMeta: userMeta,
                                     );

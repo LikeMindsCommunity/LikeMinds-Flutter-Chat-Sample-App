@@ -189,7 +189,9 @@ class _HomePageState extends State<HomePage> {
         ChatItem(
           chatroom: chatrooms[i],
           conversation: conversation,
-          attachmentsMeta: response.conversationAttachmentsMeta ?? {},
+          attachmentsMeta: response
+                  .conversationAttachmentsMeta?[conversation.id.toString()] ??
+              [],
           user: userMeta[conversation.member?.id ?? conversation.userId],
         ),
       );

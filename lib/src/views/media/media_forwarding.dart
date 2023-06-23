@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -14,8 +15,12 @@ import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/home/home_page.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/document/document_factory.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/multimedia/video/chat_video_factory.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
+import 'package:video_player/video_player.dart';
 
 class MediaForward extends StatefulWidget {
   final int chatroomId;
@@ -38,6 +43,7 @@ class _MediaForwardState extends State<MediaForward> {
   CarouselController controller = CarouselController();
   ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
   ChatActionBloc? chatActionBloc;
+  FlickManager? flickManager;
 
   List<UserTag> userTags = [];
   String? result;
@@ -51,6 +57,7 @@ class _MediaForwardState extends State<MediaForward> {
   @override
   void dispose() {
     _textEditingController.dispose();
+
     super.dispose();
   }
 
@@ -89,16 +96,38 @@ class _MediaForwardState extends State<MediaForward> {
     );
   }
 
+  void setupFlickManager() {
+    if (mediaList[currPosition].mediaType == MediaType.photo) {
+      return;
+    } else if (mediaList[currPosition].mediaType == MediaType.video &&
+        flickManager == null) {
+      flickManager = FlickManager(
+        videoPlayerController:
+            VideoPlayerController.file(mediaList[currPosition].mediaFile!),
+        autoPlay: true,
+        onVideoEnd: () {
+          flickManager?.flickVideoManager?.videoPlayerController!
+              .setLooping(true);
+        },
+        autoInitialize: true,
+      );
+    }
+  }
+
   Widget getMediaPreview() {
-    if (mediaList.first.mediaType == MediaType.photo) {
+    if (mediaList.first.mediaType == MediaType.photo ||
+        mediaList.first.mediaType == MediaType.video) {
+      // Initialise Flick Manager in case the selected media is an video
+      setupFlickManager();
       return Column(
         children: [
-          Expanded(
-            child: AspectRatio(
-                aspectRatio: mediaList[currPosition].width! /
-                    mediaList[currPosition].height!,
-                child: Image.file(mediaList[currPosition].mediaFile!)),
-          ),
+          mediaList[currPosition].mediaType == MediaType.photo
+              ? Expanded(
+                  child: AspectRatio(
+                      aspectRatio: mediaList[currPosition].width! /
+                          mediaList[currPosition].height!,
+                      child: Image.file(mediaList[currPosition].mediaFile!)))
+              : chatVideoFactory(mediaList[currPosition], flickManager!),
           Container(
             decoration: const BoxDecoration(
                 color: kBlackColor,
@@ -117,37 +146,46 @@ class _MediaForwardState extends State<MediaForward> {
                   children: <Widget>[
                     GestureDetector(
                       onTap: () async {
-                        if (await handlePermissions(1)) {
-                          List<XFile>? pickedImage =
-                              await imagePicker.pickMultiImage();
-                          if (mediaList.length + pickedImage.length > 10) {
-                            Fluttertoast.showToast(
-                                msg: 'Only 10 attachments can be sent');
-                            return;
+                        if (mediaList.first.mediaType == MediaType.video) {
+                          List<Media> pickedVideoFiles = await pickVideoFiles();
+                          if (pickedVideoFiles.isNotEmpty) {
+                            mediaList.addAll(pickedVideoFiles);
+                            rebuildCurr.value = !rebuildCurr.value;
                           }
-                          if (pickedImage.isNotEmpty) {
-                            for (XFile xImage in pickedImage) {
-                              int fileBytes = await xImage.length();
-                              if (getFileSizeInDouble(fileBytes) > 100) {
-                                Fluttertoast.showToast(
-                                  msg: 'File size should be smaller than 100MB',
-                                );
-                                return;
-                              }
-                              File file = File(xImage.path);
-                              ui.Image image = await decodeImageFromList(
-                                  file.readAsBytesSync());
-                              Media media = Media(
-                                mediaType: MediaType.photo,
-                                height: image.height,
-                                width: image.width,
-                                mediaFile: file,
-                                size: fileBytes,
-                              );
-                              mediaList.add(media);
+                        } else {
+                          if (await handlePermissions(1)) {
+                            List<XFile>? pickedImage =
+                                await imagePicker.pickMultiImage();
+                            if (mediaList.length + pickedImage.length > 10) {
+                              Fluttertoast.showToast(
+                                  msg: 'Only 10 attachments can be sent');
+                              return;
                             }
+                            if (pickedImage.isNotEmpty) {
+                              for (XFile xImage in pickedImage) {
+                                int fileBytes = await xImage.length();
+                                if (getFileSizeInDouble(fileBytes) > 100) {
+                                  Fluttertoast.showToast(
+                                    msg:
+                                        'File size should be smaller than 100MB',
+                                  );
+                                  return;
+                                }
+                                File file = File(xImage.path);
+                                ui.Image image = await decodeImageFromList(
+                                    file.readAsBytesSync());
+                                Media media = Media(
+                                  mediaType: MediaType.photo,
+                                  height: image.height,
+                                  width: image.width,
+                                  mediaFile: file,
+                                  size: fileBytes,
+                                );
+                                mediaList.add(media);
+                              }
+                            }
+                            setState(() {});
                           }
-                          setState(() {});
                         }
                       },
                       child: SizedBox(
@@ -233,6 +271,13 @@ class _MediaForwardState extends State<MediaForward> {
                           itemBuilder: (context, index) => GestureDetector(
                             onTap: () {
                               currPosition = index;
+                              if (mediaList[index].mediaType ==
+                                  MediaType.video) {
+                                flickManager?.handleChangeVideo(
+                                  VideoPlayerController.file(
+                                      mediaList[index].mediaFile!),
+                                );
+                              }
                               rebuildCurr.value = !rebuildCurr.value;
                             },
                             child: Container(
@@ -246,10 +291,41 @@ class _MediaForwardState extends State<MediaForward> {
                                       : null),
                               width: 15.w,
                               height: 15.w,
-                              child: Image.file(
-                                mediaList[index].mediaFile!,
-                                fit: BoxFit.cover,
-                              ),
+                              child: mediaList[index].mediaType ==
+                                      MediaType.photo
+                                  ? Image.file(
+                                      mediaList[index].mediaFile!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  // check if thumbnail file is there in the media object
+                                  // if not then get the thumbnail from the video file
+                                  : mediaList[index].thumbnailFile != null
+                                      ? Image.file(
+                                          mediaList[index].thumbnailFile!,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : FutureBuilder(
+                                          future: getVideoThumbnail(
+                                              mediaList[index]),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return mediaShimmer();
+                                            } else if (snapshot.data != null) {
+                                              return Image.file(
+                                                snapshot.data!,
+                                                fit: BoxFit.cover,
+                                              );
+                                            } else {
+                                              return SizedBox(
+                                                child: Icon(
+                                                  Icons.error,
+                                                  color: LMTheme.buttonColor,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
                             ),
                           ),
                         ),

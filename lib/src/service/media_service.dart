@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flick_video_player/flick_video_player.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/credentials/credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
@@ -68,11 +69,13 @@ class Media {
   });
 
   static Media fromJson(dynamic json) => Media(
-      mediaType: mapStringToMediaType(json['type']),
-      height: json['height'] as int?,
-      mediaUrl: json['url'] ?? json['file_url'],
-      size: json['meta']['size'],
-      width: json['width'] as int?);
+        mediaType: mapStringToMediaType(json['type']),
+        height: json['height'] as int?,
+        mediaUrl: json['url'] ?? json['file_url'],
+        size: json['meta']['size'],
+        width: json['width'] as int?,
+        thumbnailUrl: json['thumbnail_url'] as String?,
+      );
 }
 
 class MediaService {

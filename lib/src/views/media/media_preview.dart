@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flick_video_player/flick_video_player.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/multimedia/video/chat_video_factory.dart';
+import 'package:video_player/video_player.dart';
 
 class MediaPreview extends StatefulWidget {
   final List<Media>? conversationAttachments;
@@ -28,6 +31,7 @@ class _MediaPreviewState extends State<MediaPreview> {
   CarouselController controller = CarouselController();
   ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
   List<Media>? conversationAttachments;
+  FlickManager? flickManager;
 
   bool checkIfMultipleAttachments() {
     return (conversationAttachments != null &&
@@ -46,9 +50,22 @@ class _MediaPreviewState extends State<MediaPreview> {
     });
   }
 
+  void setupFlickManager() {
+    if (conversationAttachments?[currPosition].mediaType == MediaType.video) {
+      flickManager ??= FlickManager(
+        videoPlayerController: VideoPlayerController.network(
+          conversationAttachments![currPosition].mediaUrl!,
+        ),
+        autoPlay: true,
+        autoInitialize: true,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     conversationAttachments = widget.conversationAttachments;
+    setupFlickManager();
     return Scaffold(
       backgroundColor: kBlackColor,
       appBar: AppBar(
@@ -70,32 +87,52 @@ class _MediaPreviewState extends State<MediaPreview> {
           children: <Widget>[
             Expanded(
               child: CarouselSlider.builder(
-                options: CarouselOptions(
-                    clipBehavior: Clip.hardEdge,
-                    scrollDirection: Axis.horizontal,
-                    initialPage: 0,
-                    enlargeCenterPage: false,
-                    enableInfiniteScroll: false,
-                    height: 80.h,
-                    enlargeFactor: 0.0,
-                    viewportFraction: 1.0,
-                    onPageChanged: (index, reason) {
-                      currPosition = index;
-                      rebuildCurr.value = !rebuildCurr.value;
-                    }),
-                itemCount: conversationAttachments!.length,
-                itemBuilder: (context, index, realIndex) => AspectRatio(
-                  aspectRatio: conversationAttachments![index].width! /
-                      conversationAttachments![index].height!,
-                  child: CachedNetworkImage(
-                    imageUrl: conversationAttachments![index].mediaUrl!,
-                    errorWidget: (context, url, error) => mediaErrorWidget(),
-                    progressIndicatorBuilder: (context, url, progress) =>
-                        mediaShimmer(),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
+                  options: CarouselOptions(
+                      clipBehavior: Clip.hardEdge,
+                      scrollDirection: Axis.horizontal,
+                      initialPage: 0,
+                      enlargeCenterPage: false,
+                      enableInfiniteScroll: false,
+                      height: 80.h,
+                      enlargeFactor: 0.0,
+                      viewportFraction: 1.0,
+                      onPageChanged: (index, reason) {
+                        currPosition = index;
+                        if (conversationAttachments![index].mediaType ==
+                            MediaType.video) {
+                          if (flickManager == null) {
+                            setupFlickManager();
+                          } else {
+                            flickManager?.handleChangeVideo(
+                              VideoPlayerController.network(
+                                conversationAttachments![currPosition]
+                                    .mediaUrl!,
+                              ),
+                            );
+                          }
+                        }
+                        rebuildCurr.value = !rebuildCurr.value;
+                      }),
+                  itemCount: conversationAttachments!.length,
+                  itemBuilder: (context, index, realIndex) {
+                    if (conversationAttachments![index].mediaType ==
+                        MediaType.video) {
+                      return chatVideoFactory(
+                          conversationAttachments![index], flickManager!);
+                    }
+                    return AspectRatio(
+                      aspectRatio: conversationAttachments![index].width! /
+                          conversationAttachments![index].height!,
+                      child: CachedNetworkImage(
+                        imageUrl: conversationAttachments![index].mediaUrl!,
+                        errorWidget: (context, url, error) =>
+                            mediaErrorWidget(),
+                        progressIndicatorBuilder: (context, url, progress) =>
+                            mediaShimmer(),
+                        fit: BoxFit.contain,
+                      ),
+                    );
+                  }),
             ),
             ValueListenableBuilder(
                 valueListenable: rebuildCurr,

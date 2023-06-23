@@ -95,7 +95,7 @@ final router = GoRouter(
       path: mediaPreviewRoute,
       name: "media_preview",
       builder: (context, state) => MediaPreview(
-        conversationAttachments: (state.extra as List<Media>)[0] as List<Media>,
+        conversationAttachments: (state.extra as List<dynamic>)[0],
         chatroom: (state.extra as List<dynamic>)[1],
         messageId: int.parse(state.params['messageId']!),
       ),

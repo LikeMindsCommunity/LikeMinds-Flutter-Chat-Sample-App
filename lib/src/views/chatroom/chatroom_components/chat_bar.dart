@@ -26,6 +26,7 @@ import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
   final Conversation? replyToConversation;
+  final List<Media>? replyConversationAttachments;
   final Conversation? editConversation;
   final Map<int, User?>? userMeta;
   final Function() scrollToBottom;
@@ -34,6 +35,7 @@ class ChatBar extends StatefulWidget {
     super.key,
     required this.chatroom,
     this.replyToConversation,
+    this.replyConversationAttachments,
     this.editConversation,
     required this.scrollToBottom,
     this.userMeta,
@@ -407,100 +409,165 @@ class _ChatBarState extends State<ChatBar> {
                                                 ),
                                               ],
                                             ),
-                                            // Row(
-                                            //   mainAxisAlignment:
-                                            //       MainAxisAlignment.spaceEvenly,
-                                            //   children: [
-                                            //     GestureDetector(
-                                            //       onTap: () {},
-                                            //       child: SizedBox(
-                                            //         width: 40.w,
-                                            //         height: 22.w,
-                                            //         child: Column(
-                                            //           mainAxisAlignment:
-                                            //               MainAxisAlignment.center,
-                                            //           children: [
-                                            //             Container(
-                                            //               width: 38.sp,
-                                            //               height: 38.sp,
-                                            //               decoration: BoxDecoration(
-                                            //                 borderRadius:
-                                            //                     BorderRadius.circular(40.w),
-                                            //                 color: LMBranding
-                                            //                     .instance.buttonColor,
-                                            //               ),
-                                            //               child: Icon(
-                                            //                 Icons.video_camera_back,
-                                            //                 color: kWhiteColor,
-                                            //                 size: 24.sp,
-                                            //               ),
-                                            //             ),
-                                            //             kVerticalPaddingMedium,
-                                            //             Text(
-                                            //               "Video",
-                                            //               style: lmBranding.fonts.medium,
-                                            //             ),
-                                            //           ],
-                                            //         ),
-                                            //       ),
-                                            //     ),
-                                            GestureDetector(
-                                              onTap: () async {
-                                                _popupMenuController.hideMenu();
-                                                if (await handlePermissions(
-                                                    3)) {
-                                                  List<Media> pickedMediaFiles =
-                                                      await pickDocumentFiles();
-                                                  if (pickedMediaFiles
-                                                      .isNotEmpty) {
-                                                    context.pushNamed(
-                                                        "media_forward",
-                                                        extra: pickedMediaFiles,
-                                                        params: {
-                                                          'chatroomId': widget
-                                                              .chatroom.id
-                                                              .toString()
-                                                        });
-                                                  }
-                                                }
-                                              },
-                                              child: SizedBox(
-                                                width: 40.w,
-                                                height: 22.w,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      width: 38.sp,
-                                                      height: 38.sp,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(40.w),
-                                                        color: LMBranding
-                                                            .instance
-                                                            .buttonColor,
-                                                      ),
-                                                      child: Icon(
-                                                        Icons
-                                                            .file_copy_outlined,
-                                                        color: kWhiteColor,
-                                                        size: 24.sp,
-                                                      ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    _popupMenuController
+                                                        .hideMenu();
+                                                    if (await handlePermissions(
+                                                        2)) {
+                                                      List<Media>
+                                                          pickedVideoFiles =
+                                                          await pickVideoFiles();
+                                                      if (pickedVideoFiles
+                                                              .length >
+                                                          10) {
+                                                        Fluttertoast.showToast(
+                                                            msg:
+                                                                'Only 10 attachments can be sent');
+                                                        return;
+                                                      }
+
+                                                      if (pickedVideoFiles
+                                                          .isNotEmpty) {
+                                                        for (Media videoFile
+                                                            in pickedVideoFiles) {
+                                                          if (getFileSizeInDouble(
+                                                                  videoFile
+                                                                      .size!) >
+                                                              100) {
+                                                            Fluttertoast
+                                                                .showToast(
+                                                              msg:
+                                                                  'File size should be smaller than 100 MB',
+                                                            );
+                                                            pickedVideoFiles
+                                                                .remove(
+                                                                    videoFile);
+                                                          }
+                                                        }
+                                                      }
+                                                      if (pickedVideoFiles
+                                                          .isNotEmpty) {
+                                                        context.pushNamed(
+                                                          "media_forward",
+                                                          extra:
+                                                              pickedVideoFiles,
+                                                          params: {
+                                                            'chatroomId': widget
+                                                                .chatroom.id
+                                                                .toString()
+                                                          },
+                                                        );
+                                                      }
+                                                    }
+                                                  },
+                                                  child: SizedBox(
+                                                    width: 32.w,
+                                                    height: 9.h,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          width: 32.sp,
+                                                          height: 32.sp,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        40.w),
+                                                            color: LMBranding
+                                                                .instance
+                                                                .buttonColor,
+                                                          ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .video_camera_back,
+                                                            color: kWhiteColor,
+                                                            size: 20.sp,
+                                                          ),
+                                                        ),
+                                                        kVerticalPaddingMedium,
+                                                        Text(
+                                                          "Video",
+                                                          style: lmBranding
+                                                              .fonts.medium,
+                                                        ),
+                                                      ],
                                                     ),
-                                                    kVerticalPaddingMedium,
-                                                    Text(
-                                                      "Document",
-                                                      style: lmBranding
-                                                          .fonts.medium,
-                                                    ),
-                                                  ],
+                                                  ),
                                                 ),
-                                              ),
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    _popupMenuController
+                                                        .hideMenu();
+                                                    if (await handlePermissions(
+                                                        3)) {
+                                                      List<Media>
+                                                          pickedMediaFiles =
+                                                          await pickDocumentFiles();
+                                                      if (pickedMediaFiles
+                                                          .isNotEmpty) {
+                                                        context.pushNamed(
+                                                            "media_forward",
+                                                            extra:
+                                                                pickedMediaFiles,
+                                                            params: {
+                                                              'chatroomId':
+                                                                  widget
+                                                                      .chatroom
+                                                                      .id
+                                                                      .toString()
+                                                            });
+                                                      }
+                                                    }
+                                                  },
+                                                  child: SizedBox(
+                                                    width: 32.w,
+                                                    height: 9.h,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          width: 32.sp,
+                                                          height: 32.sp,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        40.w),
+                                                            color: LMBranding
+                                                                .instance
+                                                                .buttonColor,
+                                                          ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .file_copy_outlined,
+                                                            color: kWhiteColor,
+                                                            size: 20.sp,
+                                                          ),
+                                                        ),
+                                                        kVerticalPaddingMedium,
+                                                        Text(
+                                                          "Document",
+                                                          style: lmBranding
+                                                              .fonts.medium,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            //   ],
-                                            // ),
                                           ],
                                         ),
                                       ),
