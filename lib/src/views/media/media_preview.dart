@@ -5,21 +5,25 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/multimedia/video/chat_video_factory.dart';
 import 'package:video_player/video_player.dart';
 
 class MediaPreview extends StatefulWidget {
-  final List<Media>? conversationAttachments;
-  final int messageId;
+  final List<Media> conversationAttachments;
+  final Conversation conversation;
+  final Map<int, User?> userMeta;
+
   final ChatRoom chatroom;
 
   const MediaPreview({
     Key? key,
-    this.conversationAttachments,
+    required this.conversationAttachments,
     required this.chatroom,
-    required this.messageId,
+    required this.conversation,
+    required this.userMeta,
   }) : super(key: key);
 
   @override
@@ -31,6 +35,8 @@ class _MediaPreviewState extends State<MediaPreview> {
   CarouselController controller = CarouselController();
   ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
   List<Media>? conversationAttachments;
+  Conversation? conversation;
+  Map<int, User?>? userMeta;
   FlickManager? flickManager;
 
   bool checkIfMultipleAttachments() {
@@ -40,13 +46,12 @@ class _MediaPreviewState extends State<MediaPreview> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     LMAnalytics.get().track(AnalyticsKeys.imageViewed, {
       'chatroom_id': widget.chatroom.id,
       'community_id': widget.chatroom.communityId,
       'chatroom_type': widget.chatroom.type,
-      'message_id': widget.messageId,
+      'message_id': widget.conversation.id,
     });
   }
 
@@ -65,6 +70,8 @@ class _MediaPreviewState extends State<MediaPreview> {
   @override
   Widget build(BuildContext context) {
     conversationAttachments = widget.conversationAttachments;
+    userMeta = widget.userMeta;
+    conversation = widget.conversation;
     setupFlickManager();
     return Scaffold(
       backgroundColor: kBlackColor,
@@ -79,6 +86,27 @@ class _MediaPreviewState extends State<MediaPreview> {
           ),
         ),
         elevation: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              userMeta?[conversation?.userId]?.name ?? '',
+              style: LMTheme.regular.copyWith(
+                color: kWhiteColor,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            kVerticalPaddingSmall,
+            Text(
+              '${conversation?.date},  ${conversation?.createdAt}',
+              style: LMTheme.regular.copyWith(
+                fontSize: 10.sp,
+                color: kWhiteColor,
+              ),
+            ),
+          ],
+        ),
       ),
       body: SafeArea(
         bottom: true,

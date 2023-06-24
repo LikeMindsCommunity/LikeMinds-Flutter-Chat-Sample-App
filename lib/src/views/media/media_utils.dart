@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
@@ -106,18 +105,23 @@ Widget getImageMessage(
     BuildContext context,
     List<Media>? conversationAttachments,
     ChatRoom chatroom,
-    int conversationId) {
+    Conversation conversation,
+    Map<int, User?> userMeta) {
+  void onTap() {
+    router.pushNamed(
+      "media_preview",
+      extra: [
+        conversationAttachments,
+        chatroom,
+        conversation,
+        userMeta,
+      ],
+    );
+  }
+
   if (conversationAttachments!.length == 1) {
     return GestureDetector(
-      onTap: () {
-        router.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: getChatBubbleImage(
         conversationAttachments.first,
         height: 55.w,
@@ -126,15 +130,7 @@ Widget getImageMessage(
     );
   } else if (conversationAttachments.length == 2) {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Row(
         children: <Widget>[
           getChatBubbleImage(
@@ -153,15 +149,7 @@ Widget getImageMessage(
     );
   } else if (conversationAttachments.length == 3) {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Row(
         children: <Widget>[
           getChatBubbleImage(
@@ -205,15 +193,7 @@ Widget getImageMessage(
     );
   } else if (conversationAttachments.length == 4) {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Column(
         children: [
           Row(
@@ -252,15 +232,7 @@ Widget getImageMessage(
     );
   } else {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Column(
         children: [
           Row(

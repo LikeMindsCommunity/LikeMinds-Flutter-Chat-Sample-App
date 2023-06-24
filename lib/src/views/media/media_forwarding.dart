@@ -191,9 +191,7 @@ class _MediaForwardState extends State<MediaForward> {
                         width: 10.w,
                         height: 10.w,
                         child: Icon(
-                          mediaList.first.mediaType == MediaType.photo
-                              ? Icons.add_a_photo
-                              : Icons.video_camera_back,
+                          Icons.photo_library,
                           color: kWhiteColor,
                           size: 24.sp,
                         ),

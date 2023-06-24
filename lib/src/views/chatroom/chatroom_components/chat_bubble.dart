@@ -658,7 +658,8 @@ class _ChatBubbleState extends State<ChatBubble> {
           context,
           conversationAttachments!,
           widget.chatroom,
-          conversation!.id,
+          conversation!,
+          userMeta!,
         );
       } else if (conversationAttachments!.first.mediaType ==
           MediaType.document) {
