@@ -74,6 +74,7 @@ class Media {
         size: json['meta']['size'],
         width: json['width'] as int?,
         thumbnailUrl: json['thumbnail_url'] as String?,
+        pageCount: json['meta']['number_of_page'] as int?,
       );
 }
 

@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/document_shimmer.dart';
 import 'package:path/path.dart';
 import 'package:open_filex/open_filex.dart';
@@ -10,20 +12,13 @@ import 'package:pdf_render/pdf_render_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DocumentThumbnailFile extends StatefulWidget {
-  final String? url;
-  final String type;
-  final String size;
-  final File? docFile;
   final int? index;
-  final Function(int)? removeAttachment;
+  final Media media;
+
   const DocumentThumbnailFile({
     Key? key,
-    this.docFile,
-    this.url,
-    this.removeAttachment,
+    required this.media,
     this.index,
-    required this.size,
-    required this.type,
   }) : super(key: key);
 
   @override
@@ -38,11 +33,11 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
   Widget? documentFile;
 
   Future loadFile() async {
-    if (widget.url != null) {
-      final String url = widget.url!;
-      file = await DefaultCacheManager().getSingleFile(url);
+    url = widget.media.mediaUrl;
+    if (url != null) {
+      file = await DefaultCacheManager().getSingleFile(url!);
     } else {
-      file = widget.docFile!;
+      file = widget.media.mediaFile;
     }
     _fileName = basenameWithoutExtension(file!.path);
     documentFile = PdfDocumentLoader.openFile(
@@ -87,12 +82,12 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
             snapshot.hasData) {
           return InkWell(
             onTap: () async {
-              if (widget.url != null) {
-                debugPrint(widget.url);
-                Uri fileUrl = Uri.parse(widget.url!);
+              if (widget.media.mediaUrl != null) {
+                debugPrint(widget.media.mediaUrl);
+                Uri fileUrl = Uri.parse(widget.media.mediaUrl!);
                 launchUrl(fileUrl, mode: LaunchMode.externalApplication);
               } else {
-                OpenFilex.open(widget.docFile!.path);
+                OpenFilex.open(file!.path);
               }
             },
             child: Column(
@@ -153,21 +148,11 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
 }
 
 class DocumentTile extends StatefulWidget {
-  final String? url;
-  final String type;
-  final String size;
-  final File? docFile;
-  final int? index;
-  final Function(int)? removeAttachment;
+  final Media media;
 
   const DocumentTile({
     super.key,
-    this.docFile,
-    this.url,
-    this.removeAttachment,
-    this.index,
-    required this.size,
-    required this.type,
+    required this.media,
   });
 
   @override
@@ -176,22 +161,21 @@ class DocumentTile extends StatefulWidget {
 
 class _DocumentTileState extends State<DocumentTile> {
   String? _fileName;
-  String? _fileExtension;
+  final String _fileExtension = 'pdf';
   String? _fileSize;
-  String? url;
   File? file;
   Future? loadedFile;
 
   Future loadFile() async {
     File file;
-    if (widget.url != null) {
-      final String url = widget.url!;
+    if (widget.media.mediaUrl != null) {
+      final String url = widget.media.mediaUrl!;
       file = File(url);
     } else {
-      file = widget.docFile!;
+      file = widget.media.mediaFile!;
     }
-    _fileExtension = widget.type;
-    _fileSize = widget.size;
+
+    _fileSize = getFileSizeString(bytes: widget.media.size!);
     _fileName = basenameWithoutExtension(file.path);
     return file;
   }
@@ -211,12 +195,12 @@ class _DocumentTileState extends State<DocumentTile> {
               snapshot.hasData) {
             return InkWell(
               onTap: () async {
-                if (widget.url != null) {
-                  debugPrint(widget.url);
-                  Uri fileUrl = Uri.parse(widget.url!);
+                if (widget.media.mediaUrl != null) {
+                  debugPrint(widget.media.mediaUrl);
+                  Uri fileUrl = Uri.parse(widget.media.mediaUrl!);
                   launchUrl(fileUrl, mode: LaunchMode.externalApplication);
                 } else {
-                  OpenFilex.open(widget.docFile!.path);
+                  OpenFilex.open(widget.media.mediaFile!.path);
                 }
               },
               child: Padding(
@@ -249,7 +233,30 @@ class _DocumentTileState extends State<DocumentTile> {
                             ),
                             kVerticalPaddingSmall,
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
+                                widget.media.pageCount != null
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          kHorizontalPaddingXSmall,
+                                          Text(
+                                            "${widget.media.pageCount!} ${widget.media.pageCount! > 1 ? "Pages" : "Page"}",
+                                            style: TextStyle(
+                                                fontSize: 8.sp,
+                                                color: kGrey3Color),
+                                          ),
+                                          kHorizontalPaddingXSmall,
+                                          Text(
+                                            '·',
+                                            style: TextStyle(
+                                                fontSize: 8.sp,
+                                                color: kGrey3Color),
+                                          ),
+                                        ],
+                                      )
+                                    : const SizedBox(),
                                 kHorizontalPaddingXSmall,
                                 Text(
                                   _fileSize!.toUpperCase(),
@@ -264,7 +271,7 @@ class _DocumentTileState extends State<DocumentTile> {
                                 ),
                                 kHorizontalPaddingXSmall,
                                 Text(
-                                  _fileExtension!.toUpperCase(),
+                                  _fileExtension.toUpperCase(),
                                   style: TextStyle(
                                       fontSize: 8.sp, color: kGrey3Color),
                                 ),
@@ -276,13 +283,6 @@ class _DocumentTileState extends State<DocumentTile> {
                       const SizedBox(
                         width: 30,
                       ),
-                      widget.docFile != null
-                          ? GestureDetector(
-                              onTap: () {
-                                widget.removeAttachment!(widget.index!);
-                              },
-                              child: const CloseButtonIcon())
-                          : const SizedBox.shrink()
                     ],
                   ),
                 ),

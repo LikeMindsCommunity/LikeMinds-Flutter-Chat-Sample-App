@@ -1,17 +1,12 @@
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/document_tile.dart';
 
 // ChatBubble for Single Document Attachment
 Widget getSingleDocPreview(Media media) {
   return DocumentThumbnailFile(
-    size: getFileSizeString(bytes: media.size!),
-    type: 'pdf',
-    url: media.mediaUrl,
-    docFile: media.mediaFile,
-    index: 1,
+    media: media,
   );
 }
 
@@ -21,18 +16,10 @@ Widget getDualDocPreview(List<Media> mediaList) {
     mainAxisAlignment: MainAxisAlignment.start,
     children: <Widget>[
       DocumentTile(
-        size: getFileSizeString(bytes: mediaList[0].size!),
-        type: 'pdf',
-        url: mediaList[0].mediaUrl,
-        docFile: mediaList[0].mediaFile,
-        index: 1,
+        media: mediaList.first,
       ),
       DocumentTile(
-        size: getFileSizeString(bytes: mediaList[1].size!),
-        type: 'pdf',
-        url: mediaList[1].mediaUrl,
-        docFile: mediaList[1].mediaFile,
-        index: 1,
+        media: mediaList[1],
       )
     ],
   );
@@ -75,10 +62,7 @@ class GgetMultipleDocPreviewState extends State<GetMultipleDocPreview> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: length,
               itemBuilder: (context, index) => DocumentTile(
-                size: getFileSizeString(bytes: mediaList![index].size!),
-                type: 'pdf',
-                url: mediaList![index].mediaUrl,
-                index: 1,
+                media: mediaList![index],
               ),
             ),
             mediaList!.length > 2 && mediaList!.length != length

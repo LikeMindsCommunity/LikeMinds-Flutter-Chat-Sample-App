@@ -228,7 +228,10 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
                     ..index(i)
                     ..height(media.height)
                     ..width(media.width)
-                    ..meta({'size': media.size})
+                    ..meta({
+                      'size': media.size,
+                      'number_of_page': media.pageCount,
+                    })
                     ..type(attachmentType)
                     ..thumbnailUrl(thumbnailUrl)
                     ..url(url))
