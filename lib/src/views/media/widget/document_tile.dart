@@ -222,11 +222,12 @@ class _DocumentTileState extends State<DocumentTile> {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: kPaddingSmall),
                 child: Container(
-                  height: 65,
+                  height: 70,
                   width: 60.w,
                   decoration: BoxDecoration(
-                      border: Border.all(color: kGreyWebBGColor, width: 1),
-                      borderRadius: BorderRadius.circular(kBorderRadiusMedium)),
+                    border: Border.all(color: kGreyWebBGColor, width: 1),
+                    borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: kPaddingLarge),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,

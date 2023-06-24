@@ -1,10 +1,7 @@
-import 'dart:io';
-import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
@@ -78,7 +75,7 @@ class _MediaForwardState extends State<MediaForward> {
           backgroundColor: kBlackColor,
           leading: IconButton(
             onPressed: () {
-              context.pop();
+              router.pop();
             },
             icon: const Icon(
               Icons.arrow_back,
@@ -145,46 +142,26 @@ class _MediaForwardState extends State<MediaForward> {
                   children: <Widget>[
                     GestureDetector(
                       onTap: () async {
-                        if (mediaList.first.mediaType == MediaType.video) {
-                          List<Media> pickedVideoFiles = await pickVideoFiles();
+                        if (await handlePermissions(1)) {
+                          List<Media> pickedVideoFiles = await pickMediaFiles();
                           if (pickedVideoFiles.isNotEmpty) {
-                            mediaList.addAll(pickedVideoFiles);
-                            rebuildCurr.value = !rebuildCurr.value;
-                          }
-                        } else {
-                          if (await handlePermissions(1)) {
-                            List<XFile>? pickedImage =
-                                await imagePicker.pickMultiImage();
-                            if (mediaList.length + pickedImage.length > 10) {
+                            if (mediaList.length + pickedVideoFiles.length >
+                                10) {
                               Fluttertoast.showToast(
                                   msg: 'Only 10 attachments can be sent');
                               return;
                             }
-                            if (pickedImage.isNotEmpty) {
-                              for (XFile xImage in pickedImage) {
-                                int fileBytes = await xImage.length();
-                                if (getFileSizeInDouble(fileBytes) > 100) {
-                                  Fluttertoast.showToast(
-                                    msg:
-                                        'File size should be smaller than 100MB',
-                                  );
-                                  return;
-                                }
-                                File file = File(xImage.path);
-                                ui.Image image = await decodeImageFromList(
-                                    file.readAsBytesSync());
-                                Media media = Media(
-                                  mediaType: MediaType.photo,
-                                  height: image.height,
-                                  width: image.width,
-                                  mediaFile: file,
-                                  size: fileBytes,
+                            for (Media media in pickedVideoFiles) {
+                              if (getFileSizeInDouble(media.size!) > 100) {
+                                Fluttertoast.showToast(
+                                  msg: 'File size should be smaller than 100MB',
                                 );
-                                mediaList.add(media);
+                                pickedVideoFiles.remove(media);
                               }
                             }
-                            setState(() {});
+                            mediaList.addAll(pickedVideoFiles);
                           }
+                          rebuildCurr.value = !rebuildCurr.value;
                         }
                       },
                       child: SizedBox(

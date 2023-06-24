@@ -5,7 +5,6 @@ import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
@@ -219,7 +218,7 @@ class _ChatBarState extends State<ChatBar> {
                                       color: Colors.white,
                                       child: Padding(
                                         padding: EdgeInsets.symmetric(
-                                          vertical: 1.4.h,
+                                          vertical: 6.w,
                                           horizontal: 4.w,
                                         ),
                                         child: Column(
@@ -239,9 +238,9 @@ class _ChatBarState extends State<ChatBar> {
                                                       XFile? pickedImage =
                                                           await imagePicker!
                                                               .pickImage(
-                                                        source:
-                                                            ImageSource.camera,
-                                                      );
+                                                                  source:
+                                                                      ImageSource
+                                                                          .camera);
                                                       List<Media> mediaList =
                                                           [];
                                                       if (pickedImage != null) {
@@ -259,107 +258,6 @@ class _ChatBarState extends State<ChatBar> {
                                                         );
                                                         mediaList.add(media);
                                                         router.pushNamed(
-                                                            "media_forward",
-                                                            extra: mediaList,
-                                                            params: {
-                                                              'chatroomId':
-                                                                  widget
-                                                                      .chatroom
-                                                                      .id
-                                                                      .toString()
-                                                            });
-                                                      }
-                                                    }
-                                                  },
-                                                  child: SizedBox(
-                                                    width: 32.w,
-                                                    height: 9.h,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 32.sp,
-                                                          height: 32.sp,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        40.w),
-                                                            color: LMBranding
-                                                                .instance
-                                                                .buttonColor,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons
-                                                                .camera_alt_outlined,
-                                                            color: kWhiteColor,
-                                                            size: 20.sp,
-                                                          ),
-                                                        ),
-                                                        kVerticalPaddingMedium,
-                                                        Text(
-                                                          "Camera",
-                                                          style: lmBranding
-                                                              .fonts.medium,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                GestureDetector(
-                                                  onTap: () async {
-                                                    _popupMenuController
-                                                        .hideMenu();
-                                                    if (await handlePermissions(
-                                                        1)) {
-                                                      List<XFile>? pickedImage =
-                                                          await imagePicker!
-                                                              .pickMultiImage();
-                                                      if (pickedImage.length >
-                                                          10) {
-                                                        Fluttertoast.showToast(
-                                                            msg:
-                                                                'Only 10 attachments can be sent');
-                                                        return;
-                                                      }
-                                                      List<Media> mediaList =
-                                                          [];
-                                                      if (pickedImage
-                                                          .isNotEmpty) {
-                                                        for (XFile xImage
-                                                            in pickedImage) {
-                                                          int fileBytes =
-                                                              await xImage
-                                                                  .length();
-                                                          if (getFileSizeInDouble(
-                                                                  fileBytes) >
-                                                              100) {
-                                                            Fluttertoast
-                                                                .showToast(
-                                                              msg:
-                                                                  'File size should be smaller than 100 MB',
-                                                            );
-                                                            return;
-                                                          }
-                                                          File file =
-                                                              File(xImage.path);
-                                                          ui.Image image =
-                                                              await decodeImageFromList(
-                                                                  file.readAsBytesSync());
-                                                          Media media = Media(
-                                                            mediaType:
-                                                                MediaType.photo,
-                                                            height:
-                                                                image.height,
-                                                            width: image.width,
-                                                            mediaFile: file,
-                                                          );
-                                                          mediaList.add(media);
-                                                        }
-                                                        context.pushNamed(
                                                           "media_forward",
                                                           extra: mediaList,
                                                           params: {
@@ -372,7 +270,7 @@ class _ChatBarState extends State<ChatBar> {
                                                     }
                                                   },
                                                   child: SizedBox(
-                                                    width: 32.w,
+                                                    width: 25.w,
                                                     height: 9.h,
                                                     child: Column(
                                                       mainAxisAlignment:
@@ -380,28 +278,26 @@ class _ChatBarState extends State<ChatBar> {
                                                               .center,
                                                       children: [
                                                         Container(
-                                                          width: 32.sp,
-                                                          height: 32.sp,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        40.w),
-                                                            color: LMBranding
-                                                                .instance
-                                                                .buttonColor,
-                                                          ),
+                                                          width: 40.sp,
+                                                          height: 40.sp,
+                                                          decoration: BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              color: LMBranding
+                                                                  .instance
+                                                                  .buttonColor),
                                                           child: Icon(
-                                                            Icons
-                                                                .photo_outlined,
-                                                            color: kWhiteColor,
-                                                            size: 20.sp,
-                                                          ),
+                                                              Icons
+                                                                  .camera_alt_outlined,
+                                                              color:
+                                                                  kWhiteColor,
+                                                              size: 25.sp),
                                                         ),
                                                         kVerticalPaddingMedium,
                                                         Text(
-                                                          "Photo",
+                                                          "Camera",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                           style: lmBranding
                                                               .fonts.medium,
                                                         ),
@@ -409,12 +305,6 @@ class _ChatBarState extends State<ChatBar> {
                                                     ),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
                                                 GestureDetector(
                                                   onTap: () async {
                                                     _popupMenuController
@@ -422,9 +312,9 @@ class _ChatBarState extends State<ChatBar> {
                                                     if (await handlePermissions(
                                                         2)) {
                                                       List<Media>
-                                                          pickedVideoFiles =
-                                                          await pickVideoFiles();
-                                                      if (pickedVideoFiles
+                                                          pickedMediaFiles =
+                                                          await pickMediaFiles();
+                                                      if (pickedMediaFiles
                                                               .length >
                                                           10) {
                                                         Fluttertoast.showToast(
@@ -433,12 +323,12 @@ class _ChatBarState extends State<ChatBar> {
                                                         return;
                                                       }
 
-                                                      if (pickedVideoFiles
+                                                      if (pickedMediaFiles
                                                           .isNotEmpty) {
-                                                        for (Media videoFile
-                                                            in pickedVideoFiles) {
+                                                        for (Media mediaFile
+                                                            in pickedMediaFiles) {
                                                           if (getFileSizeInDouble(
-                                                                  videoFile
+                                                                  mediaFile
                                                                       .size!) >
                                                               100) {
                                                             Fluttertoast
@@ -446,18 +336,18 @@ class _ChatBarState extends State<ChatBar> {
                                                               msg:
                                                                   'File size should be smaller than 100 MB',
                                                             );
-                                                            pickedVideoFiles
+                                                            pickedMediaFiles
                                                                 .remove(
-                                                                    videoFile);
+                                                                    mediaFile);
                                                           }
                                                         }
                                                       }
-                                                      if (pickedVideoFiles
+                                                      if (pickedMediaFiles
                                                           .isNotEmpty) {
-                                                        context.pushNamed(
+                                                        router.pushNamed(
                                                           "media_forward",
                                                           extra:
-                                                              pickedVideoFiles,
+                                                              pickedMediaFiles,
                                                           params: {
                                                             'chatroomId': widget
                                                                 .chatroom.id
@@ -468,7 +358,7 @@ class _ChatBarState extends State<ChatBar> {
                                                     }
                                                   },
                                                   child: SizedBox(
-                                                    width: 32.w,
+                                                    width: 25.w,
                                                     height: 9.h,
                                                     child: Column(
                                                       mainAxisAlignment:
@@ -476,28 +366,27 @@ class _ChatBarState extends State<ChatBar> {
                                                               .center,
                                                       children: [
                                                         Container(
-                                                          width: 32.sp,
-                                                          height: 32.sp,
+                                                          width: 40.sp,
+                                                          height: 40.sp,
                                                           decoration:
                                                               BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        40.w),
+                                                            shape:
+                                                                BoxShape.circle,
                                                             color: LMBranding
                                                                 .instance
                                                                 .buttonColor,
                                                           ),
                                                           child: Icon(
-                                                            Icons
-                                                                .video_camera_back,
+                                                            Icons.photo_library,
                                                             color: kWhiteColor,
-                                                            size: 20.sp,
+                                                            size: 25.sp,
                                                           ),
                                                         ),
                                                         kVerticalPaddingMedium,
                                                         Text(
-                                                          "Video",
+                                                          "Gallery",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                           style: lmBranding
                                                               .fonts.medium,
                                                         ),
@@ -516,22 +405,21 @@ class _ChatBarState extends State<ChatBar> {
                                                           await pickDocumentFiles();
                                                       if (pickedMediaFiles
                                                           .isNotEmpty) {
-                                                        context.pushNamed(
-                                                            "media_forward",
-                                                            extra:
-                                                                pickedMediaFiles,
-                                                            params: {
-                                                              'chatroomId':
-                                                                  widget
-                                                                      .chatroom
-                                                                      .id
-                                                                      .toString()
-                                                            });
+                                                        router.pushNamed(
+                                                          "media_forward",
+                                                          extra:
+                                                              pickedMediaFiles,
+                                                          params: {
+                                                            'chatroomId': widget
+                                                                .chatroom.id
+                                                                .toString()
+                                                          },
+                                                        );
                                                       }
                                                     }
                                                   },
                                                   child: SizedBox(
-                                                    width: 32.w,
+                                                    width: 25.w,
                                                     height: 9.h,
                                                     child: Column(
                                                       mainAxisAlignment:
@@ -539,14 +427,12 @@ class _ChatBarState extends State<ChatBar> {
                                                               .center,
                                                       children: [
                                                         Container(
-                                                          width: 32.sp,
-                                                          height: 32.sp,
+                                                          width: 40.sp,
+                                                          height: 40.sp,
                                                           decoration:
                                                               BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        40.w),
+                                                            shape:
+                                                                BoxShape.circle,
                                                             color: LMBranding
                                                                 .instance
                                                                 .buttonColor,
@@ -555,12 +441,14 @@ class _ChatBarState extends State<ChatBar> {
                                                             Icons
                                                                 .file_copy_outlined,
                                                             color: kWhiteColor,
-                                                            size: 20.sp,
+                                                            size: 25.sp,
                                                           ),
                                                         ),
                                                         kVerticalPaddingMedium,
                                                         Text(
                                                           "Document",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                           style: lmBranding
                                                               .fonts.medium,
                                                         ),

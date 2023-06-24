@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
@@ -308,7 +307,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
             MarkReadChatroomEvent(chatroomId: widget.chatroomId),
           );
           BlocProvider.of<HomeBloc>(context).add(UpdateHomeEvent());
-          context.pop();
+          router.pop();
           return false;
         },
         child: Scaffold(

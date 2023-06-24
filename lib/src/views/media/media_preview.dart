@@ -56,14 +56,17 @@ class _MediaPreviewState extends State<MediaPreview> {
   }
 
   void setupFlickManager() {
-    if (conversationAttachments?[currPosition].mediaType == MediaType.video) {
-      flickManager ??= FlickManager(
-        videoPlayerController: VideoPlayerController.network(
-          conversationAttachments![currPosition].mediaUrl!,
-        ),
-        autoPlay: true,
-        autoInitialize: true,
-      );
+    for (int i = 0; i < conversationAttachments!.length; i++) {
+      if (conversationAttachments?[i].mediaType == MediaType.video) {
+        flickManager ??= FlickManager(
+          videoPlayerController: VideoPlayerController.network(
+            conversationAttachments![i].mediaUrl!,
+          ),
+          autoPlay: true,
+          autoInitialize: true,
+        );
+        break;
+      }
     }
   }
 

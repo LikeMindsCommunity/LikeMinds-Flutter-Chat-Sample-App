@@ -1,7 +1,7 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
@@ -12,6 +12,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class ChatItem extends StatefulWidget {
@@ -102,7 +103,7 @@ class _ChatItemState extends State<ChatItem> {
           behavior: HitTestBehavior.opaque,
           onTap: () {
             LMRealtime.instance.chatroomId = chatroom.id;
-            context.push("/chatroom/${chatroom.id}");
+            router.push("/chatroom/${chatroom.id}");
             markRead(toast: false);
           },
           child: Padding(
@@ -157,24 +158,8 @@ class _ChatItemState extends State<ChatItem> {
                           ),
                           const SizedBox(height: 8),
                           (hasAttachments ?? false)
-                              ? Row(children: [
-                                  Icon(
-                                    getAttachmentIcon(),
-                                    color: kGreyColor,
-                                    size: 12.sp,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    getAttachmentText(),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: LMBranding.instance.fonts.regular
-                                        .copyWith(
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                ])
+                              ? getChatItemAttachmentTile(
+                                  attachmentMeta ?? <Media>[])
                               : Text(
                                   conversation!.state != 0
                                       ? TaggingHelper.extractStateMessage(
