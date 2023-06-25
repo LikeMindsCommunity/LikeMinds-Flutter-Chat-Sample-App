@@ -159,7 +159,7 @@ class _ChatItemState extends State<ChatItem> {
                           const SizedBox(height: 8),
                           (hasAttachments ?? false)
                               ? getChatItemAttachmentTile(
-                                  attachmentMeta ?? <Media>[])
+                                  attachmentMeta ?? <Media>[], conversation!)
                               : Text(
                                   conversation!.state != 0
                                       ? TaggingHelper.extractStateMessage(

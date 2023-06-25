@@ -54,38 +54,37 @@ class _DocumentFactoryState extends State<DocumentFactory> {
       valueListenable: rebuildCurr,
       builder: (context, _, __) {
         return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: SizedBox(
-                width: 100.w,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    getDocumentThumbnail(mediaList![currPosition].mediaFile!),
-                    kVerticalPaddingXLarge,
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        SizedBox(
-                          width: 80.w,
-                          child: Text(
-                            basenameWithoutExtension(
-                                mediaList![currPosition].mediaFile!.path),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: LMTheme.medium.copyWith(
-                              color: kWhiteColor,
-                            ),
+            SizedBox(
+              width: 100.w,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  getDocumentThumbnail(mediaList![currPosition].mediaFile!),
+                  kVerticalPaddingXLarge,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 80.w,
+                        child: Text(
+                          basenameWithoutExtension(
+                              mediaList![currPosition].mediaFile!.path),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: LMTheme.medium.copyWith(
+                            color: kWhiteColor,
                           ),
                         ),
-                        kVerticalPaddingSmall,
-                        getDocumentDetails(mediaList![currPosition]),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      kVerticalPaddingSmall,
+                      getDocumentDetails(mediaList![currPosition]),
+                    ],
+                  ),
+                ],
               ),
             ),
             Container(
@@ -119,7 +118,7 @@ class _DocumentFactoryState extends State<DocumentFactory> {
                           width: 10.w,
                           height: 10.w,
                           child: Icon(
-                            Icons.attach_file,
+                            Icons.insert_drive_file,
                             color: kWhiteColor,
                             size: 24.sp,
                           ),

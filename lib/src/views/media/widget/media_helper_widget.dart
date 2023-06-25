@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
@@ -11,7 +12,8 @@ import 'package:pdf_bitmaps/pdf_bitmaps.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-Widget getChatItemAttachmentTile(List<Media> mediaFiles) {
+Widget getChatItemAttachmentTile(
+    List<Media> mediaFiles, Conversation conversation) {
   if (mediaFiles.isEmpty) {
     return const SizedBox();
   } else {
@@ -19,8 +21,11 @@ Widget getChatItemAttachmentTile(List<Media> mediaFiles) {
     String text = '';
     if (mediaFiles.first.mediaType == MediaType.document) {
       iconData = Icons.insert_drive_file;
-      text =
-          "${mediaFiles.length} ${mediaFiles.length > 1 ? "Documents" : "Document"}";
+      if (conversation.answer.isEmpty) {
+        text = mediaFiles.length > 1 ? "Documents" : "Document";
+      } else {
+        text = conversation.answer;
+      }
     } else {
       int videoCount = 0;
       int imageCount = 0;
@@ -34,12 +39,6 @@ Widget getChatItemAttachmentTile(List<Media> mediaFiles) {
       if (videoCount != 0 && imageCount != 0) {
         return Row(
           children: <Widget>[
-            Icon(
-              Icons.video_camera_back,
-              color: kGreyColor,
-              size: 12.sp,
-            ),
-            kHorizontalPaddingSmall,
             Text(
               videoCount.toString(),
               maxLines: 1,
@@ -49,13 +48,13 @@ Widget getChatItemAttachmentTile(List<Media> mediaFiles) {
                 fontWeight: FontWeight.normal,
               ),
             ),
-            kHorizontalPaddingMedium,
+            kHorizontalPaddingSmall,
             Icon(
-              Icons.camera_alt,
+              Icons.video_camera_back,
               color: kGreyColor,
               size: 12.sp,
             ),
-            kHorizontalPaddingSmall,
+            kHorizontalPaddingMedium,
             Text(
               imageCount.toString(),
               maxLines: 1,
@@ -65,33 +64,71 @@ Widget getChatItemAttachmentTile(List<Media> mediaFiles) {
                 fontWeight: FontWeight.normal,
               ),
             ),
+            kHorizontalPaddingSmall,
+            Icon(
+              Icons.image,
+              color: kGreyColor,
+              size: 12.sp,
+            ),
+            kHorizontalPaddingSmall,
+            Expanded(
+              child: Text(
+                conversation.answer,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: LMBranding.instance.fonts.regular.copyWith(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            )
           ],
         );
       } else if (videoCount == 0) {
-        iconData = Icons.camera_alt;
-        text =
-            "${mediaFiles.length} ${mediaFiles.length > 1 ? "Images" : "Image"}";
+        iconData = Icons.image;
+        if (conversation.answer.isEmpty) {
+          text = mediaFiles.length > 1 ? "Images" : "Image";
+        } else {
+          text = conversation.answer;
+        }
       } else if (imageCount == 0) {
         iconData = Icons.video_camera_back;
-        text =
-            "${mediaFiles.length} ${mediaFiles.length > 1 ? "Videos" : "Video"}";
+        if (conversation.answer.isEmpty) {
+          text = mediaFiles.length > 1 ? "Videos" : "Video";
+        } else {
+          text = conversation.answer;
+        }
       }
     }
     return Row(
       children: <Widget>[
+        mediaFiles.length > 1
+            ? Text(
+                '${mediaFiles.length}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: LMBranding.instance.fonts.regular.copyWith(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.normal,
+                ),
+              )
+            : const SizedBox(),
+        mediaFiles.length > 1 ? kHorizontalPaddingSmall : const SizedBox(),
         Icon(
           iconData,
           color: kGreyColor,
           size: 12.sp,
         ),
         kHorizontalPaddingSmall,
-        Text(
-          text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: LMBranding.instance.fonts.regular.copyWith(
-            fontSize: 10.sp,
-            fontWeight: FontWeight.normal,
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: LMBranding.instance.fonts.regular.copyWith(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.normal,
+            ),
           ),
         ),
       ],

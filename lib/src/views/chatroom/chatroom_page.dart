@@ -361,6 +361,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       conversationId: lastConversationId,
                     ),
                   );
+                  LMAnalytics.get().track(AnalyticsKeys.chatroomOpened, {
+                    'chatroom_id': chatroom!.id,
+                    'community_id': chatroom!.communityId,
+                    'chatroom_type': chatroom!.type,
+                    'source': 'home_feed',
+                  });
                 }
               },
               builder: (context, state) {
@@ -370,12 +376,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 }
 
                 if (state is ChatroomLoaded) {
-                  LMAnalytics.get().track(AnalyticsKeys.chatroomOpened, {
-                    'chatroom_id': chatroom!.id,
-                    'community_id': chatroom!.communityId,
-                    'chatroom_type': chatroom!.type,
-                    'source': 'home_feed',
-                  });
                   var pagedListView = ValueListenableBuilder(
                     valueListenable: rebuildConversationList,
                     builder: (context, _, __) {

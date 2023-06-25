@@ -27,6 +27,8 @@ class DocumentThumbnailFile extends StatefulWidget {
 
 class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
   String? _fileName;
+  final String _fileExtension = 'pdf';
+  String? _fileSize;
   String? url;
   File? file;
   Future? loadedFile;
@@ -35,18 +37,21 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
   Future loadFile() async {
     url = widget.media.mediaUrl;
     if (url != null) {
-      file = await DefaultCacheManager().getSingleFile(url!);
+      final String url = widget.media.mediaUrl!;
+      _fileName = basenameWithoutExtension(url);
+      file = await DefaultCacheManager().getSingleFile(url);
     } else {
       file = widget.media.mediaFile;
+      _fileName = basenameWithoutExtension(file!.path);
     }
-    _fileName = basenameWithoutExtension(file!.path);
+    _fileSize = getFileSizeString(bytes: widget.media.size!);
     documentFile = PdfDocumentLoader.openFile(
       file!.path,
       pageNumber: 1,
       pageBuilder: (context, textureBuilder, pageSize) => SizedBox(
         child: Container(
-          height: 80,
-          width: 60.w,
+          height: 140,
+          width: 55.w,
           clipBehavior: Clip.hardEdge,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
@@ -58,8 +63,12 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
               ),
             ),
           ),
-          child: textureBuilder(
-            size: Size(pageSize.width, pageSize.height),
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: textureBuilder(
+                allowAntialiasingIOS: true,
+                backgroundFill: true,
+                size: Size(pageSize.width, pageSize.height)),
           ),
         ),
       ),
@@ -90,18 +99,19 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
                 OpenFilex.open(file!.path);
               }
             },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
               children: [
                 SizedBox(
                   child: documentFile!,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: kPaddingSmall),
+                Positioned(
+                  bottom: 0,
                   child: Container(
-                    height: 55,
-                    width: 60.w,
+                    height: 70,
+                    width: 54.w,
                     decoration: BoxDecoration(
+                      color: kWhiteColor,
                       border: Border.all(color: kGreyWebBGColor, width: 1),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(
@@ -123,13 +133,78 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
                         ),
                         kHorizontalPaddingSmall,
                         Expanded(
-                          child: Text(
-                            _fileName ?? '',
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                TextStyle(fontSize: 10.sp, color: kGrey2Color),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _fileName ?? '',
+                                  textAlign: TextAlign.left,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 10.sp, color: kGrey2Color),
+                                ),
+                              ),
+                              kVerticalPaddingSmall,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  widget.media.pageCount != null
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            kHorizontalPaddingXSmall,
+                                            Text(
+                                              "${widget.media.pageCount!} ${widget.media.pageCount! > 1 ? "Pages" : "Page"}",
+                                              textAlign: TextAlign.left,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontSize: 8.sp,
+                                                  color: kGrey3Color),
+                                            ),
+                                            kHorizontalPaddingXSmall,
+                                            Text(
+                                              '·',
+                                              textAlign: TextAlign.left,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontSize: 8.sp,
+                                                  color: kGrey3Color),
+                                            ),
+                                          ],
+                                        )
+                                      : const SizedBox(),
+                                  kHorizontalPaddingXSmall,
+                                  Text(
+                                    _fileSize!.toUpperCase(),
+                                    textAlign: TextAlign.left,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 8.sp, color: kGrey3Color),
+                                  ),
+                                  kHorizontalPaddingXSmall,
+                                  Text(
+                                    '·',
+                                    textAlign: TextAlign.left,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 8.sp, color: kGrey3Color),
+                                  ),
+                                  kHorizontalPaddingXSmall,
+                                  Text(
+                                    _fileExtension.toUpperCase(),
+                                    textAlign: TextAlign.left,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 8.sp, color: kGrey3Color),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
                         ),
+                        kHorizontalPaddingXSmall,
                       ],
                     ),
                   ),

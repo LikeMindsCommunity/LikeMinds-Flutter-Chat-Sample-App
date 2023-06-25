@@ -71,6 +71,7 @@ class _MediaForwardState extends State<MediaForward> {
       },
       child: Scaffold(
         backgroundColor: kBlackColor,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           backgroundColor: kBlackColor,
           leading: IconButton(

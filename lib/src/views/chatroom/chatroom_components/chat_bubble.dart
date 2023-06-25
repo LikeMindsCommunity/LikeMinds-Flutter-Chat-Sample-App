@@ -259,6 +259,28 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           ),
                         ),
+                        kVerticalPaddingMedium,
+                        Visibility(
+                          visible: checkEditPermissions(),
+                          child: ListTile(
+                            onTap: () async {
+                              widget.onEdit(conversation!);
+                              _controller.hideMenu();
+                            },
+                            leading: Icon(
+                              Icons.edit,
+                              color: LMTheme.buttonColor,
+                              size: 16.sp,
+                            ),
+                            title: Text(
+                              "Edit",
+                              style: LMTheme.regular.copyWith(
+                                fontSize: 10.sp,
+                              ),
+                            ),
+                          ),
+                        ),
+                        kVerticalPaddingMedium,
                         Visibility(
                           visible: checkDeletePermissions(),
                           child: ListTile(
@@ -293,27 +315,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           ),
                         ),
-                        kVerticalPaddingMedium,
-                        Visibility(
-                          visible: checkEditPermissions(),
-                          child: ListTile(
-                            onTap: () async {
-                              widget.onEdit(conversation!);
-                              _controller.hideMenu();
-                            },
-                            leading: Icon(
-                              Icons.edit,
-                              color: LMTheme.buttonColor,
-                              size: 16.sp,
-                            ),
-                            title: Text(
-                              "Edit",
-                              style: LMTheme.regular.copyWith(
-                                fontSize: 10.sp,
-                              ),
-                            ),
-                          ),
-                        ),
+
                         // ListTile(
                         //   onTap: () {
                         //     _controller.hideMenu();
