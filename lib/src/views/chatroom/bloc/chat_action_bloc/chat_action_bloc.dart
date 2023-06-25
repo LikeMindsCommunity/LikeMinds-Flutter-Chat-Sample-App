@@ -6,7 +6,7 @@ import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 
 part 'chat_action_event.dart';
 part 'chat_action_state.dart';
@@ -206,14 +206,15 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
             if (url == null) {
               throw 'Error uploading file';
             } else {
+              String attachmentType = mapMediaTypeToString(media.mediaType);
               PutMediaRequest putMediaRequest = (PutMediaRequestBuilder()
                     ..conversationId(postConversationResponse.conversation!.id)
                     ..filesCount(length)
                     ..index(i)
-                    ..height(media.height!)
-                    ..width(media.width!)
+                    ..height(media.height)
+                    ..width(media.width)
                     ..meta({'size': media.size})
-                    ..type("image")
+                    ..type(attachmentType)
                     ..url(url))
                   .build();
               LMResponse<PutMediaResponse> uploadFileResponse =

@@ -1,17 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 
 class MediaPreview extends StatefulWidget {
-  final List<dynamic>? conversationAttachments;
+  final List<Media>? conversationAttachments;
   final int messageId;
   final ChatRoom chatroom;
 
-  MediaPreview({
+  const MediaPreview({
     Key? key,
     this.conversationAttachments,
     required this.chatroom,
@@ -26,10 +27,11 @@ class _MediaPreviewState extends State<MediaPreview> {
   int currPosition = 0;
   CarouselController controller = CarouselController();
   ValueNotifier<bool> rebuildCurr = ValueNotifier<bool>(false);
+  List<Media>? conversationAttachments;
 
   bool checkIfMultipleAttachments() {
-    return (widget.conversationAttachments != null &&
-        widget.conversationAttachments!.length > 1);
+    return (conversationAttachments != null &&
+        conversationAttachments!.length > 1);
   }
 
   @override
@@ -37,7 +39,7 @@ class _MediaPreviewState extends State<MediaPreview> {
     // TODO: implement initState
     super.initState();
     LMAnalytics.get().track(AnalyticsKeys.imageViewed, {
-      'chatroom_id': widget.conversationAttachments!.first,
+      'chatroom_id': widget.chatroom.id,
       'community_id': widget.chatroom.communityId,
       'chatroom_type': widget.chatroom.type,
       'message_id': widget.messageId,
@@ -46,6 +48,7 @@ class _MediaPreviewState extends State<MediaPreview> {
 
   @override
   Widget build(BuildContext context) {
+    conversationAttachments = widget.conversationAttachments;
     return Scaffold(
       backgroundColor: kBlackColor,
       appBar: AppBar(
@@ -80,14 +83,12 @@ class _MediaPreviewState extends State<MediaPreview> {
                       currPosition = index;
                       rebuildCurr.value = !rebuildCurr.value;
                     }),
-                itemCount: widget.conversationAttachments!.length,
+                itemCount: conversationAttachments!.length,
                 itemBuilder: (context, index, realIndex) => AspectRatio(
-                  aspectRatio: widget.conversationAttachments![index]["width"] /
-                      widget.conversationAttachments![index]['height'],
+                  aspectRatio: conversationAttachments![index].width! /
+                      conversationAttachments![index].height!,
                   child: CachedNetworkImage(
-                    imageUrl: widget.conversationAttachments![index]
-                            ['file_url'] ??
-                        widget.conversationAttachments![index]['url'],
+                    imageUrl: conversationAttachments![index].mediaUrl!,
                     errorWidget: (context, url, error) => mediaErrorWidget(),
                     progressIndicatorBuilder: (context, url, progress) =>
                         mediaShimmer(),
@@ -107,10 +108,9 @@ class _MediaPreviewState extends State<MediaPreview> {
                       checkIfMultipleAttachments()
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children:
-                                  widget.conversationAttachments!.map((url) {
-                                int index = widget.conversationAttachments!
-                                    .indexOf(url);
+                              children: conversationAttachments!.map((url) {
+                                int index =
+                                    conversationAttachments!.indexOf(url);
                                 return Container(
                                   width: 8.0,
                                   height: 8.0,

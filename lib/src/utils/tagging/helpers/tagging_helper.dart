@@ -91,7 +91,7 @@ class TaggingHelper {
     List<UserTag> userTags = [];
     for (final match in matches) {
       final String tag = match.group(1)!;
-      final String mid = match.group(2)!;
+      // final String mid = match.group(2)!;
       final String id = match.group(3)!;
       userTags.add(
         UserTag(

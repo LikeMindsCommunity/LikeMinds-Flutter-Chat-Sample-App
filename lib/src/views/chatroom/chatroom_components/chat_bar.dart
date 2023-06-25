@@ -13,23 +13,24 @@ import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/member_rights/member_rights.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
-  Conversation? replyToConversation;
-  Conversation? editConversation;
-  Map<int, User?>? userMeta;
+  final Conversation? replyToConversation;
+  final Conversation? editConversation;
+  final Map<int, User?>? userMeta;
   final Function() scrollToBottom;
 
-  ChatBar({
+  const ChatBar({
     super.key,
     required this.chatroom,
     this.replyToConversation,
@@ -443,90 +444,61 @@ class _ChatBarState extends State<ChatBar> {
                                             //         ),
                                             //       ),
                                             //     ),
-                                            //     GestureDetector(
-                                            //       onTap: () async {
-                                            //         FilePickerResult? pickedFile =
-                                            //             await filePicker!.pickFiles(
-                                            //                 allowMultiple: false,
-                                            //                 type: FileType.custom,
-                                            //                 allowedExtensions: ['pdf']);
-                                            //         if (pickedFile != null) {
-                                            //           File file =
-                                            //               File(pickedFile.paths.first!);
-                                            //           PdfViewerController
-                                            //               pdfViewerController =
-                                            //               PdfViewerController();
-                                            //           PdfViewer.openFile(
-                                            //             file.path,
-                                            //             viewerController:
-                                            //                 pdfViewerController,
-                                            //           );
-
-                                            //           PdfPageImage pdfImage =
-                                            //               await pdfViewerController
-                                            //                   .getPage(1)
-                                            //                   .render();
-                                            //           ui.Image image = await pdfImage
-                                            //               .createImageDetached();
-
-                                            //           final tempDir =
-                                            //               await getApplicationDocumentsDirectory();
-                                            //           File thumbnailFile = File(
-                                            //               "${tempDir.path}/thumbnail_image.png");
-
-                                            //           final data = await image.toByteData(
-                                            //             format: ui.ImageByteFormat.png,
-                                            //           );
-
-                                            //           final bytes =
-                                            //               data!.buffer.asUint64List();
-
-                                            //           thumbnailFile = await thumbnailFile
-                                            //               .writeAsBytes(bytes, flush: true);
-
-                                            //           Media media = Media(
-                                            //             mediaType: MediaType.document,
-                                            //             mediaFile: file,
-                                            //             height: image.height,
-                                            //             width: image.width,
-                                            //             pageCount:
-                                            //                 pdfViewerController.pageCount,
-                                            //             size: pickedFile.files.first.size,
-                                            //             thumbnailFile: thumbnailFile,
-                                            //           );
-                                            //         }
-                                            //       },
-                                            //       child: SizedBox(
-                                            //         width: 40.w,
-                                            //         height: 22.w,
-                                            //         child: Column(
-                                            //           mainAxisAlignment:
-                                            //               MainAxisAlignment.center,
-                                            //           children: [
-                                            //             Container(
-                                            //               width: 38.sp,
-                                            //               height: 38.sp,
-                                            //               decoration: BoxDecoration(
-                                            //                 borderRadius:
-                                            //                     BorderRadius.circular(40.w),
-                                            //                 color: LMBranding
-                                            //                     .instance.buttonColor,
-                                            //               ),
-                                            //               child: Icon(
-                                            //                 Icons.file_copy_outlined,
-                                            //                 color: kWhiteColor,
-                                            //                 size: 24.sp,
-                                            //               ),
-                                            //             ),
-                                            //             kVerticalPaddingMedium,
-                                            //             Text(
-                                            //               "Document",
-                                            //               style: lmBranding.fonts.medium,
-                                            //             ),
-                                            //           ],
-                                            //         ),
-                                            //       ),
-                                            //     ),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                _popupMenuController.hideMenu();
+                                                if (await handlePermissions(
+                                                    3)) {
+                                                  List<Media> pickedMediaFiles =
+                                                      await pickDocumentFiles();
+                                                  if (pickedMediaFiles
+                                                      .isNotEmpty) {
+                                                    context.pushNamed(
+                                                        "media_forward",
+                                                        extra: pickedMediaFiles,
+                                                        params: {
+                                                          'chatroomId': widget
+                                                              .chatroom.id
+                                                              .toString()
+                                                        });
+                                                  }
+                                                }
+                                              },
+                                              child: SizedBox(
+                                                width: 40.w,
+                                                height: 22.w,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      width: 38.sp,
+                                                      height: 38.sp,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(40.w),
+                                                        color: LMBranding
+                                                            .instance
+                                                            .buttonColor,
+                                                      ),
+                                                      child: Icon(
+                                                        Icons
+                                                            .file_copy_outlined,
+                                                        color: kWhiteColor,
+                                                        size: 24.sp,
+                                                      ),
+                                                    ),
+                                                    kVerticalPaddingMedium,
+                                                    Text(
+                                                      "Document",
+                                                      style: lmBranding
+                                                          .fonts.medium,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
                                             //   ],
                                             // ),
                                           ],
@@ -566,12 +538,13 @@ class _ChatBarState extends State<ChatBar> {
                                   result = result?.trim();
                                   if (editConversation != null) {
                                     chatActionBloc!.add(EditConversation(
-                                      (EditConversationRequestBuilder()
-                                            ..conversationId(
-                                                editConversation!.id)
-                                            ..text(result!))
-                                          .build(),
-                                    ));
+                                        (EditConversationRequestBuilder()
+                                              ..conversationId(
+                                                  editConversation!.id)
+                                              ..text(result!))
+                                            .build(),
+                                        replyConversation: editConversation!
+                                            .replyConversationObject));
                                   } else {
                                     // Fluttertoast.showToast(msg: "Send message");
                                     chatActionBloc!.add(

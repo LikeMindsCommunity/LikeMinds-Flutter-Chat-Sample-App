@@ -6,7 +6,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 
 Widget mediaErrorWidget() {
   return Container(
@@ -47,14 +47,14 @@ Widget mediaShimmer({bool? isPP}) {
 }
 
 String getFileSizeString({required int bytes, int decimals = 0}) {
-  const suffixes = ["b", "kb", "mb", "gb", "tb"];
-  var i = (log(bytes) / log(1024)).floor();
-  return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
+  const suffixes = ["B", "KB", "MB", "GB", "TB"];
+  var i = (log(bytes) / log(1000)).floor();
+  return "${((bytes / pow(1000, i)).toStringAsFixed(decimals))} ${suffixes[i]}";
 }
 
 // Returns file size in double in MBs
 double getFileSizeInDouble(int bytes) {
-  return (bytes / pow(1024, 2));
+  return (bytes / pow(1000, 2));
 }
 
 Widget getChatBubbleImage(String url) {
@@ -78,7 +78,7 @@ Widget getChatBubbleImage(String url) {
 
 Widget getImageMessage(
     BuildContext context,
-    List<dynamic>? conversationAttachments,
+    List<Media>? conversationAttachments,
     ChatRoom chatroom,
     int conversationId) {
   if (conversationAttachments!.length == 1) {
@@ -100,8 +100,7 @@ Widget getImageMessage(
           borderRadius: BorderRadius.circular(3.0),
         ),
         child: CachedNetworkImage(
-          imageUrl: conversationAttachments.first['file_url'] ??
-              conversationAttachments.first['url'],
+          imageUrl: conversationAttachments.first.mediaUrl!,
           fit: BoxFit.cover,
           height: 55.w,
           width: 55.w,
@@ -131,8 +130,7 @@ Widget getImageMessage(
               borderRadius: BorderRadius.circular(6.0),
             ),
             child: CachedNetworkImage(
-              imageUrl: conversationAttachments[0]['file_url'] ??
-                  conversationAttachments[0]['url'],
+              imageUrl: conversationAttachments[0].mediaUrl ?? '',
               fit: BoxFit.cover,
               height: 26.w,
               width: 26.w,
@@ -150,8 +148,7 @@ Widget getImageMessage(
               borderRadius: BorderRadius.circular(6.0),
             ),
             child: CachedNetworkImage(
-              imageUrl: conversationAttachments[1]['file_url'] ??
-                  conversationAttachments[1]['url'],
+              imageUrl: conversationAttachments[1].mediaUrl ?? '',
               fit: BoxFit.cover,
               height: 26.w,
               width: 26.w,
@@ -177,8 +174,7 @@ Widget getImageMessage(
       child: Row(
         children: <Widget>[
           getChatBubbleImage(
-            conversationAttachments[0]['file_url'] ??
-                conversationAttachments[0]['url'],
+            conversationAttachments[0].mediaUrl ?? '',
           ),
           kHorizontalPaddingSmall,
           Container(
@@ -191,8 +187,7 @@ Widget getImageMessage(
             child: Stack(
               children: [
                 getChatBubbleImage(
-                  conversationAttachments[1]['file_url'] ??
-                      conversationAttachments[1]['url'],
+                  conversationAttachments[1].mediaUrl ?? '',
                 ),
                 Positioned(
                   child: Container(
@@ -229,13 +224,11 @@ Widget getImageMessage(
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[0]['file_url'] ??
-                    conversationAttachments[0]['url'],
+                conversationAttachments[0].mediaUrl ?? '',
               ),
               kHorizontalPaddingSmall,
               getChatBubbleImage(
-                conversationAttachments[1]['file_url'] ??
-                    conversationAttachments[1]['url'],
+                conversationAttachments[1].mediaUrl ?? '',
               ),
             ],
           ),
@@ -243,13 +236,11 @@ Widget getImageMessage(
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[2]['file_url'] ??
-                    conversationAttachments[2]['url'],
+                conversationAttachments[2].mediaUrl ?? '',
               ),
               kHorizontalPaddingSmall,
               getChatBubbleImage(
-                conversationAttachments[3]['file_url'] ??
-                    conversationAttachments[3]['url'],
+                conversationAttachments[3].mediaUrl ?? '',
               ),
             ],
           ),
@@ -272,13 +263,11 @@ Widget getImageMessage(
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[0]['file_url'] ??
-                    conversationAttachments[0]['url'],
+                conversationAttachments[0].mediaUrl ?? '',
               ),
               kHorizontalPaddingSmall,
               getChatBubbleImage(
-                conversationAttachments[1]['file_url'] ??
-                    conversationAttachments[1]['url'],
+                conversationAttachments[1].mediaUrl ?? '',
               ),
             ],
           ),
@@ -286,8 +275,7 @@ Widget getImageMessage(
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[2]['file_url'] ??
-                    conversationAttachments[2]['url'],
+                conversationAttachments[2].mediaUrl ?? '',
               ),
               kHorizontalPaddingSmall,
               Container(
@@ -299,8 +287,7 @@ Widget getImageMessage(
                 child: Stack(
                   children: [
                     getChatBubbleImage(
-                      conversationAttachments[3]['file_url'] ??
-                          conversationAttachments[3]['url'],
+                      conversationAttachments[3].mediaUrl ?? '',
                     ),
                     Positioned(
                       child: Container(

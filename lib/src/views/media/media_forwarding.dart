@@ -9,18 +9,18 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/media/permission_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/document/document_factory.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
-import 'package:path/path.dart';
 
 class MediaForward extends StatefulWidget {
-  int chatroomId;
-  List<Media> media;
-  MediaForward({
+  final int chatroomId;
+  final List<Media> media;
+  const MediaForward({
     Key? key,
     required this.media,
     required this.chatroomId,
@@ -261,42 +261,9 @@ class _MediaForwardState extends State<MediaForward> {
         ],
       );
     } else if (mediaList.first.mediaType == MediaType.document) {
-      return SizedBox(
-        width: 100.w,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            AspectRatio(
-              aspectRatio: (mediaList.first.width! / mediaList.first.height!),
-              child: Image.file(mediaList.first.thumbnailFile!, width: 100.w),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SizedBox(
-                  width: 100.w,
-                  child: Text(
-                    basenameWithoutExtension(mediaList.first.mediaFile!.path),
-                    style: LMTheme.medium.copyWith(color: kWhiteColor),
-                  ),
-                ),
-                SizedBox(
-                  width: 100.w,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                          '${mediaList.first.pageCount} ${mediaList.first.pageCount! > 1 ? 'pages' : 'page'} * ${getFileSizeString(bytes: mediaList.first.size!)} * PDF',
-                          style: LMTheme.medium.copyWith(color: kWhiteColor))
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
+      return DocumentFactory(
+        mediaList: mediaList,
+        chatroomId: widget.chatroomId,
       );
     }
     return const SizedBox();

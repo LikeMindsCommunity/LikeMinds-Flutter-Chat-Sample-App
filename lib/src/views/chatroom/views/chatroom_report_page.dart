@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as bb;
 
 class ChatroomReportPage extends StatefulWidget {
   const ChatroomReportPage({super.key});
@@ -23,7 +23,7 @@ class _ChatroomReportPageState extends State<ChatroomReportPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const BB.BackButton(),
+                const bb.BackButton(),
                 Text(
                   "Report Chatroom",
                   style: GoogleFonts.montserrat(
