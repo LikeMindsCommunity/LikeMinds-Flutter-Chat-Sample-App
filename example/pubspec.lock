@@ -989,6 +989,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.5"
+  pdf_bitmaps:
+    dependency: transitive
+    description:
+      name: pdf_bitmaps
+      sha256: bbbaca1931875d7791a1b20b900279c32805fda04a78ee072c5a49d706333d48
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   pdf_render:
     dependency: transitive
     description:

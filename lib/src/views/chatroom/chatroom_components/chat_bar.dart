@@ -124,12 +124,22 @@ class _ChatBarState extends State<ChatBar> {
         TextPosition(offset: _textEditingController.text.length));
     userTags =
         TaggingHelper.addUserTagsIfMatched(editConversation?.answer ?? '');
+    if (editConversation != null) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  void setupReplyText() {
+    replyToConversation = widget.replyToConversation;
+    replyConversationAttachments = widget.replyConversationAttachments;
+    if (replyToConversation != null) {
+      _focusNode.requestFocus();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    replyToConversation = widget.replyToConversation;
-    replyConversationAttachments = widget.replyConversationAttachments;
+    setupReplyText();
     setupEditText();
     userMeta = widget.userMeta;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
@@ -527,9 +537,11 @@ class _ChatBarState extends State<ChatBar> {
                                   _textEditingController.clear();
                                   userTags = [];
                                   result = "";
+                                  if (editConversation == null) {
+                                    widget.scrollToBottom();
+                                  }
                                   editConversation = null;
                                   replyToConversation = null;
-                                  widget.scrollToBottom();
                                 }
                               }
                             : () {},
