@@ -13,6 +13,7 @@ import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/document/document_preview_factory.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/bubble_triangle.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
@@ -407,7 +408,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                                 : CrossAxisAlignment.start,
                             children: [
                               Visibility(
-                                visible: replyToConversation != null,
+                                visible:
+                                    replyToConversation != null && !isDeleted,
                                 maintainState: true,
                                 maintainSize: false,
                                 child: _getReplyConversation(),
@@ -431,9 +433,12 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   : const SizedBox(height: 6),
                               isDeleted
                                   ? conversation!.deletedByUserId ==
-                                          loggedInUser.id
+                                          conversation!.userId
                                       ? Text(
-                                          "This message was deleted",
+                                          conversation!.userId ==
+                                                  loggedInUser.id
+                                              ? 'You deleted this message'
+                                              : "This message was deleted",
                                           style:
                                               LMFonts.instance.regular.copyWith(
                                             fontSize: 9.sp,
@@ -502,6 +507,9 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   Container _getReplyConversation() {
+    if (replyToConversation == null) {
+      return Container();
+    }
     return Container(
       color: kGreyColor.withOpacity(0.1),
       child: Row(
@@ -534,14 +542,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                 kVerticalPaddingXSmall,
                 SizedBox(
                   width: 35.w,
-                  child: Text(
-                    _getReplyText(),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: LMTheme.regular.copyWith(
-                      fontSize: 8.sp,
-                    ),
-                  ),
+                  child: getChatItemAttachmentTile(
+                      replyConversationAttachments ?? [], replyToConversation!),
                 ),
                 const SizedBox(height: 6),
               ],
@@ -551,28 +553,6 @@ class _ChatBubbleState extends State<ChatBubble> {
         ],
       ),
     );
-  }
-
-  String _getReplyText() {
-    String attachmentText = "";
-    if (replyToConversation?.hasFiles != null &&
-        replyToConversation!.hasFiles! &&
-        replyConversationAttachments?.first.mediaType == MediaType.document) {
-      attachmentText =
-          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Documents" : "Document"}";
-    } else if (replyToConversation?.hasFiles != null &&
-        replyToConversation!.hasFiles! &&
-        replyConversationAttachments?.first.mediaType == MediaType.photo) {
-      attachmentText =
-          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Images" : "Image"}";
-    }
-
-    return replyToConversation?.answer != null &&
-            replyToConversation?.answer.isNotEmpty == true
-        ? TaggingHelper.convertRouteToTag(replyToConversation?.answer,
-                withTilde: false) ??
-            ""
-        : attachmentText;
   }
 
   void refresh() {

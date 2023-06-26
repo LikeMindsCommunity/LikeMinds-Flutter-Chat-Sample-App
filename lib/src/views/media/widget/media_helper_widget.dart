@@ -6,6 +6,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 import 'package:pdf_bitmaps/pdf_bitmaps.dart';
@@ -14,8 +15,21 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 Widget getChatItemAttachmentTile(
     List<Media> mediaFiles, Conversation conversation) {
-  if (mediaFiles.isEmpty) {
+  String answerText =
+      TaggingHelper.convertRouteToTag(conversation.answer, withTilde: false) ??
+          '';
+  if (mediaFiles.isEmpty && conversation.answer.isEmpty) {
     return const SizedBox();
+  } else if (mediaFiles.isEmpty) {
+    return Text(
+      answerText,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: LMBranding.instance.fonts.regular.copyWith(
+        fontSize: 10.sp,
+        fontWeight: FontWeight.normal,
+      ),
+    );
   } else {
     IconData iconData = Icons.camera_alt;
     String text = '';
@@ -24,7 +38,7 @@ Widget getChatItemAttachmentTile(
       if (conversation.answer.isEmpty) {
         text = mediaFiles.length > 1 ? "Documents" : "Document";
       } else {
-        text = conversation.answer;
+        text = answerText;
       }
     } else {
       int videoCount = 0;
@@ -73,7 +87,7 @@ Widget getChatItemAttachmentTile(
             kHorizontalPaddingSmall,
             Expanded(
               child: Text(
-                conversation.answer,
+                answerText,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: LMBranding.instance.fonts.regular.copyWith(
@@ -89,14 +103,14 @@ Widget getChatItemAttachmentTile(
         if (conversation.answer.isEmpty) {
           text = mediaFiles.length > 1 ? "Images" : "Image";
         } else {
-          text = conversation.answer;
+          text = answerText;
         }
       } else if (imageCount == 0) {
         iconData = Icons.video_camera_back;
         if (conversation.answer.isEmpty) {
           text = mediaFiles.length > 1 ? "Videos" : "Video";
         } else {
-          text = conversation.answer;
+          text = answerText;
         }
       }
     }
