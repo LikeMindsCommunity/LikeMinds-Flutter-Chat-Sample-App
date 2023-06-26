@@ -5,21 +5,23 @@ homepage: "https://likeminds.community"
 publish_to: none
 
 environment:
-  sdk: '>=2.19.6 <3.0.0'
+  sdk: ">=2.19.6 <3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
-  ## Flutter SDK 
+  ## Flutter SDK
   flutter:
     sdk: flutter
 
   ## LikeMinds Chat SDK
   likeminds_chat_fl: 1.1.1
-   #  path: ../LikeMinds-Flutter-GroupChat-SDK
+    #path: ../LikeMinds-Flutter-GroupChat-SDK
 
   ## Flutter Packages
+  path: 1.8.3
   sizer: ^2.0.15
-  flutter_bloc: ^8.1.2
+  bloc: ^8.1.2
+  flutter_bloc: ^8.1.3
   shimmer: ^2.0.0
   fluttertoast: ^8.2.1
   get_it: ^7.2.0
@@ -61,6 +63,8 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^21.2.10
   flutter_svg: ^2.0.7
   flutter_cache_manager: ^3.3.0
+  flick_video_player: ^0.5.0
+  pdf_bitmaps: ^1.0.1
 
 dev_dependencies:
   flutter_test:

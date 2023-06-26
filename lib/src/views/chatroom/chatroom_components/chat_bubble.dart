@@ -259,6 +259,28 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           ),
                         ),
+                        kVerticalPaddingMedium,
+                        Visibility(
+                          visible: checkEditPermissions(),
+                          child: ListTile(
+                            onTap: () async {
+                              widget.onEdit(conversation!);
+                              _controller.hideMenu();
+                            },
+                            leading: Icon(
+                              Icons.edit,
+                              color: LMTheme.buttonColor,
+                              size: 16.sp,
+                            ),
+                            title: Text(
+                              "Edit",
+                              style: LMTheme.regular.copyWith(
+                                fontSize: 10.sp,
+                              ),
+                            ),
+                          ),
+                        ),
+                        kVerticalPaddingMedium,
                         Visibility(
                           visible: checkDeletePermissions(),
                           child: ListTile(
@@ -293,27 +315,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           ),
                         ),
-                        kVerticalPaddingMedium,
-                        Visibility(
-                          visible: checkEditPermissions(),
-                          child: ListTile(
-                            onTap: () async {
-                              widget.onEdit(conversation!);
-                              _controller.hideMenu();
-                            },
-                            leading: Icon(
-                              Icons.edit,
-                              color: LMTheme.buttonColor,
-                              size: 16.sp,
-                            ),
-                            title: Text(
-                              "Edit",
-                              style: LMTheme.regular.copyWith(
-                                fontSize: 10.sp,
-                              ),
-                            ),
-                          ),
-                        ),
+
                         // ListTile(
                         //   onTap: () {
                         //     _controller.hideMenu();
@@ -607,7 +609,9 @@ class _ChatBubbleState extends State<ChatBubble> {
       }
       Widget mediaWidget;
       if (widget.mediaFiles[widget.conversation.temporaryId]!.first.mediaType ==
-          MediaType.photo) {
+              MediaType.photo ||
+          widget.mediaFiles[widget.conversation.temporaryId]!.first.mediaType ==
+              MediaType.video) {
         mediaWidget = getImageFileMessage(
             context, widget.mediaFiles[widget.conversation.temporaryId]!);
       } else if (widget
@@ -650,12 +654,14 @@ class _ChatBubbleState extends State<ChatBubble> {
       }
 
       Widget mediaWidget;
-      if (conversationAttachments!.first.mediaType == MediaType.photo) {
+      if (conversationAttachments!.first.mediaType == MediaType.photo ||
+          conversationAttachments!.first.mediaType == MediaType.video) {
         mediaWidget = getImageMessage(
           context,
           conversationAttachments!,
           widget.chatroom,
-          conversation!.id,
+          conversation!,
+          userMeta!,
         );
       } else if (conversationAttachments!.first.mediaType ==
           MediaType.document) {

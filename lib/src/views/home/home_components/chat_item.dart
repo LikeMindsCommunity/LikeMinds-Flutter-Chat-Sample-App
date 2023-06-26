@@ -1,8 +1,9 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
@@ -11,12 +12,13 @@ import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class ChatItem extends StatefulWidget {
   final ChatRoom chatroom;
   final Conversation conversation;
-  final Map<dynamic, dynamic>? attachmentsMeta;
+  final List<dynamic>? attachmentsMeta;
   final User? user;
 
   const ChatItem({
@@ -36,6 +38,7 @@ class _ChatItemState extends State<ChatItem> {
   late bool _muteStatus;
   int? _unreadCount;
   Conversation? conversation;
+  List<Media>? attachmentMeta;
   final User user = UserLocalPreference.instance.fetchUserData();
 
   @override
@@ -44,26 +47,40 @@ class _ChatItemState extends State<ChatItem> {
   }
 
   String getAttachmentText() {
-    if (widget.attachmentsMeta != null &&
-        widget.attachmentsMeta![conversation!.id]?.first.type == 'pdf') {
+    if (attachmentMeta != null &&
+        attachmentMeta?.first.mediaType == MediaType.document) {
       return "${conversation!.attachmentCount} ${conversation!.attachmentCount! > 1 ? "Documents" : "Document"}";
+    } else if (attachmentMeta != null &&
+        attachmentMeta?.first.mediaType == MediaType.video) {
+      return "${conversation!.attachmentCount} ${conversation!.attachmentCount! > 1 ? "Videos" : "Video"}";
+    } else {
+      return "${conversation!.attachmentCount} ${conversation!.attachmentCount! > 1 ? "Images" : "Image"}";
     }
-    return "${conversation!.attachmentCount} ${conversation!.attachmentCount! > 1 ? "Images" : "Image"}";
   }
 
   IconData getAttachmentIcon() {
-    if (conversation!.attachments?.first.type == 'pdf') {
+    if (attachmentMeta != null &&
+        attachmentMeta?.first.mediaType == MediaType.document) {
       return Icons.insert_drive_file;
+    } else if (attachmentMeta != null &&
+        attachmentMeta?.first.mediaType == MediaType.video) {
+      return Icons.video_camera_back;
     }
     return Icons.camera_alt;
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void setupChatItem() {
     chatroom = widget.chatroom;
     conversation = widget.conversation;
     _unreadCount = chatroom.unseenCount;
     _muteStatus = chatroom.muteStatus ?? false;
+    attachmentMeta =
+        widget.attachmentsMeta?.map((e) => Media.fromJson(e)).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    setupChatItem();
     String _name = chatroom.header;
     String _message = conversation!.deletedByUserId == null
         ? '${widget.user?.name}: ${conversation!.state != 0 ? TaggingHelper.extractStateMessage(
@@ -79,7 +96,6 @@ class _ChatItemState extends State<ChatItem> {
     bool _isSecret = chatroom.isSecret ?? false;
     bool? hasAttachments = conversation!.hasFiles;
     String? _avatarUrl = chatroom.chatroomImageUrl;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -87,7 +103,7 @@ class _ChatItemState extends State<ChatItem> {
           behavior: HitTestBehavior.opaque,
           onTap: () {
             LMRealtime.instance.chatroomId = chatroom.id;
-            context.push("/chatroom/${chatroom.id}");
+            router.push("/chatroom/${chatroom.id}");
             markRead(toast: false);
           },
           child: Padding(
@@ -142,24 +158,8 @@ class _ChatItemState extends State<ChatItem> {
                           ),
                           const SizedBox(height: 8),
                           (hasAttachments ?? false)
-                              ? Row(children: [
-                                  Icon(
-                                    getAttachmentIcon(),
-                                    color: kGreyColor,
-                                    size: 12.sp,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    getAttachmentText(),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: LMBranding.instance.fonts.regular
-                                        .copyWith(
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                ])
+                              ? getChatItemAttachmentTile(
+                                  attachmentMeta ?? <Media>[], conversation!)
                               : Text(
                                   conversation!.state != 0
                                       ? TaggingHelper.extractStateMessage(

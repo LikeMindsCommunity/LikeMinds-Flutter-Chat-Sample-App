@@ -68,11 +68,14 @@ class Media {
   });
 
   static Media fromJson(dynamic json) => Media(
-      mediaType: mapStringToMediaType(json['type']),
-      height: json['height'] as int?,
-      mediaUrl: json['url'] ?? json['file_url'],
-      size: json['meta']['size'],
-      width: json['width'] as int?);
+        mediaType: mapStringToMediaType(json['type']),
+        height: json['height'] as int?,
+        mediaUrl: json['url'] ?? json['file_url'],
+        size: json['meta']['size'],
+        width: json['width'] as int?,
+        thumbnailUrl: json['thumbnail_url'] as String?,
+        pageCount: json['meta']['number_of_page'] as int?,
+      );
 }
 
 class MediaService {

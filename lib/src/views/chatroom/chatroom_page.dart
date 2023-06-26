@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
@@ -308,7 +307,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
             MarkReadChatroomEvent(chatroomId: widget.chatroomId),
           );
           BlocProvider.of<HomeBloc>(context).add(UpdateHomeEvent());
-          context.pop();
+          router.pop();
           return false;
         },
         child: Scaffold(
@@ -362,6 +361,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       conversationId: lastConversationId,
                     ),
                   );
+                  LMAnalytics.get().track(AnalyticsKeys.chatroomOpened, {
+                    'chatroom_id': chatroom!.id,
+                    'community_id': chatroom!.communityId,
+                    'chatroom_type': chatroom!.type,
+                    'source': 'home_feed',
+                  });
                 }
               },
               builder: (context, state) {
@@ -371,12 +376,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 }
 
                 if (state is ChatroomLoaded) {
-                  LMAnalytics.get().track(AnalyticsKeys.chatroomOpened, {
-                    'chatroom_id': chatroom!.id,
-                    'community_id': chatroom!.communityId,
-                    'chatroom_type': chatroom!.type,
-                    'source': 'home_feed',
-                  });
                   var pagedListView = ValueListenableBuilder(
                     valueListenable: rebuildConversationList,
                     builder: (context, _, __) {
@@ -791,6 +790,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                     return ChatBar(
                                       chatroom: chatroom!,
                                       replyToConversation: state.conversation,
+                                      replyConversationAttachments:
+                                          conversationAttachmentsMeta
+                                                  .containsKey(state
+                                                      .conversation.id
+                                                      .toString())
+                                              ? (conversationAttachmentsMeta[
+                                                          '${state.conversation.id}']
+                                                      as List<dynamic>?)
+                                                  ?.map(
+                                                      (e) => Media.fromJson(e))
+                                                  .toList()
+                                              : null,
                                       scrollToBottom: _scrollToBottom,
                                       userMeta: userMeta,
                                     );

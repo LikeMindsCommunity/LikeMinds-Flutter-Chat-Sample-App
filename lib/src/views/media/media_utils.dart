@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
@@ -17,13 +16,16 @@ Widget mediaErrorWidget() {
       children: [
         Icon(
           Icons.error_outline,
-          size: 24,
+          size: 9.sp,
           color: LMTheme.headerColor,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
         Text(
           "An error occurred fetching media",
-          style: LMTheme.medium,
+          textAlign: TextAlign.center,
+          style: LMTheme.medium.copyWith(
+            fontSize: 7.sp,
+          ),
         )
       ],
     ),
@@ -57,21 +59,44 @@ double getFileSizeInDouble(int bytes) {
   return (bytes / pow(1000, 2));
 }
 
-Widget getChatBubbleImage(String url) {
+Widget getChatBubbleImage(Media mediaFile, {double? width, double? height}) {
   return Container(
-    height: 26.w,
-    width: 26.w,
+    height: height,
+    width: width,
     clipBehavior: Clip.hardEdge,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(6.0),
     ),
-    child: CachedNetworkImage(
-      imageUrl: url,
-      fit: BoxFit.cover,
-      height: 26.w,
-      width: 26.w,
-      errorWidget: (context, url, error) => mediaErrorWidget(),
-      progressIndicatorBuilder: (context, url, progress) => mediaShimmer(),
+    child: Stack(
+      children: [
+        CachedNetworkImage(
+          imageUrl: mediaFile.mediaType == MediaType.photo
+              ? mediaFile.mediaUrl ?? ''
+              : mediaFile.thumbnailUrl ?? '',
+          fit: BoxFit.cover,
+          height: height,
+          width: width,
+          errorWidget: (context, url, error) => mediaErrorWidget(),
+          progressIndicatorBuilder: (context, url, progress) => mediaShimmer(),
+        ),
+        mediaFile.mediaType == MediaType.video && mediaFile.thumbnailUrl != null
+            ? Center(
+                child: Container(
+                  width: 8.w,
+                  height: 8.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: kWhiteColor.withOpacity(0.7)),
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: kBlackColor,
+                    size: 5.w,
+                  ),
+                ),
+              )
+            : const SizedBox(),
+      ],
     ),
   );
 }
@@ -80,101 +105,57 @@ Widget getImageMessage(
     BuildContext context,
     List<Media>? conversationAttachments,
     ChatRoom chatroom,
-    int conversationId) {
+    Conversation conversation,
+    Map<int, User?> userMeta) {
+  void onTap() {
+    router.pushNamed(
+      "media_preview",
+      extra: [
+        conversationAttachments,
+        chatroom,
+        conversation,
+        userMeta,
+      ],
+    );
+  }
+
   if (conversationAttachments!.length == 1) {
     return GestureDetector(
-      onTap: () {
-        router.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
-      child: Container(
+      onTap: onTap,
+      child: getChatBubbleImage(
+        conversationAttachments.first,
         height: 55.w,
         width: 55.w,
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(3.0),
-        ),
-        child: CachedNetworkImage(
-          imageUrl: conversationAttachments.first.mediaUrl!,
-          fit: BoxFit.cover,
-          height: 55.w,
-          width: 55.w,
-          errorWidget: (context, url, error) => mediaErrorWidget(),
-          progressIndicatorBuilder: (context, url, progress) => mediaShimmer(),
-        ),
       ),
     );
   } else if (conversationAttachments.length == 2) {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Row(
         children: <Widget>[
-          Container(
+          getChatBubbleImage(
+            conversationAttachments[0],
             height: 26.w,
             width: 26.w,
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: CachedNetworkImage(
-              imageUrl: conversationAttachments[0].mediaUrl ?? '',
-              fit: BoxFit.cover,
-              height: 26.w,
-              width: 26.w,
-              errorWidget: (context, url, error) => mediaErrorWidget(),
-              progressIndicatorBuilder: (context, url, progress) =>
-                  mediaShimmer(),
-            ),
           ),
           kHorizontalPaddingSmall,
-          Container(
+          getChatBubbleImage(
+            conversationAttachments[1],
             height: 26.w,
             width: 26.w,
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: CachedNetworkImage(
-              imageUrl: conversationAttachments[1].mediaUrl ?? '',
-              fit: BoxFit.cover,
-              height: 26.w,
-              width: 26.w,
-              errorWidget: (context, url, error) => mediaErrorWidget(),
-              progressIndicatorBuilder: (context, url, progress) =>
-                  mediaShimmer(),
-            ),
-          )
+          ),
         ],
       ),
     );
   } else if (conversationAttachments.length == 3) {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Row(
         children: <Widget>[
           getChatBubbleImage(
-            conversationAttachments[0].mediaUrl ?? '',
+            conversationAttachments[0],
+            height: 26.w,
+            width: 26.w,
           ),
           kHorizontalPaddingSmall,
           Container(
@@ -187,7 +168,9 @@ Widget getImageMessage(
             child: Stack(
               children: [
                 getChatBubbleImage(
-                  conversationAttachments[1].mediaUrl ?? '',
+                  conversationAttachments[1],
+                  height: 26.w,
+                  width: 26.w,
                 ),
                 Positioned(
                   child: Container(
@@ -210,25 +193,21 @@ Widget getImageMessage(
     );
   } else if (conversationAttachments.length == 4) {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Column(
         children: [
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[0].mediaUrl ?? '',
+                conversationAttachments[0],
+                height: 26.w,
+                width: 26.w,
               ),
               kHorizontalPaddingSmall,
               getChatBubbleImage(
-                conversationAttachments[1].mediaUrl ?? '',
+                conversationAttachments[1],
+                height: 26.w,
+                width: 26.w,
               ),
             ],
           ),
@@ -236,11 +215,15 @@ Widget getImageMessage(
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[2].mediaUrl ?? '',
+                conversationAttachments[2],
+                height: 26.w,
+                width: 26.w,
               ),
               kHorizontalPaddingSmall,
               getChatBubbleImage(
-                conversationAttachments[3].mediaUrl ?? '',
+                conversationAttachments[3],
+                height: 26.w,
+                width: 26.w,
               ),
             ],
           ),
@@ -249,25 +232,21 @@ Widget getImageMessage(
     );
   } else {
     return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          "media_preview",
-          extra: [conversationAttachments, chatroom],
-          params: {
-            'messageId': conversationId.toString(),
-          },
-        );
-      },
+      onTap: onTap,
       child: Column(
         children: [
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[0].mediaUrl ?? '',
+                conversationAttachments[0],
+                height: 26.w,
+                width: 26.w,
               ),
               kHorizontalPaddingSmall,
               getChatBubbleImage(
-                conversationAttachments[1].mediaUrl ?? '',
+                conversationAttachments[1],
+                height: 26.w,
+                width: 26.w,
               ),
             ],
           ),
@@ -275,7 +254,9 @@ Widget getImageMessage(
           Row(
             children: <Widget>[
               getChatBubbleImage(
-                conversationAttachments[2].mediaUrl ?? '',
+                conversationAttachments[2],
+                height: 26.w,
+                width: 26.w,
               ),
               kHorizontalPaddingSmall,
               Container(
@@ -287,7 +268,9 @@ Widget getImageMessage(
                 child: Stack(
                   children: [
                     getChatBubbleImage(
-                      conversationAttachments[3].mediaUrl ?? '',
+                      conversationAttachments[3],
+                      height: 26.w,
+                      width: 26.w,
                     ),
                     Positioned(
                       child: Container(
@@ -313,56 +296,75 @@ Widget getImageMessage(
   }
 }
 
+Widget getFileImageTile(Media mediaFile, {double? width, double? height}) {
+  if (mediaFile.mediaFile == null && mediaFile.thumbnailFile == null) {
+    return mediaErrorWidget();
+  }
+  return Container(
+    height: height,
+    width: width,
+    clipBehavior: Clip.hardEdge,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(3.0),
+    ),
+    child: Stack(
+      children: [
+        Image.file(
+          mediaFile.mediaType == MediaType.photo
+              ? mediaFile.mediaFile!
+              : mediaFile.thumbnailFile!,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => mediaErrorWidget(),
+          height: height,
+          width: width,
+        ),
+        mediaFile.mediaType == MediaType.video &&
+                mediaFile.thumbnailFile != null
+            ? Center(
+                child: Container(
+                  width: 8.w,
+                  height: 8.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: kWhiteColor.withOpacity(0.7),
+                  ),
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: kBlackColor,
+                    size: 5.w,
+                  ),
+                ),
+              )
+            : const SizedBox(),
+      ],
+    ),
+  );
+}
+
 Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
   if (mediaFiles.length == 1) {
     return GestureDetector(
-      child: Container(
+      child: getFileImageTile(
+        mediaFiles.first,
         height: 55.w,
         width: 55.w,
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(3.0),
-        ),
-        child: Image.file(
-          mediaFiles.first.mediaFile!,
-          fit: BoxFit.cover,
-          height: 55.w,
-          width: 55.w,
-        ),
       ),
     );
   } else if (mediaFiles.length == 2) {
     return GestureDetector(
       child: Row(
         children: <Widget>[
-          Container(
+          getFileImageTile(
+            mediaFiles[0],
             height: 26.w,
             width: 26.w,
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: Image.file(
-              mediaFiles[0].mediaFile!,
-              fit: BoxFit.cover,
-              height: 26.w,
-              width: 26.w,
-            ),
           ),
           kHorizontalPaddingSmall,
-          Container(
+          getFileImageTile(
+            mediaFiles[1],
             height: 26.w,
             width: 26.w,
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: Image.file(
-              mediaFiles[1].mediaFile!,
-              fit: BoxFit.cover,
-              height: 26.w,
-              width: 26.w,
-            ),
           )
         ],
       ),
@@ -371,19 +373,10 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
     return GestureDetector(
       child: Row(
         children: <Widget>[
-          Container(
+          getFileImageTile(
+            mediaFiles[0],
             height: 26.w,
             width: 26.w,
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: Image.file(
-              mediaFiles[0].mediaFile!,
-              fit: BoxFit.cover,
-              height: 26.w,
-              width: 26.w,
-            ),
           ),
           kHorizontalPaddingSmall,
           Container(
@@ -395,19 +388,10 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
             ),
             child: Stack(
               children: [
-                Container(
+                getFileImageTile(
+                  mediaFiles[1],
                   height: 26.w,
                   width: 26.w,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
-                  child: Image.file(
-                    mediaFiles[1].mediaFile!,
-                    fit: BoxFit.cover,
-                    height: 26.w,
-                    width: 26.w,
-                  ),
                 ),
                 Positioned(
                   child: Container(
@@ -434,68 +418,32 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
         children: [
           Row(
             children: <Widget>[
-              Container(
+              getFileImageTile(
+                mediaFiles[0],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Image.file(
-                  mediaFiles[0].mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
               kHorizontalPaddingSmall,
-              Container(
+              getFileImageTile(
+                mediaFiles[1],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Image.file(
-                  mediaFiles[1].mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
             ],
           ),
           kVerticalPaddingSmall,
           Row(
             children: <Widget>[
-              Container(
+              getFileImageTile(
+                mediaFiles[2],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Image.file(
-                  mediaFiles[2].mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
               kHorizontalPaddingSmall,
-              Container(
+              getFileImageTile(
+                mediaFiles[3],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Image.file(
-                  mediaFiles[3].mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
             ],
           ),
@@ -508,53 +456,26 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
         children: [
           Row(
             children: <Widget>[
-              Container(
+              getFileImageTile(
+                mediaFiles[0],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Image.file(
-                  mediaFiles[0].mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
               kHorizontalPaddingSmall,
-              Container(
+              getFileImageTile(
+                mediaFiles[1],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Image.file(
-                  mediaFiles[1].mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
             ],
           ),
           kVerticalPaddingSmall,
           Row(
             children: <Widget>[
-              Container(
+              getFileImageTile(
+                mediaFiles[2],
                 height: 26.w,
                 width: 26.w,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Image.file(
-                  mediaFiles[2].mediaFile!,
-                  fit: BoxFit.cover,
-                  height: 26.w,
-                  width: 26.w,
-                ),
               ),
               kHorizontalPaddingSmall,
               Container(
@@ -565,19 +486,10 @@ Widget getImageFileMessage(BuildContext context, List<Media> mediaFiles) {
                     BoxDecoration(borderRadius: BorderRadius.circular(6.0)),
                 child: Stack(
                   children: [
-                    Container(
+                    getFileImageTile(
+                      mediaFiles[3],
                       height: 26.w,
                       width: 26.w,
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      child: Image.file(
-                        mediaFiles[3].mediaFile!,
-                        fit: BoxFit.cover,
-                        height: 26.w,
-                        width: 26.w,
-                      ),
                     ),
                     Positioned(
                       child: Container(

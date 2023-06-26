@@ -5,7 +5,6 @@ import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
@@ -26,6 +25,7 @@ import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
   final Conversation? replyToConversation;
+  final List<Media>? replyConversationAttachments;
   final Conversation? editConversation;
   final Map<int, User?>? userMeta;
   final Function() scrollToBottom;
@@ -34,6 +34,7 @@ class ChatBar extends StatefulWidget {
     super.key,
     required this.chatroom,
     this.replyToConversation,
+    this.replyConversationAttachments,
     this.editConversation,
     required this.scrollToBottom,
     this.userMeta,
@@ -48,6 +49,7 @@ class _ChatBarState extends State<ChatBar> {
   ImagePicker? imagePicker;
   FilePicker? filePicker;
   Conversation? replyToConversation;
+  List<Media>? replyConversationAttachments;
   Conversation? editConversation;
   Map<int, User?>? userMeta;
   late CustomPopupMenuController _popupMenuController;
@@ -127,6 +129,7 @@ class _ChatBarState extends State<ChatBar> {
   @override
   Widget build(BuildContext context) {
     replyToConversation = widget.replyToConversation;
+    replyConversationAttachments = widget.replyConversationAttachments;
     setupEditText();
     userMeta = widget.userMeta;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
@@ -215,7 +218,7 @@ class _ChatBarState extends State<ChatBar> {
                                       color: Colors.white,
                                       child: Padding(
                                         padding: EdgeInsets.symmetric(
-                                          vertical: 1.4.h,
+                                          vertical: 6.w,
                                           horizontal: 4.w,
                                         ),
                                         child: Column(
@@ -235,9 +238,9 @@ class _ChatBarState extends State<ChatBar> {
                                                       XFile? pickedImage =
                                                           await imagePicker!
                                                               .pickImage(
-                                                        source:
-                                                            ImageSource.camera,
-                                                      );
+                                                                  source:
+                                                                      ImageSource
+                                                                          .camera);
                                                       List<Media> mediaList =
                                                           [];
                                                       if (pickedImage != null) {
@@ -255,107 +258,6 @@ class _ChatBarState extends State<ChatBar> {
                                                         );
                                                         mediaList.add(media);
                                                         router.pushNamed(
-                                                            "media_forward",
-                                                            extra: mediaList,
-                                                            params: {
-                                                              'chatroomId':
-                                                                  widget
-                                                                      .chatroom
-                                                                      .id
-                                                                      .toString()
-                                                            });
-                                                      }
-                                                    }
-                                                  },
-                                                  child: SizedBox(
-                                                    width: 32.w,
-                                                    height: 9.h,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 32.sp,
-                                                          height: 32.sp,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        40.w),
-                                                            color: LMBranding
-                                                                .instance
-                                                                .buttonColor,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons
-                                                                .camera_alt_outlined,
-                                                            color: kWhiteColor,
-                                                            size: 20.sp,
-                                                          ),
-                                                        ),
-                                                        kVerticalPaddingMedium,
-                                                        Text(
-                                                          "Camera",
-                                                          style: lmBranding
-                                                              .fonts.medium,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                GestureDetector(
-                                                  onTap: () async {
-                                                    _popupMenuController
-                                                        .hideMenu();
-                                                    if (await handlePermissions(
-                                                        1)) {
-                                                      List<XFile>? pickedImage =
-                                                          await imagePicker!
-                                                              .pickMultiImage();
-                                                      if (pickedImage.length >
-                                                          10) {
-                                                        Fluttertoast.showToast(
-                                                            msg:
-                                                                'Only 10 attachments can be sent');
-                                                        return;
-                                                      }
-                                                      List<Media> mediaList =
-                                                          [];
-                                                      if (pickedImage
-                                                          .isNotEmpty) {
-                                                        for (XFile xImage
-                                                            in pickedImage) {
-                                                          int fileBytes =
-                                                              await xImage
-                                                                  .length();
-                                                          if (getFileSizeInDouble(
-                                                                  fileBytes) >
-                                                              100) {
-                                                            Fluttertoast
-                                                                .showToast(
-                                                              msg:
-                                                                  'File size should be smaller than 100 MB',
-                                                            );
-                                                            return;
-                                                          }
-                                                          File file =
-                                                              File(xImage.path);
-                                                          ui.Image image =
-                                                              await decodeImageFromList(
-                                                                  file.readAsBytesSync());
-                                                          Media media = Media(
-                                                            mediaType:
-                                                                MediaType.photo,
-                                                            height:
-                                                                image.height,
-                                                            width: image.width,
-                                                            mediaFile: file,
-                                                          );
-                                                          mediaList.add(media);
-                                                        }
-                                                        context.pushNamed(
                                                           "media_forward",
                                                           extra: mediaList,
                                                           params: {
@@ -368,7 +270,7 @@ class _ChatBarState extends State<ChatBar> {
                                                     }
                                                   },
                                                   child: SizedBox(
-                                                    width: 32.w,
+                                                    width: 25.w,
                                                     height: 9.h,
                                                     child: Column(
                                                       mainAxisAlignment:
@@ -376,28 +278,177 @@ class _ChatBarState extends State<ChatBar> {
                                                               .center,
                                                       children: [
                                                         Container(
-                                                          width: 32.sp,
-                                                          height: 32.sp,
+                                                          width: 40.sp,
+                                                          height: 40.sp,
+                                                          decoration: BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              color: LMBranding
+                                                                  .instance
+                                                                  .buttonColor),
+                                                          child: Icon(
+                                                              Icons
+                                                                  .camera_alt_outlined,
+                                                              color:
+                                                                  kWhiteColor,
+                                                              size: 25.sp),
+                                                        ),
+                                                        kVerticalPaddingMedium,
+                                                        Text(
+                                                          "Camera",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: lmBranding
+                                                              .fonts.medium,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    _popupMenuController
+                                                        .hideMenu();
+                                                    if (await handlePermissions(
+                                                        2)) {
+                                                      List<Media>
+                                                          pickedMediaFiles =
+                                                          await pickMediaFiles();
+                                                      if (pickedMediaFiles
+                                                              .length >
+                                                          10) {
+                                                        Fluttertoast.showToast(
+                                                            msg:
+                                                                'Only 10 attachments can be sent');
+                                                        return;
+                                                      }
+
+                                                      if (pickedMediaFiles
+                                                          .isNotEmpty) {
+                                                        for (Media mediaFile
+                                                            in pickedMediaFiles) {
+                                                          if (getFileSizeInDouble(
+                                                                  mediaFile
+                                                                      .size!) >
+                                                              100) {
+                                                            Fluttertoast
+                                                                .showToast(
+                                                              msg:
+                                                                  'File size should be smaller than 100 MB',
+                                                            );
+                                                            pickedMediaFiles
+                                                                .remove(
+                                                                    mediaFile);
+                                                          }
+                                                        }
+                                                      }
+                                                      if (pickedMediaFiles
+                                                          .isNotEmpty) {
+                                                        router.pushNamed(
+                                                          "media_forward",
+                                                          extra:
+                                                              pickedMediaFiles,
+                                                          params: {
+                                                            'chatroomId': widget
+                                                                .chatroom.id
+                                                                .toString()
+                                                          },
+                                                        );
+                                                      }
+                                                    }
+                                                  },
+                                                  child: SizedBox(
+                                                    width: 25.w,
+                                                    height: 9.h,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          width: 40.sp,
+                                                          height: 40.sp,
                                                           decoration:
                                                               BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        40.w),
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            color: LMBranding
+                                                                .instance
+                                                                .buttonColor,
+                                                          ),
+                                                          child: Icon(
+                                                            Icons.photo_library,
+                                                            color: kWhiteColor,
+                                                            size: 25.sp,
+                                                          ),
+                                                        ),
+                                                        kVerticalPaddingMedium,
+                                                        Text(
+                                                          "Gallery",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: lmBranding
+                                                              .fonts.medium,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    _popupMenuController
+                                                        .hideMenu();
+                                                    if (await handlePermissions(
+                                                        3)) {
+                                                      List<Media>
+                                                          pickedMediaFiles =
+                                                          await pickDocumentFiles();
+                                                      if (pickedMediaFiles
+                                                          .isNotEmpty) {
+                                                        router.pushNamed(
+                                                          "media_forward",
+                                                          extra:
+                                                              pickedMediaFiles,
+                                                          params: {
+                                                            'chatroomId': widget
+                                                                .chatroom.id
+                                                                .toString()
+                                                          },
+                                                        );
+                                                      }
+                                                    }
+                                                  },
+                                                  child: SizedBox(
+                                                    width: 25.w,
+                                                    height: 9.h,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          width: 40.sp,
+                                                          height: 40.sp,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
                                                             color: LMBranding
                                                                 .instance
                                                                 .buttonColor,
                                                           ),
                                                           child: Icon(
                                                             Icons
-                                                                .photo_outlined,
+                                                                .file_copy_outlined,
                                                             color: kWhiteColor,
-                                                            size: 20.sp,
+                                                            size: 25.sp,
                                                           ),
                                                         ),
                                                         kVerticalPaddingMedium,
                                                         Text(
-                                                          "Photo",
+                                                          "Document",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                           style: lmBranding
                                                               .fonts.medium,
                                                         ),
@@ -407,100 +458,6 @@ class _ChatBarState extends State<ChatBar> {
                                                 ),
                                               ],
                                             ),
-                                            // Row(
-                                            //   mainAxisAlignment:
-                                            //       MainAxisAlignment.spaceEvenly,
-                                            //   children: [
-                                            //     GestureDetector(
-                                            //       onTap: () {},
-                                            //       child: SizedBox(
-                                            //         width: 40.w,
-                                            //         height: 22.w,
-                                            //         child: Column(
-                                            //           mainAxisAlignment:
-                                            //               MainAxisAlignment.center,
-                                            //           children: [
-                                            //             Container(
-                                            //               width: 38.sp,
-                                            //               height: 38.sp,
-                                            //               decoration: BoxDecoration(
-                                            //                 borderRadius:
-                                            //                     BorderRadius.circular(40.w),
-                                            //                 color: LMBranding
-                                            //                     .instance.buttonColor,
-                                            //               ),
-                                            //               child: Icon(
-                                            //                 Icons.video_camera_back,
-                                            //                 color: kWhiteColor,
-                                            //                 size: 24.sp,
-                                            //               ),
-                                            //             ),
-                                            //             kVerticalPaddingMedium,
-                                            //             Text(
-                                            //               "Video",
-                                            //               style: lmBranding.fonts.medium,
-                                            //             ),
-                                            //           ],
-                                            //         ),
-                                            //       ),
-                                            //     ),
-                                            GestureDetector(
-                                              onTap: () async {
-                                                _popupMenuController.hideMenu();
-                                                if (await handlePermissions(
-                                                    3)) {
-                                                  List<Media> pickedMediaFiles =
-                                                      await pickDocumentFiles();
-                                                  if (pickedMediaFiles
-                                                      .isNotEmpty) {
-                                                    context.pushNamed(
-                                                        "media_forward",
-                                                        extra: pickedMediaFiles,
-                                                        params: {
-                                                          'chatroomId': widget
-                                                              .chatroom.id
-                                                              .toString()
-                                                        });
-                                                  }
-                                                }
-                                              },
-                                              child: SizedBox(
-                                                width: 40.w,
-                                                height: 22.w,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      width: 38.sp,
-                                                      height: 38.sp,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(40.w),
-                                                        color: LMBranding
-                                                            .instance
-                                                            .buttonColor,
-                                                      ),
-                                                      child: Icon(
-                                                        Icons
-                                                            .file_copy_outlined,
-                                                        color: kWhiteColor,
-                                                        size: 24.sp,
-                                                      ),
-                                                    ),
-                                                    kVerticalPaddingMedium,
-                                                    Text(
-                                                      "Document",
-                                                      style: lmBranding
-                                                          .fonts.medium,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            //   ],
-                                            // ),
                                           ],
                                         ),
                                       ),
@@ -609,6 +566,33 @@ class _ChatBarState extends State<ChatBar> {
     );
   }
 
+  String _getReplyText() {
+    String attachmentText = "";
+    if (replyToConversation?.hasFiles != null &&
+        replyToConversation!.hasFiles! &&
+        replyConversationAttachments?.first.mediaType == MediaType.document) {
+      attachmentText =
+          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Documents" : "Document"}";
+    } else if (replyToConversation?.hasFiles != null &&
+        replyToConversation!.hasFiles! &&
+        replyConversationAttachments?.first.mediaType == MediaType.photo) {
+      attachmentText =
+          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Images" : "Image"}";
+    } else if (replyToConversation?.hasFiles != null &&
+        replyToConversation!.hasFiles! &&
+        replyConversationAttachments?.first.mediaType == MediaType.video) {
+      attachmentText =
+          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Videos" : "Video"}";
+    }
+
+    return replyToConversation?.answer != null &&
+            replyToConversation?.answer.isNotEmpty == true
+        ? TaggingHelper.convertRouteToTag(replyToConversation?.answer,
+                withTilde: false) ??
+            ""
+        : attachmentText;
+  }
+
   Container _getReplyConversation() {
     return Container(
       height: 8.h,
@@ -648,16 +632,7 @@ class _ChatBarState extends State<ChatBar> {
                           SizedBox(
                             width: 70.w,
                             child: Text(
-                              replyToConversation?.answer != null &&
-                                      replyToConversation?.answer.isNotEmpty ==
-                                          true
-                                  ? TaggingHelper.convertRouteToTag(
-                                          replyToConversation?.answer,
-                                          withTilde: false) ??
-                                      ""
-                                  : replyToConversation?.hasFiles ?? false
-                                      ? "📷 ${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
-                                      : "",
+                              _getReplyText(),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: LMTheme.regular.copyWith(
