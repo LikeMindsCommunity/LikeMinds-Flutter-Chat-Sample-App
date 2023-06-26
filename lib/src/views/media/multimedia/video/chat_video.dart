@@ -1,6 +1,7 @@
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class ChatVideo extends StatefulWidget {
   final Media media;
@@ -36,41 +37,55 @@ class _ChatVideoState extends State<ChatVideo> {
     media = widget.media;
     flickManager = widget.flickManager;
     showControls = widget.showControls;
-    return Expanded(
-      child: showControls!
-          ? FlickVideoPlayer(
-              flickManager: flickManager!,
-              flickVideoWithControls: const FlickVideoWithControls(
-                controls: FlickPortraitControls(),
-                videoFit: BoxFit.fitWidth,
-              ),
-            )
-          : FlickVideoPlayer(
-              flickManager: flickManager!,
-              flickVideoWithControls: FlickVideoWithControls(
-                controls: FlickShowControlsAction(
-                  child: FlickSeekVideoAction(
-                    child: Center(
-                      child: FlickVideoBuffer(
-                        child: FlickAutoHideChild(
-                          showIfVideoNotInitialized: false,
-                          child: FlickPlayToggle(
-                            size: 30,
-                            color: kBlackColor,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: kWhiteColor.withOpacity(0.7),
-                              borderRadius: BorderRadius.circular(40.0),
+    return VisibilityDetector(
+      key: Key(widget.media.mediaUrl ?? widget.media.mediaFile!.path),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction == 0 &&
+            (flickManager?.flickVideoManager?.isPlaying ?? false)) {
+          flickManager?.flickControlManager?.autoPause();
+        } else if (info.visibleFraction == 1 &&
+            (flickManager?.flickVideoManager?.videoPlayerController?.value
+                    .isInitialized ??
+                false)) {
+          flickManager?.flickControlManager?.autoResume();
+        }
+      },
+      child: Expanded(
+        child: showControls!
+            ? FlickVideoPlayer(
+                flickManager: flickManager!,
+                flickVideoWithControls: const FlickVideoWithControls(
+                  controls: FlickPortraitControls(),
+                  videoFit: BoxFit.fitWidth,
+                ),
+              )
+            : FlickVideoPlayer(
+                flickManager: flickManager!,
+                flickVideoWithControls: FlickVideoWithControls(
+                  controls: FlickShowControlsAction(
+                    child: FlickSeekVideoAction(
+                      child: Center(
+                        child: FlickVideoBuffer(
+                          child: FlickAutoHideChild(
+                            showIfVideoNotInitialized: false,
+                            child: FlickPlayToggle(
+                              size: 30,
+                              color: kBlackColor,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: kWhiteColor.withOpacity(0.7),
+                                borderRadius: BorderRadius.circular(40.0),
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
+                  videoFit: BoxFit.fitWidth,
                 ),
-                videoFit: BoxFit.fitWidth,
               ),
-            ),
+      ),
     );
   }
 }
