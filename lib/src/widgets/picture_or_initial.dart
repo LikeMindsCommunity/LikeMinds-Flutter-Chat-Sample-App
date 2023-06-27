@@ -62,7 +62,9 @@ class PictureOrInitial extends StatelessWidget {
                     mediaShimmer(
                   isPP: true,
                 ),
-                errorWidget: (context, url, error) => mediaErrorWidget(),
+                errorWidget: (context, url, error) => mediaErrorWidget(
+                  isPP: true,
+                ),
               )
             : Text(
                 getInitials(fallbackText),

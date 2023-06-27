@@ -47,7 +47,6 @@ class _MediaForwardState extends State<MediaForward> {
   @override
   void initState() {
     super.initState();
-    mediaList = widget.media;
   }
 
   @override
@@ -63,6 +62,8 @@ class _MediaForwardState extends State<MediaForward> {
 
   @override
   Widget build(BuildContext context) {
+    mediaList = widget.media;
+
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return WillPopScope(
       onWillPop: () {
@@ -71,7 +72,6 @@ class _MediaForwardState extends State<MediaForward> {
       },
       child: Scaffold(
         backgroundColor: kBlackColor,
-        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           backgroundColor: kBlackColor,
           leading: IconButton(
@@ -251,10 +251,25 @@ class _MediaForwardState extends State<MediaForward> {
                               currPosition = index;
                               if (mediaList[index].mediaType ==
                                   MediaType.video) {
-                                flickManager?.handleChangeVideo(
-                                  VideoPlayerController.file(
-                                      mediaList[index].mediaFile!),
-                                );
+                                if (flickManager == null) {
+                                  flickManager = FlickManager(
+                                    videoPlayerController:
+                                        VideoPlayerController.file(
+                                            mediaList[index].mediaFile!),
+                                    autoPlay: true,
+                                    onVideoEnd: () {
+                                      flickManager?.flickVideoManager
+                                          ?.videoPlayerController!
+                                          .setLooping(true);
+                                    },
+                                    autoInitialize: true,
+                                  );
+                                } else {
+                                  flickManager?.handleChangeVideo(
+                                    VideoPlayerController.file(
+                                        mediaList[index].mediaFile!),
+                                  );
+                                }
                               }
                               rebuildCurr.value = !rebuildCurr.value;
                             },

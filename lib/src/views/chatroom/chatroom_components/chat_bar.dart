@@ -281,7 +281,7 @@ class _ChatBarState extends State<ChatBar> {
                                                   },
                                                   child: SizedBox(
                                                     width: 25.w,
-                                                    height: 9.h,
+                                                    height: 12.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -367,7 +367,7 @@ class _ChatBarState extends State<ChatBar> {
                                                   },
                                                   child: SizedBox(
                                                     width: 25.w,
-                                                    height: 9.h,
+                                                    height: 12.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -428,7 +428,7 @@ class _ChatBarState extends State<ChatBar> {
                                                   },
                                                   child: SizedBox(
                                                     width: 25.w,
-                                                    height: 9.h,
+                                                    height: 12.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment

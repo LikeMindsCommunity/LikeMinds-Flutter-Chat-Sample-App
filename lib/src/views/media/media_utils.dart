@@ -7,9 +7,9 @@ import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 
-Widget mediaErrorWidget() {
+Widget mediaErrorWidget({bool isPP = false}) {
   return Container(
-    color: kWhiteColor,
+    color: isPP ? LMTheme.buttonColor : kWhiteColor,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -19,14 +19,16 @@ Widget mediaErrorWidget() {
           size: 9.sp,
           color: LMTheme.headerColor,
         ),
-        const SizedBox(height: 12),
-        Text(
-          "An error occurred fetching media",
-          textAlign: TextAlign.center,
-          style: LMTheme.medium.copyWith(
-            fontSize: 7.sp,
-          ),
-        )
+        isPP ? const SizedBox() : const SizedBox(height: 12),
+        isPP
+            ? const SizedBox()
+            : Text(
+                "An error occurred fetching media",
+                textAlign: TextAlign.center,
+                style: LMTheme.medium.copyWith(
+                  fontSize: 7.sp,
+                ),
+              )
       ],
     ),
   );
