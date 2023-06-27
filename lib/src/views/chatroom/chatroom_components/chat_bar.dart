@@ -341,11 +341,9 @@ class _ChatBarState extends State<ChatBar> {
                                                                   mediaFile
                                                                       .size!) >
                                                               100) {
-                                                            Fluttertoast
-                                                                .showToast(
-                                                              msg:
-                                                                  'File size should be smaller than 100 MB',
-                                                            );
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    'File size should be smaller than 100 MB');
                                                             pickedMediaFiles
                                                                 .remove(
                                                                     mediaFile);

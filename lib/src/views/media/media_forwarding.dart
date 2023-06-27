@@ -118,15 +118,15 @@ class _MediaForwardState extends State<MediaForward> {
       setupFlickManager();
       return Column(
         children: [
-          const Spacer(),
-          mediaList[currPosition].mediaType == MediaType.photo
-              ? Expanded(
-                  child: AspectRatio(
-                      aspectRatio: mediaList[currPosition].width! /
-                          mediaList[currPosition].height!,
-                      child: Image.file(mediaList[currPosition].mediaFile!)))
-              : chatVideoFactory(mediaList[currPosition], flickManager!),
-          const Spacer(),
+          Expanded(
+            child: mediaList[currPosition].mediaType == MediaType.photo
+                ? AspectRatio(
+                    aspectRatio: mediaList[currPosition].width! /
+                        mediaList[currPosition].height!,
+                    child: Image.file(mediaList[currPosition].mediaFile!),
+                  )
+                : chatVideoFactory(mediaList[currPosition], flickManager!),
+          ),
           Container(
             decoration: const BoxDecoration(
                 color: kBlackColor,
