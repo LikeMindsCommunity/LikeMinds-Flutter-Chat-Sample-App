@@ -118,6 +118,7 @@ class _MediaForwardState extends State<MediaForward> {
       setupFlickManager();
       return Column(
         children: [
+          const Spacer(),
           mediaList[currPosition].mediaType == MediaType.photo
               ? Expanded(
                   child: AspectRatio(
@@ -125,6 +126,7 @@ class _MediaForwardState extends State<MediaForward> {
                           mediaList[currPosition].height!,
                       child: Image.file(mediaList[currPosition].mediaFile!)))
               : chatVideoFactory(mediaList[currPosition], flickManager!),
+          const Spacer(),
           Container(
             decoration: const BoxDecoration(
                 color: kBlackColor,
@@ -134,8 +136,7 @@ class _MediaForwardState extends State<MediaForward> {
                     width: 0.1,
                   ),
                 )),
-            padding:
-                const EdgeInsets.symmetric(vertical: 12.5, horizontal: 5.0),
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Column(
               children: [
                 Row(

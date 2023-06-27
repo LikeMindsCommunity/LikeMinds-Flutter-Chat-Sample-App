@@ -25,6 +25,8 @@ export 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 export 'package:likeminds_chat_mm_fl/src/utils/branding/lm_fonts.dart';
 export 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
 
+const bool isDebug = !bool.fromEnvironment('DEBUG');
+
 class LMChat extends StatelessWidget {
   final String _userId;
   final String _userName;
