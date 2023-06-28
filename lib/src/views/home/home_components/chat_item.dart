@@ -89,8 +89,10 @@ class _ChatItemState extends State<ChatItem> {
             conversation!.answer,
             withTilde: false,
           )}'
-        : conversation!.deletedByUserId == user.id
-            ? "This message was deleted"
+        : conversation!.deletedByUserId == conversation!.userId
+            ? conversation!.userId == user.id
+                ? 'You deleted this message'
+                : "This message was deleted"
             : "This message was deleted by the CM";
     String _time = conversation!.lastUpdated.toString();
     bool _isSecret = chatroom.isSecret ?? false;

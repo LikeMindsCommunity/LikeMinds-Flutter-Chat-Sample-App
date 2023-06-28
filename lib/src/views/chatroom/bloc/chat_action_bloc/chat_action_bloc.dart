@@ -2,17 +2,17 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:equatable/equatable.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:bloc/bloc.dart';
+import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 
 part 'chat_action_event.dart';
 part 'chat_action_state.dart';
-
-const bool isDebug = bool.fromEnvironment('DEBUG');
 
 class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
   MediaService mediaService = MediaService(!isDebug);

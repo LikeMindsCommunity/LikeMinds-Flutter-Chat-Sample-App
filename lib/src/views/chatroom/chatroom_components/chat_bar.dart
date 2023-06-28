@@ -281,7 +281,7 @@ class _ChatBarState extends State<ChatBar> {
                                                   },
                                                   child: SizedBox(
                                                     width: 25.w,
-                                                    height: 9.h,
+                                                    height: 12.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -341,11 +341,9 @@ class _ChatBarState extends State<ChatBar> {
                                                                   mediaFile
                                                                       .size!) >
                                                               100) {
-                                                            Fluttertoast
-                                                                .showToast(
-                                                              msg:
-                                                                  'File size should be smaller than 100 MB',
-                                                            );
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    'File size should be smaller than 100 MB');
                                                             pickedMediaFiles
                                                                 .remove(
                                                                     mediaFile);
@@ -369,7 +367,7 @@ class _ChatBarState extends State<ChatBar> {
                                                   },
                                                   child: SizedBox(
                                                     width: 25.w,
-                                                    height: 9.h,
+                                                    height: 12.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -430,7 +428,7 @@ class _ChatBarState extends State<ChatBar> {
                                                   },
                                                   child: SizedBox(
                                                     width: 25.w,
-                                                    height: 9.h,
+                                                    height: 12.h,
                                                     child: Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -578,34 +576,10 @@ class _ChatBarState extends State<ChatBar> {
     );
   }
 
-  String _getReplyText() {
-    String attachmentText = "";
-    if (replyToConversation?.hasFiles != null &&
-        replyToConversation!.hasFiles! &&
-        replyConversationAttachments?.first.mediaType == MediaType.document) {
-      attachmentText =
-          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Documents" : "Document"}";
-    } else if (replyToConversation?.hasFiles != null &&
-        replyToConversation!.hasFiles! &&
-        replyConversationAttachments?.first.mediaType == MediaType.photo) {
-      attachmentText =
-          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Images" : "Image"}";
-    } else if (replyToConversation?.hasFiles != null &&
-        replyToConversation!.hasFiles! &&
-        replyConversationAttachments?.first.mediaType == MediaType.video) {
-      attachmentText =
-          "${replyToConversation!.attachmentCount} ${replyToConversation!.attachmentCount! > 1 ? "Videos" : "Video"}";
-    }
-
-    return replyToConversation?.answer != null &&
-            replyToConversation?.answer.isNotEmpty == true
-        ? TaggingHelper.convertRouteToTag(replyToConversation?.answer,
-                withTilde: false) ??
-            ""
-        : attachmentText;
-  }
-
   Container _getReplyConversation() {
+    if (replyToConversation == null) {
+      return Container();
+    }
     return Container(
       height: 8.h,
       width: 100.w,
@@ -643,14 +617,9 @@ class _ChatBarState extends State<ChatBar> {
                           kVerticalPaddingSmall,
                           SizedBox(
                             width: 70.w,
-                            child: Text(
-                              _getReplyText(),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: LMTheme.regular.copyWith(
-                                fontSize: 8.sp,
-                              ),
-                            ),
+                            child: getChatItemAttachmentTile(
+                                replyConversationAttachments ?? [],
+                                replyToConversation!),
                           ),
                         ],
                       ),
