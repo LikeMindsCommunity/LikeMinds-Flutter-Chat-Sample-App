@@ -100,7 +100,7 @@ class MultiMediaConversationLoading extends ChatActionState {
 
 class MultiMediaConversationPosted extends ChatActionState {
   final PostConversationResponse postConversationResponse;
-  final List<dynamic> putMediaResponse;
+  final List<Media> putMediaResponse;
 
   MultiMediaConversationPosted(
     this.postConversationResponse,

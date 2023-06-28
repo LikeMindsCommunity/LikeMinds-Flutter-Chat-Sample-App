@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -27,8 +28,8 @@ class ChatBubble extends StatefulWidget {
   final User sender;
   final Map<int, User?> userMeta;
   final Map<String, List<Media>> mediaFiles;
-  final List<dynamic>? conversationAttachments;
-  final List<dynamic>? replyConversationAttachments;
+  final List<Media>? conversationAttachments;
+  final List<Media>? replyConversationAttachments;
   final Function(Conversation replyingTo) onReply;
   final Function(Conversation editConversation) onEdit;
   final Function(Conversation conversation) onLongPress;
@@ -119,11 +120,8 @@ class _ChatBubbleState extends State<ChatBubble> {
     isDeleted = conversation!.deletedByUserId != null;
     isEdited = conversation!.isEdited ?? false;
     mediaFiles = widget.mediaFiles;
-    conversationAttachments =
-        widget.conversationAttachments?.map((e) => Media.fromJson(e)).toList();
-    replyConversationAttachments = widget.replyConversationAttachments
-        ?.map((e) => Media.fromJson(e))
-        .toList();
+    conversationAttachments = widget.conversationAttachments;
+    replyConversationAttachments = widget.replyConversationAttachments;
   }
 
   @override
@@ -169,6 +167,8 @@ class _ChatBubbleState extends State<ChatBubble> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Swipeable(
+            dismissThresholds: const {SwipeDirection.startToEnd: 0.2},
+            movementDuration: const Duration(milliseconds: 50),
             key: ValueKey(conversation!.id),
             onSwipe: (direction) {
               int userId = conversation!.userId ?? conversation!.memberId!;

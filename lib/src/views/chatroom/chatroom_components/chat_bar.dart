@@ -581,7 +581,7 @@ class _ChatBarState extends State<ChatBar> {
       return Container();
     }
     return Container(
-      height: 8.h,
+      height: 10.h,
       width: 100.w,
       color: kGreyColor.withOpacity(0.1),
       child: Padding(
