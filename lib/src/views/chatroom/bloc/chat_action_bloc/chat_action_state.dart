@@ -20,6 +20,17 @@ class ChatActionError extends ChatActionState {
       ];
 }
 
+class LocalConversation extends ChatActionState {
+  final Conversation conversation;
+
+  LocalConversation(this.conversation);
+
+  @override
+  List<Object> get props => [
+        conversation,
+      ];
+}
+
 class ConversationPosted extends ChatActionState {
   final PostConversationResponse postConversationResponse;
 
@@ -73,24 +84,23 @@ class ConversationDelete extends ChatActionState {
 }
 
 class MultiMediaConversationLoading extends ChatActionState {
-  final PostConversationResponse postConversationResponse;
+  final Conversation postConversation;
   final List<Media> mediaFiles;
 
   MultiMediaConversationLoading(
-    this.postConversationResponse,
+    this.postConversation,
     this.mediaFiles,
   );
 
   @override
   List<Object> get props => [
-        postConversationResponse,
         mediaFiles,
       ];
 }
 
 class MultiMediaConversationPosted extends ChatActionState {
   final PostConversationResponse postConversationResponse;
-  final List<dynamic> putMediaResponse;
+  final List<Media> putMediaResponse;
 
   MultiMediaConversationPosted(
     this.postConversationResponse,
@@ -139,6 +149,30 @@ class ReplyConversationState extends ChatActionState {
 }
 
 class ReplyRemoveState extends ChatActionState {
+  @override
+  List<Object> get props => [];
+}
+
+class EditConversationState extends ChatActionState {
+  final int chatroomId;
+  final int conversationId;
+  final Conversation editConversation;
+
+  EditConversationState({
+    required this.chatroomId,
+    required this.conversationId,
+    required this.editConversation,
+  });
+
+  @override
+  List<Object> get props => [
+        chatroomId,
+        conversationId,
+        editConversation.toEntity().toJson(),
+      ];
+}
+
+class EditRemoveState extends ChatActionState {
   @override
   List<Object> get props => [];
 }

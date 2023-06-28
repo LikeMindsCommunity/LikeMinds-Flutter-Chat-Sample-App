@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,9 +10,11 @@ import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/document/document_preview_factory.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/bubble_triangle.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
@@ -23,9 +26,12 @@ class ChatBubble extends StatefulWidget {
   final Conversation? replyToConversation;
   final ChatRoom chatroom;
   final User sender;
+  final Map<int, User?> userMeta;
   final Map<String, List<Media>> mediaFiles;
-  final List<dynamic>? conversationAttachments;
+  final List<Media>? conversationAttachments;
+  final List<Media>? replyConversationAttachments;
   final Function(Conversation replyingTo) onReply;
+  final Function(Conversation editConversation) onEdit;
   final Function(Conversation conversation) onLongPress;
   final ValueChanged<bool> isSelected;
 
@@ -37,9 +43,12 @@ class ChatBubble extends StatefulWidget {
     required this.sender,
     required this.mediaFiles,
     this.conversationAttachments,
+    this.replyConversationAttachments,
     required this.onReply,
     required this.onLongPress,
     required this.isSelected,
+    required this.userMeta,
+    required this.onEdit,
   });
 
   @override
@@ -50,11 +59,16 @@ class _ChatBubbleState extends State<ChatBubble> {
   List reactions = [];
   late final EmojiParser emojiParser;
   late final CustomPopupMenuController _controller;
-  late bool isSent;
-  late Conversation conversation;
-  late Conversation? replyToConversation;
+  Map<int, User?>? userMeta;
+  bool? isSent;
+  Conversation? conversation;
+  Conversation? replyToConversation;
+  Map<String, List<Media>>? mediaFiles;
+  List<Media>? conversationAttachments;
+  List<Media>? replyConversationAttachments;
   bool isSelected = false;
   bool isDeleted = false;
+  bool isEdited = false;
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
   final User loggedInUser = UserLocalPreference.instance.fetchUserData();
   final MemberStateResponse isCm =
@@ -68,11 +82,7 @@ class _ChatBubbleState extends State<ChatBubble> {
     super.initState();
     emojiParser = EmojiParser();
     // user = UserLocalPreference.instance.fetchUserData();
-    isSent = widget.sender.id == loggedInUser.id;
     _controller = CustomPopupMenuController();
-    conversation = widget.conversation;
-    replyToConversation = widget.replyToConversation;
-    isDeleted = conversation.deletedByUserId != null;
   }
 
   @override
@@ -83,31 +93,54 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   bool checkDeletePermissions() {
-    if (isCm.member?.state == 1 && conversation.deletedByUserId == null) {
+    if (isCm.member?.state == 1 && conversation!.deletedByUserId == null) {
       return true;
     } else if (loggedInUser.id == widget.sender.id &&
-        conversation.deletedByUserId == null) {
+        conversation!.deletedByUserId == null) {
       return true;
     } else {
       return false;
     }
   }
 
+  bool checkEditPermissions() {
+    if (conversation!.answer.isEmpty) {
+      return false;
+    } else if (loggedInUser.id == widget.sender.id &&
+        conversation!.deletedByUserId == null) {
+      return true;
+    }
+    return false;
+  }
+
+  void setupConversation() {
+    isSent = widget.sender.id == loggedInUser.id;
+    conversation = widget.conversation;
+    replyToConversation = widget.replyToConversation;
+    isDeleted = conversation!.deletedByUserId != null;
+    isEdited = conversation!.isEdited ?? false;
+    mediaFiles = widget.mediaFiles;
+    conversationAttachments = widget.conversationAttachments;
+    replyConversationAttachments = widget.replyConversationAttachments;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!isSent &&
-        widget.conversation.hasFiles != null &&
-        widget.conversation.hasFiles! &&
-        widget.conversation.attachmentsUploaded != null &&
-        !widget.conversation.attachmentsUploaded!) {
+    setupConversation();
+    if (!isSent! &&
+        conversation?.hasFiles != null &&
+        conversation!.hasFiles! &&
+        conversation?.attachmentsUploaded != null &&
+        !conversation!.attachmentsUploaded!) {
       return const SizedBox.shrink();
     }
+    userMeta = widget.userMeta;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () {
         _isSelected.value = true;
         debugPrint("Long Pressed");
-        widget.onLongPress(conversation);
+        widget.onLongPress(conversation!);
         setState(() {
           _controller.showMenu();
           widget.isSelected(isSelected);
@@ -134,16 +167,18 @@ class _ChatBubbleState extends State<ChatBubble> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Swipeable(
-            key: ValueKey(conversation.id),
+            dismissThresholds: const {SwipeDirection.startToEnd: 0.2},
+            movementDuration: const Duration(milliseconds: 50),
+            key: ValueKey(conversation!.id),
             onSwipe: (direction) {
-              int userId = conversation.userId ?? conversation.memberId!;
+              int userId = conversation!.userId ?? conversation!.memberId!;
               if (userId == loggedInUser.id) {
-                conversation.member = loggedInUser;
+                conversation!.member = loggedInUser;
               }
-              if (conversation.deletedByUserId != null) {
+              if (conversation!.deletedByUserId != null) {
                 return;
               }
-              widget.onReply(conversation);
+              widget.onReply(conversation!);
             },
             background: Padding(
               padding: EdgeInsets.only(
@@ -184,7 +219,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                       children: [
                         ListTile(
                           onTap: () {
-                            widget.onReply(conversation);
+                            widget.onReply(conversation!);
                             _controller.hideMenu();
                           },
                           leading: Icon(
@@ -225,6 +260,28 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           ),
                         ),
+                        kVerticalPaddingMedium,
+                        Visibility(
+                          visible: checkEditPermissions(),
+                          child: ListTile(
+                            onTap: () async {
+                              widget.onEdit(conversation!);
+                              _controller.hideMenu();
+                            },
+                            leading: Icon(
+                              Icons.edit,
+                              color: LMTheme.buttonColor,
+                              size: 16.sp,
+                            ),
+                            title: Text(
+                              "Edit",
+                              style: LMTheme.regular.copyWith(
+                                fontSize: 10.sp,
+                              ),
+                            ),
+                          ),
+                        ),
+                        kVerticalPaddingMedium,
                         Visibility(
                           visible: checkDeletePermissions(),
                           child: ListTile(
@@ -232,13 +289,14 @@ class _ChatBubbleState extends State<ChatBubble> {
                               final response = await locator<LikeMindsService>()
                                   .deleteConversation(
                                       (DeleteConversationRequestBuilder()
-                                            ..conversationIds([conversation.id])
+                                            ..conversationIds(
+                                                [conversation!.id])
                                             ..reason("Delete"))
                                           .build());
                               if (response.success) {
                                 _controller.hideMenu();
                                 setState(() {
-                                  conversation.deletedByUserId =
+                                  conversation!.deletedByUserId =
                                       loggedInUser.id;
                                   isDeleted = true;
                                 });
@@ -258,7 +316,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           ),
                         ),
-                        kVerticalPaddingMedium
+
                         // ListTile(
                         //   onTap: () {
                         //     _controller.hideMenu();
@@ -306,16 +364,16 @@ class _ChatBubbleState extends State<ChatBubble> {
                 children: [
                   Padding(
                     padding: EdgeInsets.only(
-                      right: isSent ? 2.5.w : 0,
+                      right: isSent! ? 2.5.w : 0,
                       // vertical: 0.5..h,
                     ),
                     child: Row(
-                      mainAxisAlignment: isSent
+                      mainAxisAlignment: isSent!
                           ? MainAxisAlignment.end
                           : MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        !isSent
+                        !isSent!
                             ? PictureOrInitial(
                                 fallbackText: widget.sender.name,
                                 imageUrl: widget.sender.imageUrl,
@@ -324,7 +382,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                               )
                             : const SizedBox(),
                         const SizedBox(width: 6),
-                        !isSent
+                        !isSent!
                             ? Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.rotationY(3.14),
@@ -345,12 +403,13 @@ class _ChatBubbleState extends State<ChatBubble> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Column(
-                            crossAxisAlignment: isSent
+                            crossAxisAlignment: isSent!
                                 ? CrossAxisAlignment.end
                                 : CrossAxisAlignment.start,
                             children: [
                               Visibility(
-                                visible: replyToConversation != null,
+                                visible:
+                                    replyToConversation != null && !isDeleted,
                                 maintainState: true,
                                 maintainSize: false,
                                 child: _getReplyConversation(),
@@ -358,25 +417,28 @@ class _ChatBubbleState extends State<ChatBubble> {
                               replyToConversation != null
                                   ? const SizedBox(height: 8)
                                   : const SizedBox(),
-                              isSent
+                              isSent!
                                   ? const SizedBox()
                                   : Text(
                                       widget.sender.name,
                                       style: LMFonts.instance.medium.copyWith(
                                         fontSize: 10.sp,
-                                        color: isSent
+                                        color: isSent!
                                             ? Colors.black.withOpacity(0.6)
                                             : LMTheme.headerColor,
                                       ),
                                     ),
-                              isSent
+                              isSent!
                                   ? const SizedBox()
                                   : const SizedBox(height: 6),
                               isDeleted
-                                  ? conversation.deletedByUserId ==
-                                          loggedInUser.id
+                                  ? conversation!.deletedByUserId ==
+                                          conversation!.userId
                                       ? Text(
-                                          "This message was deleted",
+                                          conversation!.userId ==
+                                                  loggedInUser.id
+                                              ? 'You deleted this message'
+                                              : "This message was deleted",
                                           style:
                                               LMFonts.instance.regular.copyWith(
                                             fontSize: 9.sp,
@@ -405,7 +467,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                           widget.conversation
                                               .attachmentsUploaded!))
                                   ? Text(
-                                      widget.conversation.createdAt,
+                                      "${isEdited ? 'Edited  ' : ''}${widget.conversation.createdAt}",
                                       style: LMFonts.instance.regular.copyWith(
                                         fontSize: 8.sp,
                                         color: kGreyColor,
@@ -418,7 +480,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ],
                           ),
                         ),
-                        isSent
+                        isSent!
                             ? CustomPaint(
                                 painter: BubbleTriangle(),
                               )
@@ -445,6 +507,9 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   Container _getReplyConversation() {
+    if (replyToConversation == null) {
+      return Container();
+    }
     return Container(
       color: kGreyColor.withOpacity(0.1),
       child: Row(
@@ -457,48 +522,37 @@ class _ChatBubbleState extends State<ChatBubble> {
             color: LMTheme.buttonColor,
           ),
           kHorizontalPaddingMedium,
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 6),
-              Text(
-                replyToConversation?.member?.name ?? "",
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: LMTheme.medium.copyWith(
-                  color: kPrimaryColor,
-                  fontSize: 9.sp,
-                ),
-              ),
-              kVerticalPaddingXSmall,
-              Container(
-                constraints: BoxConstraints(maxWidth: 48.w),
-                child: Text(
-                  _getReplyText(),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 6),
+                Text(
+                  replyToConversation?.member?.name ??
+                      userMeta?[replyToConversation?.userId]?.name ??
+                      '',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: LMTheme.regular.copyWith(
-                    fontSize: 8.sp,
+                  style: LMTheme.medium.copyWith(
+                    color: kPrimaryColor,
+                    fontSize: 9.sp,
                   ),
                 ),
-              ),
-              const SizedBox(height: 6),
-            ],
+                kVerticalPaddingXSmall,
+                SizedBox(
+                  width: 35.w,
+                  child: getChatItemAttachmentTile(
+                      replyConversationAttachments ?? [], replyToConversation!),
+                ),
+                const SizedBox(height: 6),
+              ],
+            ),
           ),
           kHorizontalPaddingMedium,
         ],
       ),
     );
-  }
-
-  String _getReplyText() {
-    return replyToConversation?.answer != null &&
-            replyToConversation?.answer.isNotEmpty == true
-        ? TaggingHelper.convertRouteToTag(replyToConversation?.answer) ?? ""
-        : replyToConversation?.hasFiles ?? false
-            ? "${replyToConversation?.attachmentCount} Image${replyToConversation?.attachmentCount == 1 ? "" : "s"}"
-            : "";
   }
 
   void refresh() {
@@ -520,21 +574,40 @@ class _ChatBubbleState extends State<ChatBubble> {
         fontSize: 9.sp,
       ),
     );
+    // if no media is attached to the conversation
+    // return text message
     if (widget.conversation.hasFiles == null ||
         !widget.conversation.hasFiles!) {
       return expandableText;
     } else if (widget.conversation.attachmentsUploaded == null ||
         !widget.conversation.attachmentsUploaded!) {
-      if (widget.mediaFiles[widget.conversation.temporaryId] == null) {
+      // If conversation has media but not uploaded yet
+      // show local files
+      if (widget.mediaFiles[widget.conversation.temporaryId] == null ||
+          widget.mediaFiles[widget.conversation.temporaryId]!.isEmpty) {
         return expandableText;
+      }
+      Widget mediaWidget;
+      if (widget.mediaFiles[widget.conversation.temporaryId]!.first.mediaType ==
+              MediaType.photo ||
+          widget.mediaFiles[widget.conversation.temporaryId]!.first.mediaType ==
+              MediaType.video) {
+        mediaWidget = getImageFileMessage(
+            context, widget.mediaFiles[widget.conversation.temporaryId]!);
+      } else if (widget
+              .mediaFiles[widget.conversation.temporaryId]!.first.mediaType ==
+          MediaType.document) {
+        mediaWidget = documentPreviewFactory(
+            widget.mediaFiles[widget.conversation.temporaryId]!);
+      } else {
+        mediaWidget = const SizedBox();
       }
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Stack(
             children: [
-              getImageFileMessage(
-                  context, widget.mediaFiles[widget.conversation.temporaryId]!),
+              mediaWidget,
               const Positioned(
                 top: 0,
                 bottom: 0,
@@ -546,7 +619,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           ),
           widget.conversation.answer.isEmpty
               ? const SizedBox.shrink()
-              : kVerticalPaddingMedium,
+              : kVerticalPaddingXSmall,
           widget.conversation.answer.isEmpty
               ? const SizedBox.shrink()
               : expandableText,
@@ -554,63 +627,44 @@ class _ChatBubbleState extends State<ChatBubble> {
       );
     } else if (widget.conversation.attachmentsUploaded != null ||
         widget.conversation.attachmentsUploaded!) {
-      if (widget.conversationAttachments == null) {
+      // If conversation has media and uploaded
+      // show uploaded files
+      if (conversationAttachments == null) {
         return expandableText;
+      }
+
+      Widget mediaWidget;
+      if (conversationAttachments!.first.mediaType == MediaType.photo ||
+          conversationAttachments!.first.mediaType == MediaType.video) {
+        mediaWidget = getImageMessage(
+          context,
+          conversationAttachments!,
+          widget.chatroom,
+          conversation!,
+          userMeta!,
+        );
+      } else if (conversationAttachments!.first.mediaType ==
+          MediaType.document) {
+        mediaWidget = documentPreviewFactory(conversationAttachments!);
+      } else {
+        mediaWidget = const SizedBox();
       }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (widget.conversationAttachments!.first['type'] == 'image')
-            getImageMessage(
-              context,
-              widget.conversationAttachments!,
-              widget.chatroom,
-              widget.conversation.id,
-            ),
-          widget.conversation.answer.isEmpty
+          mediaWidget,
+          conversation!.answer.isEmpty
               ? const SizedBox.shrink()
-              : kVerticalPaddingMedium,
-          widget.conversation.answer.isEmpty
+              : kVerticalPaddingXSmall,
+          conversation!.answer.isEmpty
               ? const SizedBox.shrink()
               : expandableText,
         ],
       );
     }
     return const SizedBox();
-
-    // final uint8list = await VideoThumbnail.thumbnailData(
-    //   video: message,
-    //   imageFormat: ImageFormat.JPEG,
-    //   maxWidth: 600,
-    //   quality: 25,
-    // );
-
-    // return Stack(
-    //   alignment: Alignment.center,
-    //   children: [
-    //     Image.memory(uint8list!),
-    //     GestureDetector(
-    //       onTap: (() {
-    //         Navigator.push(
-    //           context,
-    //           MaterialPageRoute(
-    //             builder: (context) => VideoPlayerScreen(
-    //               videoUrl: message,
-    //             ),
-    //           ),
-    //         );
-    //       }),
-    //       child: const Icon(
-    //         Icons.play_circle_outline,
-    //         size: 48,
-    //         color: Colors.white,
-    //       ),
-    //     ),
-    //   ],
-    // );
   }
 }
-
 
 /// Code or conversation actions

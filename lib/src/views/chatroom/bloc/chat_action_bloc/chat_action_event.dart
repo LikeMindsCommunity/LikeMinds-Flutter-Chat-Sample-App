@@ -4,8 +4,9 @@ abstract class ChatActionEvent extends Equatable {}
 
 class PostConversation extends ChatActionEvent {
   final PostConversationRequest postConversationRequest;
+  final Conversation? replyConversation;
 
-  PostConversation(this.postConversationRequest);
+  PostConversation(this.postConversationRequest, {this.replyConversation});
 
   @override
   List<Object> get props => [
@@ -15,13 +16,38 @@ class PostConversation extends ChatActionEvent {
 
 class EditConversation extends ChatActionEvent {
   final EditConversationRequest editConversationRequest;
+  final Conversation? replyConversation;
 
-  EditConversation(this.editConversationRequest);
+  EditConversation(this.editConversationRequest, {this.replyConversation});
 
   @override
   List<Object> get props => [
         editConversationRequest,
       ];
+}
+
+class EditingConversation extends ChatActionEvent {
+  final int conversationId;
+  final int chatroomId;
+  final Conversation editConversation;
+
+  EditingConversation({
+    required this.conversationId,
+    required this.chatroomId,
+    required this.editConversation,
+  });
+
+  @override
+  List<Object> get props => [
+        conversationId,
+        chatroomId,
+        editConversation,
+      ];
+}
+
+class EditRemove extends ChatActionEvent {
+  @override
+  List<Object> get props => [];
 }
 
 class DeleteConversation extends ChatActionEvent {

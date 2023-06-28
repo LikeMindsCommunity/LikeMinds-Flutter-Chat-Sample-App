@@ -4,8 +4,10 @@ part of 'home_bloc.dart';
 abstract class HomeEvent extends Equatable {}
 
 class InitHomeEvent extends HomeEvent {
-  int page;
+  final int page;
+
   InitHomeEvent({required this.page});
+
   @override
   List<Object?> get props => [page];
 }

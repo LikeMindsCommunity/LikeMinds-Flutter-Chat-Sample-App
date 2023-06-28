@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chatroom_bloc.dart';
@@ -28,7 +28,7 @@ const exploreRoute = '/explore';
 const profileRoute = '/profile';
 const moderationRoute = '/moderation';
 const mediaForwardRoute = '/media_forward/:chatroomId';
-const mediaPreviewRoute = '/media_preview/:messageId';
+const mediaPreviewRoute = '/media_preview';
 
 final router = GoRouter(
   routes: [
@@ -95,10 +95,10 @@ final router = GoRouter(
       path: mediaPreviewRoute,
       name: "media_preview",
       builder: (context, state) => MediaPreview(
-        conversationAttachments:
-            (state.extra as List<dynamic>)[0] as List<dynamic>,
+        conversationAttachments: (state.extra as List<dynamic>)[0],
         chatroom: (state.extra as List<dynamic>)[1],
-        messageId: int.parse(state.params['messageId']!),
+        conversation: (state.extra as List<dynamic>)[2],
+        userMeta: (state.extra as List<dynamic>)[3],
       ),
     ),
   ],

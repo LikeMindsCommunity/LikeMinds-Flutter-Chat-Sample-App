@@ -1,4 +1,4 @@
-import 'package:go_router/go_router.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class BackButton extends StatelessWidget {
@@ -13,10 +13,10 @@ class BackButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (onTap == null) {
-          context.pop();
+          router.pop();
         } else {
           onTap!();
-          context.pop();
+          router.pop();
         }
       },
       child: Container(

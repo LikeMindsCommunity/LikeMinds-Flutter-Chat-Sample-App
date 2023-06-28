@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
-const kPrimaryColor = Color.fromARGB(255, 37, 64, 110);
-const kSecondaryColor = Color.fromARGB(255, 223, 103, 34);
-const kAccentColor = Color.fromARGB(255, 100, 204, 40);
+const Color kPrimaryColor = Color.fromARGB(255, 37, 64, 110);
+const Color kSecondaryColor = Color.fromARGB(255, 223, 103, 34);
+const Color kAccentColor = Color.fromARGB(255, 100, 204, 40);
 
-const kWhiteColor = Color.fromARGB(255, 255, 255, 255);
-const kBlackColor = Color.fromARGB(255, 0, 0, 0);
-const kGreyColor = Color.fromARGB(255, 128, 128, 128);
-const kLightGreyColor = Color.fromARGB(255, 211, 211, 211);
-const kDarkGreyColor = Color.fromARGB(255, 61, 61, 61);
+const Color kWhiteColor = Color.fromARGB(255, 255, 255, 255);
+const Color kBlackColor = Color.fromARGB(255, 0, 0, 0);
+const Color kGreyColor = Color.fromARGB(255, 128, 128, 128);
+const Color kLightGreyColor = Color.fromARGB(255, 211, 211, 211);
+const Color kDarkGreyColor = Color.fromARGB(255, 61, 61, 61);
+const Color kGrey2Color = Color(0xff504B4B);
+const Color kGrey3Color = Color(0xff9B9B9B);
+const Color kGreyWebBGColor = Color(0xffE6EBF5);
 
 const double kFontSmall = 12;
 const double kButtonFontSize = 12;

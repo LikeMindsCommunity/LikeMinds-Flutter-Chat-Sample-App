@@ -18,7 +18,7 @@ class ConversationPaginationLoading extends ConversationState {
 }
 
 class ConversationLoaded extends ConversationState {
-  GetConversationResponse getConversationResponse;
+  final GetConversationResponse getConversationResponse;
 
   ConversationLoaded(this.getConversationResponse);
 
