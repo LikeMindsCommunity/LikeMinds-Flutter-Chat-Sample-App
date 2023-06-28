@@ -195,7 +195,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       if (response.success) {
         PostConversationResponse postConversationResponse = response.data!;
         if (postConversationResponse.success) {
-          List<dynamic> fileLink = [];
+          List<Media> fileLink = [];
           int length = event.mediaFiles.length;
           for (int i = 0; i < length; i++) {
             Media media = event.mediaFiles[i];
@@ -255,9 +255,10 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
                     ),
                   );
                 } else {
-                  fileLink.add(
-                    putMediaRequest.toJson(),
-                  );
+                  Media mediaItem = Media.fromJson(putMediaRequest.toJson());
+                  mediaItem.mediaFile = media.mediaFile;
+                  mediaItem.thumbnailFile = media.thumbnailFile;
+                  fileLink.add(mediaItem);
                 }
               }
             }

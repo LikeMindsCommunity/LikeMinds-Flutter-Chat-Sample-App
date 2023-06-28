@@ -310,13 +310,17 @@ class _DocumentTileState extends State<DocumentTile> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
                                         children: <Widget>[
-                                          kHorizontalPaddingXSmall,
-                                          Text(
-                                            "${widget.media.pageCount!} ${widget.media.pageCount! > 1 ? "Pages" : "Page"}",
-                                            style: TextStyle(
-                                                fontSize: 8.sp,
-                                                color: kGrey3Color),
-                                          ),
+                                          widget.media.pageCount == null
+                                              ? const SizedBox()
+                                              : kHorizontalPaddingXSmall,
+                                          widget.media.pageCount == null
+                                              ? const SizedBox()
+                                              : Text(
+                                                  "${widget.media.pageCount!} ${widget.media.pageCount! > 1 ? "Pages" : "Page"}",
+                                                  style: TextStyle(
+                                                      fontSize: 8.sp,
+                                                      color: kGrey3Color),
+                                                ),
                                           kHorizontalPaddingXSmall,
                                           Text(
                                             '·',

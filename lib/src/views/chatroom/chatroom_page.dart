@@ -38,7 +38,8 @@ class ChatroomPage extends StatefulWidget {
 
 class _ChatroomPageState extends State<ChatroomPage> {
   ChatActionBloc? chatActionBloc;
-  Map<String, dynamic> conversationAttachmentsMeta = <String, dynamic>{};
+  Map<String, List<Media>> conversationAttachmentsMeta =
+      <String, List<Media>>{};
   Map<String, List<Media>> mediaFiles = <String, List<Media>>{};
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
@@ -185,9 +186,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
     }
     if (!conversationAttachmentsMeta
         .containsKey(state.postConversationResponse.conversation!.id)) {
+      List<Media> putMediaAttachment = state.putMediaResponse;
       conversationAttachmentsMeta[
               '${state.postConversationResponse.conversation!.id}'] =
-          state.putMediaResponse;
+          putMediaAttachment;
     }
     List<Conversation> conversationList =
         pagedListController.itemList ?? <Conversation>[];
@@ -262,8 +264,16 @@ class _ChatroomPageState extends State<ChatroomPage> {
       if (state.getConversationResponse.conversationAttachmentsMeta != null &&
           state.getConversationResponse.conversationAttachmentsMeta!
               .isNotEmpty) {
-        conversationAttachmentsMeta
-            .addAll(state.getConversationResponse.conversationAttachmentsMeta!);
+        Map<String, List<Media>> getConversationAttachmentData = state
+            .getConversationResponse.conversationAttachmentsMeta!
+            .map((key, value) {
+          return MapEntry(
+            key,
+            (value as List<dynamic>?)?.map((e) => Media.fromJson(e)).toList() ??
+                [],
+          );
+        });
+        conversationAttachmentsMeta.addAll(getConversationAttachmentData);
       }
 
       if (state.getConversationResponse.userMeta != null) {
@@ -795,12 +805,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                   .containsKey(state
                                                       .conversation.id
                                                       .toString())
-                                              ? (conversationAttachmentsMeta[
-                                                          '${state.conversation.id}']
-                                                      as List<dynamic>?)
-                                                  ?.map(
-                                                      (e) => Media.fromJson(e))
-                                                  .toList()
+                                              ? conversationAttachmentsMeta[
+                                                  '${state.conversation.id}']
                                               : null,
                                       scrollToBottom: _scrollToBottom,
                                       userMeta: userMeta,

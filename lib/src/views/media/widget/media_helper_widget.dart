@@ -169,7 +169,7 @@ Widget getDocumentDetails(Media document) {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
-          '${document.pageCount ?? 0} ${(document.pageCount ?? 0) > 1 ? 'pages' : 'page'} ● ${getFileSizeString(bytes: document.size!)} ● PDF',
+          '${document.pageCount ?? ''} ${document.pageCount == null ? '' : (document.pageCount ?? 0) > 1 ? 'pages' : 'page'} ${document.pageCount == null ? '' : '●'} ${getFileSizeString(bytes: document.size!)} ● PDF',
           style: LMTheme.medium.copyWith(
             color: kWhiteColor,
           ),
@@ -259,9 +259,12 @@ Future<List<Media>> pickDocumentFiles() async {
   if (pickedFiles.files.isNotEmpty) {
     for (int i = 0; i < pickedFiles.files.length; i++) {
       File file = File(pickedFiles.paths[i]!);
-      int? pageCount = await PdfBitmaps().pdfPageCount(
-        params: PDFPageCountParams(pdfPath: file.path),
-      );
+      int? pageCount;
+      if (Platform.isAndroid) {
+        pageCount = await PdfBitmaps().pdfPageCount(
+          params: PDFPageCountParams(pdfPath: file.path),
+        );
+      }
       Media media = Media(
         mediaType: MediaType.document,
         mediaFile: file,
