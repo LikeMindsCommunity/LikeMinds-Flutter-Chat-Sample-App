@@ -25,7 +25,7 @@ export 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 export 'package:likeminds_chat_mm_fl/src/utils/branding/lm_fonts.dart';
 export 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
 
-const bool isDebug = !bool.fromEnvironment('DEBUG');
+const bool isDebug = bool.fromEnvironment('DEBUG');
 
 class LMChat extends StatelessWidget {
   final String _userId;
@@ -89,8 +89,6 @@ class LMChat extends StatelessWidget {
   }
 
   firebase() async {
-    // bool? isDebug = const bool.fromEnvironment('DEBUG');
-
     try {
       final clientFirebase = Firebase.app();
       final ourFirebase = await Firebase.initializeApp(
