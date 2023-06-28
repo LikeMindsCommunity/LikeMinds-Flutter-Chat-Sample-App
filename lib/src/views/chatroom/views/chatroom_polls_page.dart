@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_polls/flutter_polls.dart';
 import 'package:google_fonts/google_fonts.dart';
-import "../../../widgets/back_button.dart" as BB;
+import "../../../widgets/back_button.dart" as bb;
 
 class ChatroomPollsPage extends StatefulWidget {
   const ChatroomPollsPage({super.key});
@@ -22,7 +22,7 @@ class _ChatroomPollsPageState extends State<ChatroomPollsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const BB.BackButton(),
+                const bb.BackButton(),
                 Text(
                   "Create Poll",
                   style: GoogleFonts.montserrat(

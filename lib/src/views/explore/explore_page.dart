@@ -6,7 +6,7 @@ import 'package:likeminds_chat_mm_fl/src/views/explore/space_enum.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/bloc_error.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/page_skeleton.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as bb;
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -90,7 +90,7 @@ class _ExplorePageState extends State<ExplorePage> {
   Widget build(BuildContext context) {
     return PageSkeleton(
       appBarChildren: [
-        const BB.BackButton(),
+        const bb.BackButton(),
         const SizedBox(width: 24),
         Text(
           "Explore Spaces",

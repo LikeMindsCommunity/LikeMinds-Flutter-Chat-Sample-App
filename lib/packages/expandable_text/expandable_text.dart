@@ -84,7 +84,7 @@ class ExpandableText extends StatefulWidget {
 
 class ExpandableTextState extends State<ExpandableText>
     with TickerProviderStateMixin {
-  late String _passedText;
+  // late String _passedText;
   bool _expanded = false;
   RegExp regExp = RegExp(kRegexLinksAndTags);
   late TapGestureRecognizer _linkTapGestureRecognizer;
@@ -96,7 +96,7 @@ class ExpandableTextState extends State<ExpandableText>
   @override
   void initState() {
     super.initState();
-    _passedText = widget.text;
+    // _passedText = widget.text;
     widget.linkStyle ??= LMTheme.medium.copyWith(
       fontSize: 9.sp,
       color: LMTheme.textLinkColor,
@@ -124,8 +124,9 @@ class ExpandableTextState extends State<ExpandableText>
   void dispose() {
     _linkTapGestureRecognizer.dispose();
     _prefixTapGestureRecognizer.dispose();
-    _textSegmentsTapGestureRecognizers
-        .forEach((recognizer) => recognizer.dispose());
+    for (var recognizer in _textSegmentsTapGestureRecognizers) {
+      recognizer.dispose();
+    }
     super.dispose();
   }
 
@@ -156,9 +157,9 @@ class ExpandableTextState extends State<ExpandableText>
 
     final linkText =
         (_expanded ? widget.collapseText : widget.expandText) ?? '';
-    final linkColor = widget.linkColor ??
-        widget.linkStyle?.color ??
-        Theme.of(context).colorScheme.secondary;
+    // final linkColor = widget.linkColor ??
+    //     widget.linkStyle?.color ??
+    //     Theme.of(context).colorScheme.secondary;
     final linkTextStyle =
         LMTheme.medium.copyWith(color: LMTheme.textLinkColor, fontSize: 9.sp);
     // effectiveTextStyle!.merge(widget.linkStyle).copyWith(color: linkColor);
@@ -176,12 +177,12 @@ class ExpandableTextState extends State<ExpandableText>
             style: widget.linkEllipsis ? linkTextStyle : effectiveTextStyle,
             recognizer: widget.linkEllipsis ? _linkTapGestureRecognizer : null,
           ),
-        if (linkText.length > 0)
+        if (linkText.isNotEmpty)
           TextSpan(
             style: effectiveTextStyle,
             children: <TextSpan>[
               if (_expanded)
-                TextSpan(
+                const TextSpan(
                   text: '',
                 ),
               TextSpan(
@@ -250,7 +251,7 @@ class ExpandableTextState extends State<ExpandableText>
                 TaggingHelper.convertRouteToTagAndUserMap(widget.text);
             List<UserTag> userTags = response['userTags'];
             resultText = response['text'];
-            final lineCount = textPainter.computeLineMetrics().length;
+            // final lineCount = textPainter.computeLineMetrics().length;
             final nCount = '\n'.allMatches(resultText).length + 1;
             if (resultText.length > 500 || nCount > 4) {
               resultText = resultText.substring(0, max(endOffset, 0));
@@ -320,8 +321,9 @@ class ExpandableTextState extends State<ExpandableText>
   }
 
   void _updateText() {
-    _textSegmentsTapGestureRecognizers
-        .forEach((recognizer) => recognizer.dispose());
+    for (var recognizer in _textSegmentsTapGestureRecognizers) {
+      recognizer.dispose();
+    }
     _textSegmentsTapGestureRecognizers.clear();
 
     if (widget.onUrlTap == null &&
@@ -333,7 +335,7 @@ class ExpandableTextState extends State<ExpandableText>
 
     _textSegments = parseText(widget.text);
 
-    _textSegments.forEach((element) {
+    for (var element in _textSegments) {
       if (element.isUrl && widget.onUrlTap != null) {
         final recognizer = TapGestureRecognizer()
           ..onTap = () {
@@ -356,7 +358,7 @@ class ExpandableTextState extends State<ExpandableText>
 
         _textSegmentsTapGestureRecognizers.add(recognizer);
       }
-    });
+    }
   }
 
   List<TextSpan> _buildTextSpans(List<TextSegment> segments,

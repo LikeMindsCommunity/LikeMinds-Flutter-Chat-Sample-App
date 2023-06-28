@@ -11,7 +11,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/ui_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/participants_bloc/participants_bloc.dart';
 
-import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as bb;
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 class ChatroomParticipantsPage extends StatefulWidget {
@@ -99,7 +99,7 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       rebuildSearchBar.value
-                          ? const BB.BackButton()
+                          ? const bb.BackButton()
                           : const SizedBox(),
                       rebuildSearchBar.value
                           ? kHorizontalPaddingXLarge
@@ -154,7 +154,7 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                const BB.BackButton(),
+                                const bb.BackButton(),
                                 kHorizontalPaddingXLarge,
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

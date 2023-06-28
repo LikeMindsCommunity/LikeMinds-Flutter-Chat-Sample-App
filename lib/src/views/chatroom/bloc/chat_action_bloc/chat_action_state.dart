@@ -100,7 +100,7 @@ class MultiMediaConversationLoading extends ChatActionState {
 
 class MultiMediaConversationPosted extends ChatActionState {
   final PostConversationResponse postConversationResponse;
-  final List<dynamic> putMediaResponse;
+  final List<Media> putMediaResponse;
 
   MultiMediaConversationPosted(
     this.postConversationResponse,
@@ -149,6 +149,30 @@ class ReplyConversationState extends ChatActionState {
 }
 
 class ReplyRemoveState extends ChatActionState {
+  @override
+  List<Object> get props => [];
+}
+
+class EditConversationState extends ChatActionState {
+  final int chatroomId;
+  final int conversationId;
+  final Conversation editConversation;
+
+  EditConversationState({
+    required this.chatroomId,
+    required this.conversationId,
+    required this.editConversation,
+  });
+
+  @override
+  List<Object> get props => [
+        chatroomId,
+        conversationId,
+        editConversation.toEntity().toJson(),
+      ];
+}
+
+class EditRemoveState extends ChatActionState {
   @override
   List<Object> get props => [];
 }

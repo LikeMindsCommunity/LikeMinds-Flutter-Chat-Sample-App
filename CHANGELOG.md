@@ -10,3 +10,10 @@ Added member rights
 ## 1.1.1
 
 Fixing an issue with reply
+
+## 1.2.0
+
+Added document attachment support
+Added edit conversation support
+Added video attachment support
+Fixing an issue with reply

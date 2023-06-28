@@ -4,7 +4,7 @@ import 'package:likeminds_chat_mm_fl/src/views/profile/bloc/profile_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/big_button.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/bloc_error.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/page_skeleton.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as bb;
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -26,7 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
       isListView: true,
       backgroundColor: LMBranding.instance.headerColor,
       appBarChildren: [
-        const BB.BackButton(),
+        const bb.BackButton(),
         Text(
           '',
           style: LMBranding.instance.fonts.regular.copyWith(

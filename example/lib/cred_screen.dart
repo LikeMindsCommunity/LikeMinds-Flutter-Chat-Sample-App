@@ -3,7 +3,6 @@ import 'package:flutter_material_color_picker/flutter_material_color_picker.dart
 import 'package:google_fonts/google_fonts.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:lm_chat_example/environment/env.dart';
-import 'package:lm_chat_example/main.dart';
 import 'package:lm_chat_example/network_handling.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:sizer/sizer.dart';

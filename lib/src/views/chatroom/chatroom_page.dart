@@ -1,8 +1,6 @@
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
-import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
@@ -10,8 +8,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart'
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
@@ -19,7 +16,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chat
 import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
-import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as BB;
+import 'package:likeminds_chat_mm_fl/src/widgets/back_button.dart' as bb;
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/chatroom_skeleton.dart';
 
 import 'bloc/chatroom_bloc.dart';
@@ -41,7 +38,8 @@ class ChatroomPage extends StatefulWidget {
 
 class _ChatroomPageState extends State<ChatroomPage> {
   ChatActionBloc? chatActionBloc;
-  Map<String, dynamic> conversationAttachmentsMeta = <String, dynamic>{};
+  Map<String, List<Media>> conversationAttachmentsMeta =
+      <String, List<Media>>{};
   Map<String, List<Media>> mediaFiles = <String, List<Media>>{};
   int currentTime = DateTime.now().millisecondsSinceEpoch;
   ValueNotifier rebuildConversationList = ValueNotifier(false);
@@ -188,9 +186,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
     }
     if (!conversationAttachmentsMeta
         .containsKey(state.postConversationResponse.conversation!.id)) {
+      List<Media> putMediaAttachment = state.putMediaResponse;
       conversationAttachmentsMeta[
               '${state.postConversationResponse.conversation!.id}'] =
-          state.putMediaResponse;
+          putMediaAttachment;
     }
     List<Conversation> conversationList =
         pagedListController.itemList ?? <Conversation>[];
@@ -265,8 +264,16 @@ class _ChatroomPageState extends State<ChatroomPage> {
       if (state.getConversationResponse.conversationAttachmentsMeta != null &&
           state.getConversationResponse.conversationAttachmentsMeta!
               .isNotEmpty) {
-        conversationAttachmentsMeta
-            .addAll(state.getConversationResponse.conversationAttachmentsMeta!);
+        Map<String, List<Media>> getConversationAttachmentData = state
+            .getConversationResponse.conversationAttachmentsMeta!
+            .map((key, value) {
+          return MapEntry(
+            key,
+            (value as List<dynamic>?)?.map((e) => Media.fromJson(e)).toList() ??
+                [],
+          );
+        });
+        conversationAttachmentsMeta.addAll(getConversationAttachmentData);
       }
 
       if (state.getConversationResponse.userMeta != null) {
@@ -286,6 +293,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
     }
   }
 
+  void updateEditedConversation(Conversation editedConversation) {
+    List<Conversation> conversationList =
+        pagedListController.itemList ?? <Conversation>[];
+    int index = conversationList
+        .indexWhere((element) => element.id == editedConversation.id);
+    if (index != -1) {
+      conversationList[index] = editedConversation;
+    }
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
+  }
+
   @override
   Widget build(BuildContext context) {
     // conversationBloc = BlocProvider.of<ConversationBloc>(context);
@@ -298,7 +317,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
             MarkReadChatroomEvent(chatroomId: widget.chatroomId),
           );
           BlocProvider.of<HomeBloc>(context).add(UpdateHomeEvent());
-          context.pop();
+          router.pop();
           return false;
         },
         child: Scaffold(
@@ -352,6 +371,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
                       conversationId: lastConversationId,
                     ),
                   );
+                  LMAnalytics.get().track(AnalyticsKeys.chatroomOpened, {
+                    'chatroom_id': chatroom!.id,
+                    'community_id': chatroom!.communityId,
+                    'chatroom_type': chatroom!.type,
+                    'source': 'home_feed',
+                  });
                 }
               },
               builder: (context, state) {
@@ -361,12 +386,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 }
 
                 if (state is ChatroomLoaded) {
-                  LMAnalytics.get().track(AnalyticsKeys.chatroomOpened, {
-                    'chatroom_id': chatroom!.id,
-                    'community_id': chatroom!.communityId,
-                    'chatroom_type': chatroom!.type,
-                    'source': 'home_feed',
-                  });
                   var pagedListView = ValueListenableBuilder(
                     valueListenable: rebuildConversationList,
                     builder: (context, _, __) {
@@ -441,8 +460,22 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                     );
                                   }
                                   // item.
+
                                   return ChatBubble(
                                     key: Key(item.id.toString()),
+                                    userMeta: userMeta,
+                                    onEdit: (conversation) {
+                                      if (chatActionBloc == null) {
+                                        return;
+                                      }
+                                      chatActionBloc?.add(
+                                        EditingConversation(
+                                          chatroomId: chatroom!.id,
+                                          conversationId: conversation.id,
+                                          editConversation: conversation,
+                                        ),
+                                      );
+                                    },
                                     onReply: (replyingTo) {
                                       if (chatActionBloc == null) {
                                         return;
@@ -470,6 +503,15 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                 '${item.id}']
                                             : conversationAttachmentsMeta[
                                                 item.temporaryId],
+                                    replyConversationAttachments:
+                                        item.replyId != null
+                                            ? conversationAttachmentsMeta
+                                                    .containsKey(
+                                                        item.replyId.toString())
+                                                ? conversationAttachmentsMeta[
+                                                    item.replyId.toString()]
+                                                : null
+                                            : null,
                                     isSelected: (isSelected) {
                                       if (isSelected) {
                                         selectedConversations.add(item);
@@ -577,7 +619,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                       children: [
                                         Visibility(
                                           visible: !widget.isRoot,
-                                          child: BB.BackButton(
+                                          child: bb.BackButton(
                                             onTap: () {
                                               BlocProvider.of<HomeBloc>(context)
                                                   .add(UpdateHomeEvent());
@@ -637,7 +679,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    const BB.BackButton(),
+                                    const bb.BackButton(),
                                     SizedBox(width: 4.w),
                                     PictureOrInitial(
                                       fallbackText: chatroom!.header,
@@ -698,6 +740,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               addLocalConversationToPagedList(
                                   state.conversation);
                             }
+                            if (state is ConversationEdited) {
+                              updateEditedConversation(
+                                  state.editConversationResponse.conversation!);
+                            }
                             if (state is ConversationPosted) {
                               addConversationToPagedList(
                                 state.postConversationResponse.conversation!,
@@ -734,21 +780,42 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             if (state is ReplyConversationState) {
                               rebuildChatBar.value = !rebuildChatBar.value;
                             }
+                            if (state is EditConversationState) {
+                              rebuildChatBar.value = !rebuildChatBar.value;
+                            }
                           },
                           builder: (context, state) {
                             return ValueListenableBuilder(
                                 valueListenable: rebuildChatBar,
                                 builder: (context, _, __) {
+                                  if (state is EditConversationState) {
+                                    return ChatBar(
+                                      chatroom: chatroom!,
+                                      editConversation: state.editConversation,
+                                      scrollToBottom: _scrollToBottom,
+                                      userMeta: userMeta,
+                                    );
+                                  }
                                   if (state is ReplyConversationState) {
                                     return ChatBar(
                                       chatroom: chatroom!,
                                       replyToConversation: state.conversation,
+                                      replyConversationAttachments:
+                                          conversationAttachmentsMeta
+                                                  .containsKey(state
+                                                      .conversation.id
+                                                      .toString())
+                                              ? conversationAttachmentsMeta[
+                                                  '${state.conversation.id}']
+                                              : null,
                                       scrollToBottom: _scrollToBottom,
+                                      userMeta: userMeta,
                                     );
                                   }
                                   return ChatBar(
                                     chatroom: chatroom!,
                                     scrollToBottom: _scrollToBottom,
+                                    userMeta: userMeta,
                                   );
                                 });
                           }),

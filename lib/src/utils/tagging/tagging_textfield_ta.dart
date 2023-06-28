@@ -224,6 +224,7 @@ class _TaggingAheadTextFieldState extends State<TaggingAheadTextField> {
                 TextPosition(offset: _controller.text.length));
             tagValue = '';
             textValue = _controller.value.text;
+            page = 1;
           });
         }),
       ),

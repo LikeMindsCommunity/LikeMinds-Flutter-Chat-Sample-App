@@ -4,35 +4,43 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 import 'package:simple_s3/simple_s3.dart';
 
-enum MediaType { photo, video, document, audio, poll }
+enum MediaType { photo, video, document, audio, gif, voiceNote }
 
-MediaType mapIntToMediaType(int mediaType) {
+String mapMediaTypeToString(MediaType mediaType) {
   switch (mediaType) {
-    case 1:
-      return MediaType.photo;
-    case 2:
-      return MediaType.video;
-    case 3:
-      return MediaType.document;
-    case 4:
-      return MediaType.audio;
-    case 5:
-      return MediaType.poll;
+    case MediaType.photo:
+      return kAttachmentTypeImage;
+    case MediaType.video:
+      return kAttachmentTypeVideo;
+    case MediaType.document:
+      return kAttachmentTypePDF;
+    case MediaType.audio:
+      return kAttachmentTypeAudio;
+    case MediaType.gif:
+      return kAttachmentTypeGIF;
+    case MediaType.voiceNote:
+      return kAttachmentTypeVoiceNote;
     default:
-      return MediaType.photo;
+      return kAttachmentTypeImage;
   }
 }
 
-int mapMediaTypeToInt(MediaType mediaType) {
+MediaType mapStringToMediaType(String mediaType) {
   switch (mediaType) {
-    case MediaType.photo:
-      return 1;
-    case MediaType.video:
-      return 2;
-    case MediaType.document:
-      return 3;
+    case kAttachmentTypeImage:
+      return MediaType.photo;
+    case kAttachmentTypeVideo:
+      return MediaType.video;
+    case kAttachmentTypePDF:
+      return MediaType.document;
+    case kAttachmentTypeAudio:
+      return MediaType.audio;
+    case kAttachmentTypeGIF:
+      return MediaType.gif;
+    case kAttachmentTypeVoiceNote:
+      return MediaType.voiceNote;
     default:
-      return -1;
+      return MediaType.photo;
   }
 }
 
@@ -58,6 +66,16 @@ class Media {
     this.thumbnailUrl,
     this.width,
   });
+
+  static Media fromJson(dynamic json) => Media(
+        mediaType: mapStringToMediaType(json['type']),
+        height: json['height'] as int?,
+        mediaUrl: json['url'] ?? json['file_url'],
+        size: json['meta']['size'],
+        width: json['width'] as int?,
+        thumbnailUrl: json['thumbnail_url'] as String?,
+        pageCount: json['meta']['number_of_page'] as int?,
+      );
 }
 
 class MediaService {

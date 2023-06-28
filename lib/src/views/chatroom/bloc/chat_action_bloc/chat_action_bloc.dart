@@ -2,16 +2,17 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:equatable/equatable.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:bloc/bloc.dart';
+import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/media/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
+import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 
 part 'chat_action_event.dart';
 part 'chat_action_state.dart';
-
-const bool isDebug = bool.fromEnvironment('DEBUG');
 
 class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
   MediaService mediaService = MediaService(!isDebug);
@@ -40,13 +41,31 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     on<UpdateConversationList>((event, emit) async {
       if (lastConversationId != null &&
           event.conversationId != lastConversationId) {
+        int maxTimestamp = DateTime.now().millisecondsSinceEpoch;
         final response = await locator<LikeMindsService>()
-            .getSingleConversation((GetSingleConversationRequestBuilder()
+            .getConversation((GetConversationRequestBuilder()
                   ..chatroomId(event.chatroomId)
+                  ..minTimestamp(0)
+                  ..maxTimestamp(maxTimestamp)
+                  ..page(1)
+                  ..pageSize(200)
                   ..conversationId(event.conversationId))
                 .build());
         if (response.success) {
-          emit(UpdateConversation(response: response.data!.conversation!));
+          Conversation realTimeConversation =
+              response.data!.conversationData!.first;
+          if (response.data!.conversationMeta != null &&
+              realTimeConversation.replyId != null) {
+            Conversation? replyConversationObject = response.data!
+                .conversationMeta![realTimeConversation.replyId.toString()];
+            realTimeConversation.replyConversationObject =
+                replyConversationObject;
+          }
+          emit(
+            UpdateConversation(
+              response: realTimeConversation,
+            ),
+          );
 
           lastConversationId = event.conversationId;
         }
@@ -66,6 +85,24 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         );
       },
     );
+    on<EditConversation>(
+      (event, emit) async {
+        await mapEditConversation(
+          event,
+          emit,
+        );
+      },
+    );
+    on<EditingConversation>(
+      (event, emit) async {
+        emit(EditConversationState(
+          chatroomId: event.chatroomId,
+          conversationId: event.conversationId,
+          editConversation: event.editConversation,
+        ));
+      },
+    );
+    on<EditRemove>((event, emit) => emit(EditRemoveState()));
     on<ReplyConversation>((event, emit) async {
       emit(ReplyConversationState(
         chatroomId: event.chatroomId,
@@ -74,6 +111,54 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       ));
     });
     on<ReplyRemove>((event, emit) => emit(ReplyRemoveState()));
+  }
+
+  mapEditConversation(
+      EditConversation event, Emitter<ChatActionState> emit) async {
+    emit(EditRemoveState());
+    try {
+      LMResponse<EditConversationResponse> response =
+          await locator<LikeMindsService>().editConversation(
+        event.editConversationRequest,
+      );
+
+      if (response.success) {
+        if (response.data!.success) {
+          Conversation conversation = response.data!.conversation!;
+          if (conversation.replyId != null ||
+              conversation.replyConversation != null) {
+            conversation.replyConversationObject = event.replyConversation;
+          }
+          emit(
+            ConversationEdited(response.data!),
+          );
+        } else {
+          emit(
+            ChatActionError(
+              response.data!.errorMessage!,
+              event.editConversationRequest.conversationId.toString(),
+            ),
+          );
+          return false;
+        }
+      } else {
+        emit(
+          ChatActionError(
+            response.errorMessage!,
+            event.editConversationRequest.conversationId.toString(),
+          ),
+        );
+        return false;
+      }
+    } catch (e) {
+      emit(
+        ChatActionError(
+          "An error occurred while editing the message",
+          event.editConversationRequest.conversationId.toString(),
+        ),
+      );
+      return false;
+    }
   }
 
   mapPostMultiMediaConversation(
@@ -110,7 +195,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       if (response.success) {
         PostConversationResponse postConversationResponse = response.data!;
         if (postConversationResponse.success) {
-          List<dynamic> fileLink = [];
+          List<Media> fileLink = [];
           int length = event.mediaFiles.length;
           for (int i = 0; i < length; i++) {
             Media media = event.mediaFiles[i];
@@ -119,17 +204,36 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
               event.postConversationRequest.chatroomId,
               postConversationResponse.conversation!.id,
             );
+            String? thumbnailUrl;
+            if (media.mediaType == MediaType.video) {
+              // If the thumbnail file is not present in media object
+              // then generate the thumbnail and upload it to the server
+              if (media.thumbnailFile == null) {
+                await getVideoThumbnail(media);
+              }
+              thumbnailUrl = await mediaService.uploadFile(
+                media.thumbnailFile!,
+                event.postConversationRequest.chatroomId,
+                postConversationResponse.conversation!.id,
+              );
+            }
+
             if (url == null) {
               throw 'Error uploading file';
             } else {
+              String attachmentType = mapMediaTypeToString(media.mediaType);
               PutMediaRequest putMediaRequest = (PutMediaRequestBuilder()
                     ..conversationId(postConversationResponse.conversation!.id)
                     ..filesCount(length)
                     ..index(i)
-                    ..height(media.height!)
-                    ..width(media.width!)
-                    ..meta({'size': media.size})
-                    ..type("image")
+                    ..height(media.height)
+                    ..width(media.width)
+                    ..meta({
+                      'size': media.size,
+                      'number_of_page': media.pageCount,
+                    })
+                    ..type(attachmentType)
+                    ..thumbnailUrl(thumbnailUrl)
                     ..url(url))
                   .build();
               LMResponse<PutMediaResponse> uploadFileResponse =
@@ -151,9 +255,10 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
                     ),
                   );
                 } else {
-                  fileLink.add(
-                    putMediaRequest.toJson(),
-                  );
+                  Media mediaItem = Media.fromJson(putMediaRequest.toJson());
+                  mediaItem.mediaFile = media.mediaFile;
+                  mediaItem.thumbnailFile = media.thumbnailFile;
+                  fileLink.add(mediaItem);
                 }
               }
             }
