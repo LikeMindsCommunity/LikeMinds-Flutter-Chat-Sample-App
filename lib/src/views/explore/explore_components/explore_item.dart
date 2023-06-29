@@ -1,25 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_components/join_button.dart';
-import 'package:likeminds_chat_mm_fl/src/views/explore/models/space_model.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
-class ExploreItem extends StatelessWidget {
+class ExploreItem extends StatefulWidget {
   const ExploreItem({
     Key? key,
-    required this.space,
+    required this.chatroom,
     required this.onTap,
     required this.refresh,
   }) : super(key: key);
 
-  final SpaceModel space;
+  final ChatRoom chatroom;
   final Function() onTap;
   final Function() refresh;
+
+  @override
+  State<ExploreItem> createState() => _ExploreItemState();
+}
+
+class _ExploreItemState extends State<ExploreItem> {
+  ValueNotifier<bool> isJoinedNotifier = ValueNotifier(false);
+  User user = UserLocalPreference.instance.fetchUserData();
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        onTap();
+        widget.onTap();
       },
       child: SizedBox(
         height: 120,
@@ -27,24 +39,20 @@ class ExploreItem extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                  height: 64,
-                  width: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        space.imageUrl,
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                  )),
+              SizedBox(
+                height: 64,
+                width: 64,
+                child: PictureOrInitial(
+                    fallbackText: widget.chatroom.header,
+                    imageUrl: widget.chatroom.chatroomImageUrl),
+              ),
               const SizedBox(width: 18),
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
@@ -53,7 +61,9 @@ class ExploreItem extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                space.name,
+                                widget.chatroom.header,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -69,7 +79,7 @@ class ExploreItem extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    space.members.toString(),
+                                    widget.chatroom.participantCount.toString(),
                                     style: GoogleFonts.roboto(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
@@ -85,7 +95,7 @@ class ExploreItem extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    space.messages.toString(),
+                                    widget.chatroom.answersCount.toString(),
                                     style: GoogleFonts.roboto(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
@@ -99,24 +109,64 @@ class ExploreItem extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        JoinButton(
-                          isJoined: space.isJoined,
-                          onTap: () {
-                            space.isJoined = !space.isJoined;
-                            refresh();
-                          },
-                        ),
+                        ValueListenableBuilder(
+                            valueListenable: isJoinedNotifier,
+                            builder: (context, _, __) {
+                              return JoinButton(
+                                chatroom: widget.chatroom,
+                                onTap: () async {
+                                  if (widget.chatroom.followStatus == true) {
+                                    LMResponse response =
+                                        await locator<LikeMindsService>()
+                                            .followChatroom(
+                                                (FollowChatroomRequestBuilder()
+                                                      ..chatroomId(
+                                                          widget.chatroom.id)
+                                                      ..memberId(user.id)
+                                                      ..value(false))
+                                                    .build());
+                                    widget.chatroom.followStatus = false;
+                                    isJoinedNotifier.value =
+                                        !isJoinedNotifier.value;
+                                    if (!response.success) {
+                                      widget.chatroom.followStatus = true;
+                                      isJoinedNotifier.value =
+                                          !isJoinedNotifier.value;
+                                    }
+                                  } else {
+                                    LMResponse response =
+                                        await locator<LikeMindsService>()
+                                            .followChatroom(
+                                                (FollowChatroomRequestBuilder()
+                                                      ..chatroomId(
+                                                          widget.chatroom.id)
+                                                      ..memberId(user.id)
+                                                      ..value(true))
+                                                    .build());
+                                    widget.chatroom.followStatus = true;
+                                    isJoinedNotifier.value =
+                                        !isJoinedNotifier.value;
+                                    if (!response.success) {
+                                      widget.chatroom.followStatus = false;
+                                      isJoinedNotifier.value =
+                                          !isJoinedNotifier.value;
+                                    }
+                                  }
+                                },
+                              );
+                            }),
                         const SizedBox(width: 4),
                       ],
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      space.description,
+                      widget.chatroom.title,
                       style: GoogleFonts.roboto(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
                         color: Colors.grey[600],
                       ),
+                      textAlign: TextAlign.left,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

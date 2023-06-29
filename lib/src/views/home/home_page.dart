@@ -1,6 +1,11 @@
+import 'package:flutter_svg/svg.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
@@ -116,59 +121,132 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(top: 1.h),
-            child: BlocConsumer<HomeBloc, HomeState>(
-              bloc: homeBloc,
-              listener: (context, state) {
-                updatePagingControllers(state);
-              },
-              buildWhen: (previous, current) {
-                if (previous is HomeLoaded && current is HomeLoading) {
-                  return false;
-                } else if (previous is UpdateHomeFeed &&
-                    current is HomeLoading) {
-                  return false;
-                }
-                return true;
-              },
-              builder: (context, state) {
-                if (state is HomeLoading) {
-                  return const SkeletonChatList();
-                } else if (state is HomeError) {
-                  return Center(
-                    child: Text(state.message),
-                  );
-                } else if (state is HomeLoaded ||
-                    state is UpdateHomeFeed ||
-                    state is UpdatedHomeFeed) {
-                  return SafeArea(
-                    top: false,
-                    child: ValueListenableBuilder(
-                        valueListenable: rebuildPagedList,
-                        builder: (context, _, __) {
-                          return PagedListView<int, ChatItem>(
-                            pagingController: homeFeedPagingController,
-                            padding: EdgeInsets.zero,
-                            physics: const ClampingScrollPhysics(),
-                            builderDelegate:
-                                PagedChildBuilderDelegate<ChatItem>(
-                              newPageProgressIndicatorBuilder: (_) =>
-                                  const SizedBox(),
-                              noItemsFoundIndicatorBuilder: (context) =>
-                                  const SizedBox(),
-                              itemBuilder: (context, item, index) {
-                                return item;
-                              },
-                            ),
-                          );
-                        }),
-                  );
-                }
-                return const SizedBox();
-              },
+        GestureDetector(
+          onTap: () {
+            router.push(exploreRoute);
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 4.w,
             ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(
+                  height: 42.sp,
+                  width: 42.sp,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        kAssetExploreIcon,
+                        color: LMTheme.buttonColor,
+                        width: 8.w,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 4.w,
+                  ),
+                  child: Text(
+                    'Explore chatrooms',
+                    style: LMTheme.bold.copyWith(fontSize: 12.sp),
+                  ),
+                ),
+                const Spacer(),
+                FutureBuilder(
+                    future: locator<LikeMindsService>().getExploreTabCount(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container();
+                      }
+                      if (snapshot.connectionState == ConnectionState.done &&
+                          snapshot.hasData) {
+                        if (snapshot.data!.success) {
+                          GetExploreTabCountResponse response =
+                              snapshot.data!.data!;
+                          if (response.unseenChannelCount == 0) {
+                            return Container();
+                          } else {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                                vertical: 4.0,
+                              ),
+                              decoration: BoxDecoration(
+                                  color: LMTheme.buttonColor,
+                                  borderRadius: BorderRadius.circular(
+                                    10.0,
+                                  ),
+                                  shape: BoxShape.rectangle),
+                              child: Text(
+                                '${response.unseenChannelCount} new',
+                                style:
+                                    LMTheme.bold.copyWith(color: kWhiteColor),
+                              ),
+                            );
+                          }
+                        } else {
+                          const SizedBox();
+                        }
+                      }
+                      return const SizedBox();
+                    })
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: BlocConsumer<HomeBloc, HomeState>(
+            bloc: homeBloc,
+            listener: (context, state) {
+              updatePagingControllers(state);
+            },
+            buildWhen: (previous, current) {
+              if (previous is HomeLoaded && current is HomeLoading) {
+                return false;
+              } else if (previous is UpdateHomeFeed && current is HomeLoading) {
+                return false;
+              }
+              return true;
+            },
+            builder: (context, state) {
+              if (state is HomeLoading) {
+                return const SkeletonChatList();
+              } else if (state is HomeError) {
+                return Center(
+                  child: Text(state.message),
+                );
+              } else if (state is HomeLoaded ||
+                  state is UpdateHomeFeed ||
+                  state is UpdatedHomeFeed) {
+                return SafeArea(
+                  top: false,
+                  child: ValueListenableBuilder(
+                      valueListenable: rebuildPagedList,
+                      builder: (context, _, __) {
+                        return PagedListView<int, ChatItem>(
+                          pagingController: homeFeedPagingController,
+                          padding: EdgeInsets.zero,
+                          physics: const ClampingScrollPhysics(),
+                          builderDelegate: PagedChildBuilderDelegate<ChatItem>(
+                            newPageProgressIndicatorBuilder: (_) =>
+                                const SizedBox(),
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const SizedBox(),
+                            itemBuilder: (context, item, index) {
+                              return item;
+                            },
+                          ),
+                        );
+                      }),
+                );
+              }
+              return const SizedBox();
+            },
           ),
         ),
       ],
