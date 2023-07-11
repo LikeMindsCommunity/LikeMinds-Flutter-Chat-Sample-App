@@ -1,4 +1,6 @@
 import 'package:flutter/services.dart';
+import 'package:flutter_portal/flutter_portal.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
@@ -307,6 +309,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
     rebuildConversationList.value = !rebuildConversationList.value;
   }
 
+  void updateDeletedConversation(DeleteConversationResponse response) {
+    List<Conversation> conversationList =
+        pagedListController.itemList ?? <Conversation>[];
+    int index = conversationList.indexWhere(
+        (element) => element.id == response.conversations!.first.id);
+    if (index != -1) {
+      conversationList[index].deletedByUserId = currentUser.id;
+    }
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
+  }
+
   @override
   Widget build(BuildContext context) {
     // conversationBloc = BlocProvider.of<ConversationBloc>(context);
@@ -451,12 +465,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                           ),
                                           alignment: Alignment.center,
                                           child: Text(
-                                              TaggingHelper.extractStateMessage(
-                                                  item.answer),
-                                              textAlign: TextAlign.center,
-                                              style: LMTheme.medium.copyWith(
-                                                fontSize: 9.sp,
-                                              )),
+                                            TaggingHelper.extractStateMessage(
+                                                item.answer),
+                                            textAlign: TextAlign.center,
+                                            style: LMTheme.medium.copyWith(
+                                              fontSize: 9.sp,
+                                            ),
+                                          ),
                                         )
                                       ],
                                     );
@@ -546,11 +561,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         child: Column(
                           children: <Widget>[
                             kVerticalPaddingMedium,
-                            ValueListenableBuilder(
-                              valueListenable: showConversationActions,
-                              builder: (BuildContext context, dynamic value,
-                                  Widget? child) {
-                                if (value) {
+                            BlocBuilder(
+                              bloc: chatActionBloc,
+                              builder: (context, childState) {
+                                if (childState is ConversationToolBarState) {
                                   return Padding(
                                     padding:
                                         EdgeInsets.symmetric(horizontal: 2.w),
@@ -559,6 +573,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                         IconButton(
                                           onPressed: () {
                                             _clearSelection();
+                                            chatActionBloc!.add(
+                                                RemoveConversationToolBar());
                                           },
                                           icon: Icon(
                                             Icons.close,
@@ -577,7 +593,20 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                         Row(
                                           children: [
                                             IconButton(
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                if (chatActionBloc == null) {
+                                                  return;
+                                                }
+                                                chatActionBloc?.add(
+                                                  ReplyConversation(
+                                                    chatroomId: chatroom!.id,
+                                                    conversationId: childState
+                                                        .conversation.id,
+                                                    replyConversation:
+                                                        childState.conversation,
+                                                  ),
+                                                );
+                                              },
                                               icon: Icon(
                                                 Icons.reply,
                                                 size: 16.sp,
@@ -586,7 +615,20 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                             ),
                                             IconButton(
                                               onPressed: () {
-                                                // _copySelectedConversations();
+                                                Clipboard.setData(
+                                                  ClipboardData(
+                                                    text: TaggingHelper
+                                                            .convertRouteToTag(
+                                                                childState
+                                                                    .conversation
+                                                                    .answer) ??
+                                                        '',
+                                                  ),
+                                                ).then((value) {
+                                                  Fluttertoast.showToast(
+                                                      msg:
+                                                          "Copied to clipboard");
+                                                });
                                               },
                                               icon: Icon(
                                                 Icons.copy,
@@ -596,7 +638,42 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                             ),
                                             IconButton(
                                               onPressed: () {
-                                                // _deleteSelectedConversations();
+                                                if (chatActionBloc == null) {
+                                                  return;
+                                                }
+                                                chatActionBloc?.add(
+                                                  EditingConversation(
+                                                    chatroomId: chatroom!.id,
+                                                    conversationId: childState
+                                                        .conversation.id,
+                                                    editConversation:
+                                                        childState.conversation,
+                                                  ),
+                                                );
+                                              },
+                                              icon: Icon(
+                                                Icons.edit,
+                                                size: 16.sp,
+                                                color: LMTheme.buttonColor,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                if (chatActionBloc == null) {
+                                                  return;
+                                                }
+                                                DeleteConversationRequest
+                                                    request =
+                                                    (DeleteConversationRequestBuilder()
+                                                          ..conversationIds([
+                                                            childState
+                                                                .conversation.id
+                                                          ])
+                                                          ..reason("Delete"))
+                                                        .build();
+                                                chatActionBloc!.add(
+                                                  DeleteConversation(request),
+                                                );
                                               },
                                               icon: Icon(
                                                 Icons.delete,
@@ -673,66 +750,68 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                   );
                                 }
                               },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 4.w,
-                                  vertical: 2.h,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    const bb.BackButton(),
-                                    SizedBox(width: 4.w),
-                                    PictureOrInitial(
-                                      fallbackText: chatroom!.header,
-                                      imageUrl: chatroom?.chatroomImageUrl,
-                                      size: 30.sp,
-                                      fontSize: 14.sp,
-                                    ),
-                                    SizedBox(width: 4.w),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            chatroom!.header,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: LMTheme.medium.copyWith(
-                                              fontSize: 11.sp,
-                                            ),
-                                          ),
-                                          kVerticalPaddingSmall,
-                                          Text(
-                                            '${chatroom!.participantCount} participants',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: LMTheme.regular.copyWith(
-                                              fontSize: 9.sp,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    kHorizontalPaddingMedium,
-                                    ChatroomMenu(
-                                      chatroom: chatroom!,
-                                      chatroomActions: state
-                                          .getChatroomResponse.chatroomActions!,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              // child: Padding(
+                              //   padding: EdgeInsets.symmetric(
+                              //     horizontal: 4.w,
+                              //     vertical: 2.h,
+                              //   ),
+                              //   child: Row(
+                              //     mainAxisAlignment: MainAxisAlignment.start,
+                              //     children: [
+                              //       const bb.BackButton(),
+                              //       SizedBox(width: 4.w),
+                              //       PictureOrInitial(
+                              //         fallbackText: chatroom!.header,
+                              //         imageUrl: chatroom?.chatroomImageUrl,
+                              //         size: 30.sp,
+                              //         fontSize: 14.sp,
+                              //       ),
+                              //       SizedBox(width: 4.w),
+                              //       Expanded(
+                              //         child: Column(
+                              //           crossAxisAlignment:
+                              //               CrossAxisAlignment.start,
+                              //           children: [
+                              //             Text(
+                              //               chatroom!.header,
+                              //               maxLines: 1,
+                              //               overflow: TextOverflow.ellipsis,
+                              //               style: LMTheme.medium.copyWith(
+                              //                 fontSize: 11.sp,
+                              //               ),
+                              //             ),
+                              //             kVerticalPaddingSmall,
+                              //             Text(
+                              //               '${chatroom!.participantCount} participants',
+                              //               maxLines: 1,
+                              //               overflow: TextOverflow.ellipsis,
+                              //               style: LMTheme.regular.copyWith(
+                              //                 fontSize: 9.sp,
+                              //               ),
+                              //             ),
+                              //           ],
+                              //         ),
+                              //       ),
+                              //       kHorizontalPaddingMedium,
+                              //       ChatroomMenu(
+                              //         chatroom: chatroom!,
+                              //         chatroomActions: state
+                              //             .getChatroomResponse.chatroomActions!,
+                              //       ),
+                              //     ],
+                              //   ),
+                              // ),
                             ),
                             kVerticalPaddingMedium,
                           ],
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                          color: kGreyColor.withOpacity(0.2),
-                          child: pagedListView,
+                        child: Portal(
+                          child: Container(
+                            color: kGreyColor.withOpacity(0.2),
+                            child: pagedListView,
+                          ),
                         ),
                       ),
                       BlocConsumer(
@@ -745,6 +824,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                             if (state is ConversationEdited) {
                               updateEditedConversation(
                                   state.editConversationResponse.conversation!);
+                            }
+                            if (state is ConversationDelete) {
+                              updateDeletedConversation(
+                                  state.deleteConversationResponse);
                             }
                             if (state is ConversationPosted) {
                               addConversationToPagedList(

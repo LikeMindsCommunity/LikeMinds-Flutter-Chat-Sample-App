@@ -8,7 +8,6 @@ import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 
 part 'chat_action_event.dart';
@@ -111,6 +110,31 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       ));
     });
     on<ReplyRemove>((event, emit) => emit(ReplyRemoveState()));
+    on<DeleteConversation>(
+      (event, emit) async {
+        final response = await locator<LikeMindsService>()
+            .deleteConversation((DeleteConversationRequestBuilder()
+                  ..conversationIds(
+                      event.deleteConversationRequest.conversationIds)
+                  ..reason("Delete"))
+                .build());
+        if (response.success) {
+          emit(ConversationDelete(response.data!));
+        } else {
+          emit(ConversationDeleteError(
+              response.errorMessage ?? 'An error occured'));
+        }
+      },
+    );
+    on<ConversationToolBar>(
+      (event, emit) {
+        emit(ConversationToolBarState(
+            conversation: event.conversation,
+            replyConversation: event.replyConversation));
+      },
+    );
+    on<RemoveConversationToolBar>(
+        (event, emit) => emit(RemoveConversationToolBarState()));
   }
 
   mapEditConversation(
@@ -360,21 +384,3 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     }
   }
 }
-
-// realTime.onValue.listen((rtEvent) {
-//       on<NewConversation>((event, emit) {
-//         int chatroomId = event.chatroomId;
-//         lastConversationId = event.conversationId;
-//         if (rtEvent.snapshot.value != null) {
-//           final response = rtEvent.snapshot.value as Map;
-//           final conversationId = int.parse(response["collabcard"]["answer_id"]);
-//           if (lastConversationId != null &&
-//               conversationId != lastConversationId) {
-//             add(UpdateConversationList(
-//               chatroomId: chatroomId,
-//               conversationId: conversationId,
-//             ));
-//           }
-//         }
-//       });
-//     });

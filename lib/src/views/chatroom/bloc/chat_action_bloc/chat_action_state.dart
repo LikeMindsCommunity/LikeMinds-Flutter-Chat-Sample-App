@@ -83,6 +83,17 @@ class ConversationDelete extends ChatActionState {
       ];
 }
 
+class ConversationDeleteError extends ChatActionState {
+  final String errorMessage;
+
+  ConversationDeleteError(this.errorMessage);
+
+  @override
+  List<Object> get props => [
+        errorMessage,
+      ];
+}
+
 class MultiMediaConversationLoading extends ChatActionState {
   final Conversation postConversation;
   final List<Media> mediaFiles;
@@ -173,6 +184,24 @@ class EditConversationState extends ChatActionState {
 }
 
 class EditRemoveState extends ChatActionState {
+  @override
+  List<Object> get props => [];
+}
+
+class ConversationToolBarState extends ChatActionState {
+  final Conversation conversation;
+  final Conversation? replyConversation;
+
+  ConversationToolBarState({
+    required this.conversation,
+    this.replyConversation,
+  });
+
+  @override
+  List<Object> get props => [conversation];
+}
+
+class RemoveConversationToolBarState extends ChatActionState {
   @override
   List<Object> get props => [];
 }

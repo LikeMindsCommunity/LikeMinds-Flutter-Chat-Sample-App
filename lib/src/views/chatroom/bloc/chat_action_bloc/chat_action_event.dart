@@ -132,3 +132,18 @@ class ReplyRemove extends ChatActionEvent {
   @override
   List<Object> get props => [];
 }
+
+class ConversationToolBar extends ChatActionEvent {
+  final Conversation conversation;
+  final Conversation? replyConversation;
+
+  ConversationToolBar({required this.conversation, this.replyConversation});
+
+  @override
+  List<Object> get props => [conversation];
+}
+
+class RemoveConversationToolBar extends ChatActionEvent {
+  @override
+  List<Object> get props => [];
+}

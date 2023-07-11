@@ -32,6 +32,10 @@ abstract class ILikeMindsService {
   Future<LMResponse<DeleteConversationResponse>> deleteConversation(
       DeleteConversationRequest request);
   Future<LMResponse<PutMediaResponse>> putMultimedia(PutMediaRequest request);
+  Future<LMResponse<PutReactionResponse>> putReaction(
+      PutReactionRequest request);
+  Future<LMResponse<DeleteReactionResponse>> deleteReaction(
+      DeleteReactionRequest request);
   Future<LMResponse<RegisterDeviceResponse>> registerDevice(
       RegisterDeviceRequest request);
   Future<LMResponse<GetParticipantsResponse>> getParticipants(
@@ -151,6 +155,18 @@ class LikeMindsService implements ILikeMindsService {
   @override
   Future<LMResponse<PutMediaResponse>> putMultimedia(PutMediaRequest request) {
     return client.putMultimedia(request);
+  }
+
+  @override
+  Future<LMResponse<PutReactionResponse>> putReaction(
+      PutReactionRequest request) {
+    return client.putReaction(request);
+  }
+
+  @override
+  Future<LMResponse<DeleteReactionResponse>> deleteReaction(
+      DeleteReactionRequest request) {
+    return client.deleteReaction(request);
   }
 
   @override
