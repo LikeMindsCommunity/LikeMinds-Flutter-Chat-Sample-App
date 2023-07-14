@@ -1,20 +1,17 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
-import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
-import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
-import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bar.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bottom_sheet.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/helper/reaction_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/document/document_preview_factory.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
@@ -61,8 +58,6 @@ class ChatBubble extends StatefulWidget {
 
 class _ChatBubbleState extends State<ChatBubble> {
   late final EmojiParser emojiParser;
-  late final CustomPopupMenuController _controller;
-  late final CustomPopupMenuController _reactionController;
   Map<int, User?>? userMeta;
   bool? isSent;
   Conversation? conversation;
@@ -81,19 +76,17 @@ class _ChatBubbleState extends State<ChatBubble> {
       UserLocalPreference.instance.fetchMemberRights();
   ChatActionBloc? chatActionBloc;
   bool showReaction = false;
+  Offset? chatBubbleOffset;
+  final GlobalKey _chatBubbleKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     emojiParser = EmojiParser();
-
-    _controller = CustomPopupMenuController();
-    _reactionController = CustomPopupMenuController();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     _isSelected.dispose();
     super.dispose();
   }
@@ -132,11 +125,6 @@ class _ChatBubbleState extends State<ChatBubble> {
       mappedReactions =
           convertListToMapReaction(conversation!.conversationReactions!);
     }
-    _reactionController.addListener(() {
-      if (!_reactionController.menuIsShowing) {
-        chatActionBloc?.add(RemoveConversationToolBar());
-      }
-    });
   }
 
   void addReaction(Reaction reaction) {
@@ -148,15 +136,18 @@ class _ChatBubbleState extends State<ChatBubble> {
           convertListToMapReaction(conversation!.conversationReactions!);
       setState(() {});
     } else {
-      Reaction oldReaction = conversation!.conversationReactions!
-          .firstWhere((element) => element.userId == loggedInUser.id);
-      if (mappedReactions.containsKey(oldReaction.reaction)) {
-        mappedReactions[oldReaction.reaction]!.remove(oldReaction);
-        if (mappedReactions[oldReaction.reaction]!.isEmpty) {
-          mappedReactions.remove(oldReaction.reaction);
+      int index = conversation!.conversationReactions!
+          .indexWhere((element) => element.userId == loggedInUser.id);
+      if (index != -1) {
+        Reaction? oldReaction = conversation!.conversationReactions![index];
+        if (mappedReactions.containsKey(oldReaction.reaction)) {
+          mappedReactions[oldReaction.reaction]!.remove(oldReaction);
+          if (mappedReactions[oldReaction.reaction]!.isEmpty) {
+            mappedReactions.remove(oldReaction.reaction);
+          }
         }
+        conversation!.conversationReactions!.remove(oldReaction);
       }
-      conversation!.conversationReactions!.remove(oldReaction);
       conversation!.conversationReactions!.add(reaction);
       if (mappedReactions.containsKey(reaction.reaction)) {
         mappedReactions[reaction.reaction]?.add(reaction);
@@ -167,10 +158,22 @@ class _ChatBubbleState extends State<ChatBubble> {
     rebuildReactionsBar.value = !rebuildReactionsBar.value;
   }
 
-  void removeReaction() {}
+  void removeReaction(Reaction reaction) {
+    if (conversation!.conversationReactions != null) {
+      conversation!.conversationReactions!
+          .removeWhere((item) => item.userId == reaction.userId);
+      mappedReactions =
+          convertListToMapReaction(conversation!.conversationReactions!);
+      rebuildReactionsBar.value = !rebuildReactionsBar.value;
+      if (conversation!.conversationReactions!.isEmpty) {
+        conversation!.hasReactions = false;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     setupConversation();
     if (!isSent! &&
@@ -187,69 +190,90 @@ class _ChatBubbleState extends State<ChatBubble> {
         if (state is ConversationToolBarState) {
           if (state.conversation.id == conversation!.id) {
             setState(() {
-              showReaction = true;
+              showReaction = state.showReactionBar;
+              isSelected = true;
             });
-          } else if (state.conversation.id != conversation!.id &&
-              showReaction) {
-            setState(() {
-              showReaction = false;
-            });
+            _isSelected.value = !_isSelected.value;
+          } else if (state.conversation.id != conversation!.id) {
+            if (showReaction == true || isSelected == true) {
+              setState(() {
+                showReaction = false;
+                isSelected = false;
+              });
+              _isSelected.value = !_isSelected.value;
+            }
           }
-        } else if (showReaction) {
+        }
+        if (state is RemoveConversationToolBarState) {
           setState(() {
             showReaction = false;
+            isSelected = false;
           });
+          _isSelected.value = !_isSelected.value;
+        }
+        if (state is PutReactionState &&
+            state.putReactionRequest.conversationId == conversation!.id) {
+          Reaction addedReaction = Reaction(
+            chatroomId: widget.chatroom.id,
+            conversationId: conversation!.id,
+            reaction: state.putReactionRequest.reaction,
+            userId: loggedInUser.id,
+          );
+          addReaction(addedReaction);
+        }
+        if (state is PutReactionError &&
+            state.putReactionRequest.conversationId == conversation!.id) {
+          toast(state.errorMessage);
+          Reaction addedReaction = Reaction(
+            chatroomId: widget.chatroom.id,
+            conversationId: conversation!.id,
+            reaction: state.putReactionRequest.reaction,
+            userId: loggedInUser.id,
+          );
+          removeReaction(addedReaction);
+        }
+        if (state is DeleteReactionState &&
+            state.deleteReactionRequest.conversationId == conversation!.id) {
+          Reaction deletedReaction = Reaction(
+            chatroomId: widget.chatroom.id,
+            conversationId: conversation!.id,
+            reaction: state.deleteReactionRequest.reaction,
+            userId: loggedInUser.id,
+          );
+          removeReaction(deletedReaction);
+        }
+        if (state is DeleteReactionError &&
+            state.deleteReactionRequest.conversationId == conversation!.id) {
+          toast(state.errorMessage);
+          Reaction deletedReaction = Reaction(
+            chatroomId: widget.chatroom.id,
+            conversationId: conversation!.id,
+            reaction: state.deleteReactionRequest.reaction,
+            userId: loggedInUser.id,
+          );
+          addReaction(deletedReaction);
         }
       },
       child: PortalTarget(
         visible: showReaction,
-        anchor: const Aligned(
-          follower: Alignment.topCenter,
-          target: Alignment.bottomCenter,
-        ),
-        portalFollower: Align(
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                width: 90.w,
-                height: 50,
-                child: getListOfReactions(
-                  onTap: (String reaction) async {
-                    _reactionController.hideMenu();
-                    if (reaction == 'Add') {
-                      // TODO: Open Emoji Keyboard
-                    } else {
-                      PutReactionRequest request = (PutReactionRequestBuilder()
-                            ..conversationId(conversation!.id)
-                            ..reaction(reaction))
-                          .build();
-                      LMResponse response = await locator<LikeMindsService>()
-                          .putReaction(request);
-                      if (response.success) {
-                        Reaction addedReaction = Reaction(
-                          chatroomId: widget.chatroom.id,
-                          conversationId: conversation!.id,
-                          reaction: reaction,
-                          userId: loggedInUser.id,
-                        );
-                        addReaction(addedReaction);
-                      } else {
-                        toast('An error occured');
-                      }
-                    }
-                  },
-                ),
-              ),
-            ],
+        anchor: getPortalOverlayAlignedFromPosition(
+            screenSize.height, getPositionOfChatBubble(_chatBubbleKey)),
+        portalFollower: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              showReaction = false;
+            });
+          },
+          child: ReactionBar(
+            chatroomId: widget.chatroom.id,
+            conversation: conversation!,
+            replyToConversation: replyToConversation,
+            loggedinUser: loggedInUser,
           ),
         ),
         child: Column(
+          key: _chatBubbleKey,
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment:
@@ -258,8 +282,13 @@ class _ChatBubbleState extends State<ChatBubble> {
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onDoubleTap: () {
+                if (isDeleted) {
+                  return;
+                }
                 setState(() {
                   showReaction = true;
+                  isSelected = true;
+                  _isSelected.value = !_isSelected.value;
                   // _reactionController.showMenu();
                   chatActionBloc!.add(
                     ConversationToolBar(
@@ -271,19 +300,19 @@ class _ChatBubbleState extends State<ChatBubble> {
                 });
               },
               onLongPress: () {
-                _isSelected.value = true;
-                debugPrint("Long Pressed");
-                widget.onLongPress(conversation!);
-                setState(() {
-                  _controller.showMenu();
-                  chatActionBloc!.add(
-                    ConversationToolBar(
-                      conversation: conversation!,
-                      replyConversation: replyToConversation,
-                    ),
-                  );
-                  widget.isSelected(isSelected);
-                });
+                if (isDeleted) {
+                  return;
+                }
+                showReaction = true;
+                isSelected = true;
+                _isSelected.value = !_isSelected.value;
+                // _reactionController.showMenu();
+                chatActionBloc!.add(
+                  ConversationToolBar(
+                    conversation: conversation!,
+                    replyConversation: replyToConversation,
+                  ),
+                );
               },
               onTap: () {
                 // _isSelected.value = false;
@@ -299,7 +328,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                 valueListenable: _isSelected,
                 builder: (BuildContext context, dynamic value, Widget? child) {
                   return Container(
-                    color: value
+                    color: isSelected
                         ? LMTheme.buttonColor.withOpacity(0.2)
                         : Colors.transparent,
                     child: child,
@@ -342,288 +371,175 @@ class _ChatBubbleState extends State<ChatBubble> {
                       ),
                     ),
                     direction: SwipeDirection.startToEnd,
-                    child: CustomPopupMenu(
-                      controller: _controller,
-                      pressType: PressType.longPress,
-                      showArrow: false,
-                      verticalMargin: 1.h,
-                      menuBuilder: () => ClipRRect(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                            right: isSent! ? 2.5.w : 0,
+                            // vertical: 0.5..h,
                           ),
-                          width: 48.w,
-                          // color: Colors.white,
-                          child: IntrinsicWidth(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                ListTile(
-                                  onTap: () {
-                                    widget.onReply(conversation!);
-                                    _controller.hideMenu();
-                                  },
-                                  leading: Icon(
-                                    Icons.reply_outlined,
-                                    color: LMTheme.buttonColor,
-                                    size: 16.sp,
-                                  ),
-                                  title: Text(
-                                    "Reply",
-                                    style: LMTheme.regular.copyWith(
-                                      fontSize: 10.sp,
-                                    ),
-                                  ),
-                                ),
-                                ListTile(
-                                  onTap: () {
-                                    _controller.hideMenu();
-                                    Clipboard.setData(
-                                      ClipboardData(
-                                        text: TaggingHelper.convertRouteToTag(
-                                                widget.conversation.answer) ??
-                                            '',
+                          child: Row(
+                            mainAxisAlignment: isSent!
+                                ? MainAxisAlignment.end
+                                : MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              !isSent!
+                                  ? PictureOrInitial(
+                                      fallbackText: widget.sender.name,
+                                      imageUrl: widget.sender.imageUrl,
+                                      size: 32.sp,
+                                      fontSize: 14.sp,
+                                    )
+                                  : const SizedBox(),
+                              const SizedBox(width: 6),
+                              !isSent!
+                                  ? Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.rotationY(3.14),
+                                      child: CustomPaint(
+                                        painter: BubbleTriangle(),
                                       ),
-                                    ).then((value) {
-                                      Fluttertoast.showToast(
-                                          msg: "Copied to clipboard");
-                                    });
-                                  },
-                                  leading: Icon(
-                                    Icons.copy,
-                                    color: LMTheme.buttonColor,
-                                    size: 16.sp,
-                                  ),
-                                  title: Text(
-                                    "Copy text",
-                                    style: LMTheme.regular.copyWith(
-                                      fontSize: 10.sp,
-                                    ),
-                                  ),
+                                    )
+                                  : const SizedBox(),
+                              Container(
+                                constraints: BoxConstraints(
+                                  minHeight: 4.h,
+                                  minWidth: 10.w,
+                                  maxWidth: 60.w,
                                 ),
-                                kVerticalPaddingMedium,
-                                Visibility(
-                                  visible: checkEditPermissions(),
-                                  child: ListTile(
-                                    onTap: () async {
-                                      widget.onEdit(conversation!);
-                                      _controller.hideMenu();
-                                    },
-                                    leading: Icon(
-                                      Icons.edit,
-                                      color: LMTheme.buttonColor,
-                                      size: 16.sp,
-                                    ),
-                                    title: Text(
-                                      "Edit",
-                                      style: LMTheme.regular.copyWith(
-                                        fontSize: 10.sp,
-                                      ),
-                                    ),
-                                  ),
+                                padding: const EdgeInsets.all(12.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                                kVerticalPaddingMedium,
-                                // Only show the delete option if the user is the owner of the message
-                                // or if the user is a Community Manager
-                                Visibility(
-                                  visible: checkDeletePermissions(),
-                                  child: ListTile(
-                                    onTap: () async {
-                                      final response = await locator<
-                                              LikeMindsService>()
-                                          .deleteConversation(
-                                              (DeleteConversationRequestBuilder()
-                                                    ..conversationIds(
-                                                        [conversation!.id])
-                                                    ..reason("Delete"))
-                                                  .build());
-                                      if (response.success) {
-                                        _controller.hideMenu();
-                                        setState(() {
-                                          conversation!.deletedByUserId =
-                                              loggedInUser.id;
-                                          isDeleted = true;
-                                        });
-                                        Fluttertoast.showToast(
-                                          msg: "Message deleted",
-                                        );
-                                      }
-                                    },
-                                    leading: Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                      size: 16.sp,
+                                child: Column(
+                                  crossAxisAlignment: isSent!
+                                      ? CrossAxisAlignment.end
+                                      : CrossAxisAlignment.start,
+                                  children: [
+                                    Visibility(
+                                      visible: replyToConversation != null &&
+                                          !isDeleted,
+                                      maintainState: true,
+                                      maintainSize: false,
+                                      child: _getReplyConversation(),
                                     ),
-                                    title: Text(
-                                      "Delete",
-                                      style: LMTheme.regular.copyWith(
-                                        fontSize: 10.sp,
-                                      ),
-                                    ),
-                                  ),
+                                    replyToConversation != null
+                                        ? const SizedBox(height: 8)
+                                        : const SizedBox(),
+                                    isSent!
+                                        ? const SizedBox()
+                                        : Text(
+                                            widget.sender.name,
+                                            style: LMFonts.instance.medium
+                                                .copyWith(
+                                              fontSize: 10.sp,
+                                              color: isSent!
+                                                  ? Colors.black
+                                                      .withOpacity(0.6)
+                                                  : LMTheme.headerColor,
+                                            ),
+                                          ),
+                                    isSent!
+                                        ? const SizedBox()
+                                        : const SizedBox(height: 6),
+                                    isDeleted
+                                        ? conversation!.deletedByUserId ==
+                                                conversation!.userId
+                                            ? Text(
+                                                conversation!.userId ==
+                                                        loggedInUser.id
+                                                    ? 'You deleted this message'
+                                                    : "This message was deleted",
+                                                style: LMFonts.instance.regular
+                                                    .copyWith(
+                                                  fontSize: 9.sp,
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                              )
+                                            : Text(
+                                                "This message was deleted by the Community Manager",
+                                                style: LMFonts.instance.regular
+                                                    .copyWith(
+                                                  fontSize: 9.sp,
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                              )
+                                        : replyToConversation != null
+                                            ? Align(
+                                                alignment: Alignment.topLeft,
+                                                child: getContent())
+                                            : getContent(),
+                                    const SizedBox(height: 8),
+                                    ((widget.conversation.hasFiles == null ||
+                                                !widget
+                                                    .conversation.hasFiles!) ||
+                                            (widget.conversation
+                                                        .attachmentsUploaded !=
+                                                    null &&
+                                                widget.conversation
+                                                    .attachmentsUploaded!))
+                                        ? Text(
+                                            "${isEdited ? 'Edited  ' : ''}${widget.conversation.createdAt}",
+                                            style: LMFonts.instance.regular
+                                                .copyWith(
+                                              fontSize: 8.sp,
+                                              color: kGreyColor,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.timer_outlined,
+                                            size: 8.sp,
+                                          ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              isSent!
+                                  ? CustomPaint(
+                                      painter: BubbleTriangle(),
+                                    )
+                                  : const SizedBox(),
+                            ],
                           ),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                              right: isSent! ? 2.5.w : 0,
-                              // vertical: 0.5..h,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: isSent!
-                                  ? MainAxisAlignment.end
-                                  : MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                !isSent!
-                                    ? PictureOrInitial(
-                                        fallbackText: widget.sender.name,
-                                        imageUrl: widget.sender.imageUrl,
-                                        size: 32.sp,
-                                        fontSize: 14.sp,
-                                      )
-                                    : const SizedBox(),
-                                const SizedBox(width: 6),
-                                !isSent!
-                                    ? Transform(
-                                        alignment: Alignment.center,
-                                        transform: Matrix4.rotationY(3.14),
-                                        child: CustomPaint(
-                                          painter: BubbleTriangle(),
-                                        ),
-                                      )
-                                    : const SizedBox(),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minHeight: 4.h,
-                                    minWidth: 10.w,
-                                    maxWidth: 60.w,
-                                  ),
-                                  padding: const EdgeInsets.all(12.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: isSent!
-                                        ? CrossAxisAlignment.end
-                                        : CrossAxisAlignment.start,
-                                    children: [
-                                      Visibility(
-                                        visible: replyToConversation != null &&
-                                            !isDeleted,
-                                        maintainState: true,
-                                        maintainSize: false,
-                                        child: _getReplyConversation(),
-                                      ),
-                                      replyToConversation != null
-                                          ? const SizedBox(height: 8)
-                                          : const SizedBox(),
-                                      isSent!
-                                          ? const SizedBox()
-                                          : Text(
-                                              widget.sender.name,
-                                              style: LMFonts.instance.medium
-                                                  .copyWith(
-                                                fontSize: 10.sp,
-                                                color: isSent!
-                                                    ? Colors.black
-                                                        .withOpacity(0.6)
-                                                    : LMTheme.headerColor,
-                                              ),
-                                            ),
-                                      isSent!
-                                          ? const SizedBox()
-                                          : const SizedBox(height: 6),
-                                      isDeleted
-                                          ? conversation!.deletedByUserId ==
-                                                  conversation!.userId
-                                              ? Text(
-                                                  conversation!.userId ==
-                                                          loggedInUser.id
-                                                      ? 'You deleted this message'
-                                                      : "This message was deleted",
-                                                  style: LMFonts
-                                                      .instance.regular
-                                                      .copyWith(
-                                                    fontSize: 9.sp,
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                )
-                                              : Text(
-                                                  "This message was deleted by the Community Manager",
-                                                  style: LMFonts
-                                                      .instance.regular
-                                                      .copyWith(
-                                                    fontSize: 9.sp,
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                )
-                                          : replyToConversation != null
-                                              ? Align(
-                                                  alignment: Alignment.topLeft,
-                                                  child: getContent())
-                                              : getContent(),
-                                      const SizedBox(height: 8),
-                                      ((widget.conversation.hasFiles == null ||
-                                                  !widget.conversation
-                                                      .hasFiles!) ||
-                                              (widget.conversation
-                                                          .attachmentsUploaded !=
-                                                      null &&
-                                                  widget.conversation
-                                                      .attachmentsUploaded!))
-                                          ? Text(
-                                              "${isEdited ? 'Edited  ' : ''}${widget.conversation.createdAt}",
-                                              style: LMFonts.instance.regular
-                                                  .copyWith(
-                                                fontSize: 8.sp,
-                                                color: kGreyColor,
-                                              ),
-                                            )
-                                          : Icon(
-                                              Icons.timer_outlined,
-                                              size: 8.sp,
-                                            ),
-                                    ],
-                                  ),
-                                ),
-                                isSent!
-                                    ? CustomPaint(
-                                        painter: BubbleTriangle(),
-                                      )
-                                    : const SizedBox(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
-            (conversation!.hasReactions ?? false)
+            ((conversation!.hasReactions ?? false) &&
+                    (conversation!.conversationReactions != null &&
+                        conversation!.conversationReactions!.isNotEmpty))
                 ? ValueListenableBuilder(
                     valueListenable: rebuildReactionsBar,
                     builder: (context, _, __) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            GestureDetector(
-                              onTap: () {},
-                              child: Container(
+                        child: GestureDetector(
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              backgroundColor: Colors.transparent,
+                              elevation: 5,
+                              useSafeArea: true,
+                              builder: (context) => ReactionBottomSheet(
+                                mappedReactions: mappedReactions,
+                                userMeta: userMeta,
+                                currentUser: loggedInUser,
+                                chatActionBloc: chatActionBloc!,
+                                conversation: conversation!,
+                              ),
+                            );
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 3),
                                 decoration: BoxDecoration(
@@ -632,11 +548,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                                 child: Text(
                                     '${conversation!.conversationReactions![0].reaction} ${mappedReactions[conversation!.conversationReactions![0].reaction]!.length}'),
                               ),
-                            ),
-                            conversation!.conversationReactions!.length >= 2
-                                ? GestureDetector(
-                                    onTap: () {},
-                                    child: Container(
+                              conversation!.conversationReactions!.length >= 2
+                                  ? Container(
                                       margin: const EdgeInsets.only(left: 4.0),
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 10, vertical: 3),
@@ -646,187 +559,11 @@ class _ChatBubbleState extends State<ChatBubble> {
                                               BorderRadius.circular(10.0)),
                                       child: Text(
                                           '${conversation!.conversationReactions![1].reaction} ${mappedReactions[conversation!.conversationReactions![1].reaction]!.length}'),
-                                    ),
-                                  )
-                                : const SizedBox(),
-                            kHorizontalPaddingSmall,
-                            conversation!.conversationReactions!.length > 2
-                                ? GestureDetector(
-                                    onTap: () {
-                                      String selectedKey = 'All';
-                                      showModalBottomSheet(
-                                        context: context,
-                                        backgroundColor: Colors.transparent,
-                                        elevation: 5,
-                                        useSafeArea: true,
-                                        builder: (context) => Container(
-                                          clipBehavior: Clip.none,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20.0),
-                                          height: 60.h,
-                                          decoration: const BoxDecoration(
-                                            color: kWhiteColor,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(12.0),
-                                              topRight: Radius.circular(12.0),
-                                            ),
-                                          ),
-                                          child: StatefulBuilder(
-                                            builder: (context, setChildState) =>
-                                                Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                kVerticalPaddingXLarge,
-                                                kVerticalPaddingLarge,
-                                                Text(
-                                                  'Reactions',
-                                                  style: LMTheme.bold,
-                                                ),
-                                                kVerticalPaddingXLarge,
-                                                SizedBox(
-                                                  height: 30,
-                                                  child: Row(
-                                                    children: <Widget>[
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                            bottom: BorderSide(
-                                                                color: kGrey3Color
-                                                                    .withOpacity(
-                                                                        0.2),
-                                                                width: 1),
-                                                          ),
-                                                        ),
-                                                        width: 100.w - 40,
-                                                        height: 30,
-                                                        child: ListView.builder(
-                                                          itemCount:
-                                                              mappedReactions
-                                                                  .keys.length,
-                                                          scrollDirection:
-                                                              Axis.horizontal,
-                                                          itemBuilder: (context,
-                                                                  reactionIndex) =>
-                                                              GestureDetector(
-                                                            onTap: () {
-                                                              setChildState(() {
-                                                                selectedKey =
-                                                                    mappedReactions
-                                                                        .keys
-                                                                        .elementAt(
-                                                                            reactionIndex);
-                                                              });
-                                                            },
-                                                            child: Container(
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  horizontal:
-                                                                      8.0,
-                                                                  vertical:
-                                                                      5.0),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                      border: selectedKey ==
-                                                                              mappedReactions.keys.elementAt(reactionIndex)
-                                                                          ? Border(
-                                                                              bottom: BorderSide(
-                                                                                color: LMTheme.buttonColor,
-                                                                                width: 1,
-                                                                              ),
-                                                                            )
-                                                                          : null),
-                                                              child: Text(
-                                                                '${mappedReactions.keys.elementAt(reactionIndex)} (${mappedReactions.values.elementAt(reactionIndex)!.length})',
-                                                                style: selectedKey ==
-                                                                        mappedReactions
-                                                                            .keys
-                                                                            .elementAt(
-                                                                                reactionIndex)
-                                                                    ? LMTheme
-                                                                        .medium
-                                                                        .copyWith(
-                                                                            color: LMTheme
-                                                                                .buttonColor)
-                                                                    : LMTheme
-                                                                        .medium,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                                kVerticalPaddingLarge,
-                                                Expanded(
-                                                  child: ListView.builder(
-                                                    itemCount: mappedReactions[
-                                                            selectedKey]!
-                                                        .length,
-                                                    itemBuilder:
-                                                        (context, itemIndex) =>
-                                                            Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              bottom: 10),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .start,
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .center,
-                                                            children: <Widget>[
-                                                              PictureOrInitial(
-                                                                  imageUrl:
-                                                                      userMeta![mappedReactions[selectedKey]![itemIndex].userId]
-                                                                              ?.imageUrl ??
-                                                                          '',
-                                                                  fallbackText:
-                                                                      userMeta![mappedReactions[selectedKey]![itemIndex].userId]
-                                                                              ?.name ??
-                                                                          ''),
-                                                              kHorizontalPaddingLarge,
-                                                              Text(
-                                                                userMeta![mappedReactions[selectedKey]![itemIndex]
-                                                                            .userId]
-                                                                        ?.name ??
-                                                                    '',
-                                                                style: LMTheme
-                                                                    .bold,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          Text(
-                                                            mappedReactions[
-                                                                        selectedKey]![
-                                                                    itemIndex]
-                                                                .reaction,
-                                                            style: LMTheme.bold
-                                                                .copyWith(
-                                                                    fontSize:
-                                                                        20.sp),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
+                                    )
+                                  : const SizedBox(),
+                              kHorizontalPaddingSmall,
+                              conversation!.conversationReactions!.length > 2
+                                  ? Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 10, vertical: 3),
                                       decoration: BoxDecoration(
@@ -836,10 +573,10 @@ class _ChatBubbleState extends State<ChatBubble> {
                                         ),
                                       ),
                                       child: const Text('...'),
-                                    ),
-                                  )
-                                : const SizedBox(),
-                          ],
+                                    )
+                                  : const SizedBox(),
+                            ],
+                          ),
                         ),
                       );
                     })

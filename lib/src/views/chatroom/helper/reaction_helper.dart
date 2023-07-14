@@ -11,28 +11,26 @@ List<String> reactionEmojis = [
 ];
 
 Widget getListOfReactions({required Function onTap}) {
-  return Expanded(
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: reactionEmojis
-              .map((e) => GestureDetector(
-                    onTap: () => onTap(e),
-                    child: Text(
-                      e,
-                      style: LMTheme.bold.copyWith(fontSize: 15.sp),
-                    ),
-                  ))
-              .toList() +
-          [
-            GestureDetector(
-              onTap: () => onTap('Add'),
-              child: Icon(
-                Icons.add_reaction_outlined,
-                size: 18.sp,
-              ),
-            )
-          ],
-    ),
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: reactionEmojis
+            .map((e) => GestureDetector(
+                  onTap: () => onTap(e),
+                  child: Text(
+                    e,
+                    style: LMTheme.bold.copyWith(fontSize: 15.sp),
+                  ),
+                ))
+            .toList() +
+        [
+          GestureDetector(
+            onTap: () => onTap('Add'),
+            child: Icon(
+              Icons.add_reaction_outlined,
+              size: 18.sp,
+            ),
+          )
+        ],
   );
 }
 

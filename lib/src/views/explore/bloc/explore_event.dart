@@ -1,8 +1,11 @@
 part of 'explore_bloc.dart';
 
-abstract class ExploreEvent {}
+abstract class ExploreEvent extends Equatable {}
 
-class InitExploreEvent extends ExploreEvent {}
+class InitExploreEvent extends ExploreEvent {
+  @override
+  List<Object> get props => [];
+}
 
 class GetExplore extends ExploreEvent {
   final GetExploreFeedRequest getExploreFeedRequest;
@@ -13,11 +16,17 @@ class GetExplore extends ExploreEvent {
   List<Object> get props => [getExploreFeedRequest.toJson()];
 }
 
-class RefreshExploreEvent extends ExploreEvent {}
+class RefreshExploreEvent extends ExploreEvent {
+  @override
+  List<Object> get props => [];
+}
 
 class PinSpaceEvent extends ExploreEvent {
   final String spaceId;
   final bool isPinned;
 
   PinSpaceEvent(this.spaceId, this.isPinned);
+
+  @override
+  List<Object> get props => [spaceId, isPinned];
 }

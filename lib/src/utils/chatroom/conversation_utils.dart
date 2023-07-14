@@ -1,6 +1,34 @@
 import 'dart:collection';
 
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+
+Offset getPositionOfChatBubble(GlobalKey widgetKey) {
+  RenderBox? renderBox =
+      widgetKey.currentContext?.findRenderObject() as RenderBox?;
+  if (renderBox == null) {
+    return const Offset(0, 0);
+  }
+
+  final Offset offset = renderBox.localToGlobal(Offset.zero);
+  return offset;
+}
+
+Aligned getPortalOverlayAlignedFromPosition(
+    double screenHeight, Offset positionOfWidget) {
+  if (positionOfWidget.dy < screenHeight / 2) {
+    return const Aligned(
+        follower: Alignment.topCenter,
+        target: Alignment.bottomCenter,
+        offset: Offset(0, 10));
+  } else {
+    return const Aligned(
+        follower: Alignment.topCenter,
+        target: Alignment.topCenter,
+        offset: Offset(0, -50));
+  }
+}
 
 List<Conversation>? addTimeStampInConversationList(
     List<Conversation>? conversationList, int communityId) {
