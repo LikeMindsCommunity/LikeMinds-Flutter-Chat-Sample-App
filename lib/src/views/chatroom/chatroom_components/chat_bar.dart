@@ -88,7 +88,6 @@ class _ChatBarState extends State<ChatBar> {
   void dispose() {
     _popupMenuController.dispose();
     _textEditingController.dispose();
-    _focusNode.dispose();
     replyToConversation = null;
     super.dispose();
   }

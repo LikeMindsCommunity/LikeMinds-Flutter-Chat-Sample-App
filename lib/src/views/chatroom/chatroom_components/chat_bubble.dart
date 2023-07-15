@@ -1,6 +1,6 @@
+import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
@@ -75,9 +75,9 @@ class _ChatBubbleState extends State<ChatBubble> {
   final MemberStateResponse isCm =
       UserLocalPreference.instance.fetchMemberRights();
   ChatActionBloc? chatActionBloc;
-  bool showReaction = false;
   Offset? chatBubbleOffset;
   final GlobalKey _chatBubbleKey = GlobalKey();
+  CustomPopupMenuController reactionBarController = CustomPopupMenuController();
 
   @override
   void initState() {
@@ -89,27 +89,6 @@ class _ChatBubbleState extends State<ChatBubble> {
   void dispose() {
     _isSelected.dispose();
     super.dispose();
-  }
-
-  bool checkDeletePermissions() {
-    if (isCm.member?.state == 1 && conversation!.deletedByUserId == null) {
-      return true;
-    } else if (loggedInUser.id == widget.sender.id &&
-        conversation!.deletedByUserId == null) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  bool checkEditPermissions() {
-    if (conversation!.answer.isEmpty) {
-      return false;
-    } else if (loggedInUser.id == widget.sender.id &&
-        conversation!.deletedByUserId == null) {
-      return true;
-    }
-    return false;
   }
 
   void setupConversation() {
@@ -173,7 +152,6 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     setupConversation();
     if (!isSent! &&
@@ -189,26 +167,32 @@ class _ChatBubbleState extends State<ChatBubble> {
       listener: (context, state) {
         if (state is ConversationToolBarState) {
           if (state.conversation.id == conversation!.id) {
-            setState(() {
-              showReaction = state.showReactionBar;
-              isSelected = true;
-            });
+            isSelected = true;
+            if (state.showReactionBar) {
+              if (!reactionBarController.menuIsShowing) {
+                reactionBarController.showMenu();
+              }
+            } else {
+              if (reactionBarController.menuIsShowing) {
+                reactionBarController.hideMenu();
+              }
+            }
             _isSelected.value = !_isSelected.value;
           } else if (state.conversation.id != conversation!.id) {
-            if (showReaction == true || isSelected == true) {
-              setState(() {
-                showReaction = false;
-                isSelected = false;
-              });
+            if (isSelected == true) {
+              isSelected = false;
               _isSelected.value = !_isSelected.value;
+            }
+            if (reactionBarController.menuIsShowing) {
+              reactionBarController.hideMenu();
             }
           }
         }
         if (state is RemoveConversationToolBarState) {
-          setState(() {
-            showReaction = false;
-            isSelected = false;
-          });
+          isSelected = false;
+          if (reactionBarController.menuIsShowing) {
+            reactionBarController.hideMenu();
+          }
           _isSelected.value = !_isSelected.value;
         }
         if (state is PutReactionState &&
@@ -254,39 +238,34 @@ class _ChatBubbleState extends State<ChatBubble> {
           addReaction(deletedReaction);
         }
       },
-      child: PortalTarget(
-        visible: showReaction,
-        anchor: getPortalOverlayAlignedFromPosition(
-            screenSize.height, getPositionOfChatBubble(_chatBubbleKey)),
-        portalFollower: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            setState(() {
-              showReaction = false;
-            });
-          },
-          child: ReactionBar(
-            chatroomId: widget.chatroom.id,
-            conversation: conversation!,
-            replyToConversation: replyToConversation,
-            loggedinUser: loggedInUser,
-          ),
-        ),
-        child: Column(
-          key: _chatBubbleKey,
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment:
-              isSent! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: <Widget>[
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onDoubleTap: () {
-                if (isDeleted) {
-                  return;
-                }
-                setState(() {
-                  showReaction = true;
+      child: Stack(
+        children: [
+          Column(
+            key: _chatBubbleKey,
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment:
+                isSent! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: <Widget>[
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onDoubleTap: () {
+                  if (isDeleted) {
+                    return;
+                  }
+                  isSelected = true;
+                  _isSelected.value = !_isSelected.value;
+                  chatActionBloc!.add(
+                    ConversationToolBar(
+                      conversation: conversation!,
+                      replyConversation: replyToConversation,
+                    ),
+                  );
+                },
+                onLongPress: () {
+                  if (isDeleted) {
+                    return;
+                  }
                   isSelected = true;
                   _isSelected.value = !_isSelected.value;
                   // _reactionController.showMenu();
@@ -296,293 +275,300 @@ class _ChatBubbleState extends State<ChatBubble> {
                       replyConversation: replyToConversation,
                     ),
                   );
-                  // widget.isSelected(isSelected);
-                });
-              },
-              onLongPress: () {
-                if (isDeleted) {
-                  return;
-                }
-                showReaction = true;
-                isSelected = true;
-                _isSelected.value = !_isSelected.value;
-                // _reactionController.showMenu();
-                chatActionBloc!.add(
-                  ConversationToolBar(
-                    conversation: conversation!,
-                    replyConversation: replyToConversation,
-                  ),
-                );
-              },
-              onTap: () {
-                // _isSelected.value = false;
-                // debugPrint("Tapped");
-                // setState(() {
-                //   _controller.hideMenu();
-                //   _reactionController.hideMenu();
-                //   chatActionBloc!.add(RemoveConversationToolBar());
-                //   widget.isSelected(isSelected);
-                // });
-              },
-              child: ValueListenableBuilder(
-                valueListenable: _isSelected,
-                builder: (BuildContext context, dynamic value, Widget? child) {
-                  return Container(
-                    color: isSelected
-                        ? LMTheme.buttonColor.withOpacity(0.2)
-                        : Colors.transparent,
-                    child: child,
-                  );
                 },
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Swipeable(
-                    dismissThresholds: const {SwipeDirection.startToEnd: 0.2},
-                    movementDuration: const Duration(milliseconds: 50),
-                    key: ValueKey(conversation!.id),
-                    onSwipe: (direction) {
-                      int userId =
-                          conversation!.userId ?? conversation!.memberId!;
-                      if (userId == loggedInUser.id) {
-                        conversation!.member = loggedInUser;
-                      }
-                      if (conversation!.deletedByUserId != null) {
-                        return;
-                      }
-                      widget.onReply(conversation!);
-                    },
-                    background: Padding(
-                      padding: EdgeInsets.only(
-                        left: 2.w,
-                        right: 2.w,
-                        top: 0.2.h,
-                        bottom: 0.2.h,
+                onTap: () {},
+                child: ValueListenableBuilder(
+                  valueListenable: _isSelected,
+                  builder:
+                      (BuildContext context, dynamic value, Widget? child) {
+                    return Container(
+                      color: isSelected
+                          ? LMTheme.buttonColor.withOpacity(0.2)
+                          : Colors.transparent,
+                      child: child,
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Swipeable(
+                      dismissThresholds: const {SwipeDirection.startToEnd: 0.2},
+                      movementDuration: const Duration(milliseconds: 50),
+                      key: ValueKey(conversation!.id),
+                      onSwipe: (direction) {
+                        chatActionBloc!.add(ReplyConversation(
+                            conversationId: conversation!.id,
+                            chatroomId: widget.chatroom.id,
+                            replyConversation: conversation!));
+                        // int userId =
+                        //     conversation!.userId ?? conversation!.memberId!;
+                        // if (userId == loggedInUser.id) {
+                        //   conversation!.member = loggedInUser;
+                        // }
+                        // if (conversation!.deletedByUserId != null) {
+                        //   return;
+                        // }
+                        // widget.onReply(conversation!);
+                      },
+                      background: Padding(
+                        padding: EdgeInsets.only(
+                          left: 2.w,
+                          right: 2.w,
+                          top: 0.2.h,
+                          bottom: 0.2.h,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.reply_outlined,
+                              color: LMTheme.buttonColor,
+                              size: 18.sp,
+                            ),
+                          ],
+                        ),
                       ),
+                      direction: SwipeDirection.startToEnd,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.reply_outlined,
-                            color: LMTheme.buttonColor,
-                            size: 18.sp,
+                          Padding(
+                            padding: EdgeInsets.only(
+                              right: isSent! ? 2.5.w : 0,
+                              // vertical: 0.5..h,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: isSent!
+                                  ? MainAxisAlignment.end
+                                  : MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                !isSent!
+                                    ? PictureOrInitial(
+                                        fallbackText: widget.sender.name,
+                                        imageUrl: widget.sender.imageUrl,
+                                        size: 32.sp,
+                                        fontSize: 14.sp,
+                                      )
+                                    : const SizedBox(),
+                                const SizedBox(width: 6),
+                                !isSent!
+                                    ? Transform(
+                                        alignment: Alignment.center,
+                                        transform: Matrix4.rotationY(3.14),
+                                        child: CustomPaint(
+                                          painter: BubbleTriangle(),
+                                        ),
+                                      )
+                                    : const SizedBox(),
+                                Container(
+                                  constraints: BoxConstraints(
+                                    minHeight: 4.h,
+                                    minWidth: 10.w,
+                                    maxWidth: 60.w,
+                                  ),
+                                  padding: const EdgeInsets.all(12.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: isSent!
+                                        ? CrossAxisAlignment.end
+                                        : CrossAxisAlignment.start,
+                                    children: [
+                                      Visibility(
+                                        visible: replyToConversation != null &&
+                                            !isDeleted,
+                                        maintainState: true,
+                                        maintainSize: false,
+                                        child: _getReplyConversation(),
+                                      ),
+                                      replyToConversation != null
+                                          ? const SizedBox(height: 8)
+                                          : const SizedBox(),
+                                      isSent!
+                                          ? const SizedBox()
+                                          : Text(
+                                              widget.sender.name,
+                                              style: LMFonts.instance.medium
+                                                  .copyWith(
+                                                fontSize: 10.sp,
+                                                color: isSent!
+                                                    ? Colors.black
+                                                        .withOpacity(0.6)
+                                                    : LMTheme.headerColor,
+                                              ),
+                                            ),
+                                      isSent!
+                                          ? const SizedBox()
+                                          : const SizedBox(height: 6),
+                                      isDeleted
+                                          ? conversation!.deletedByUserId ==
+                                                  conversation!.userId
+                                              ? Text(
+                                                  conversation!.userId ==
+                                                          loggedInUser.id
+                                                      ? 'You deleted this message'
+                                                      : "This message was deleted",
+                                                  style: LMFonts
+                                                      .instance.regular
+                                                      .copyWith(
+                                                    fontSize: 9.sp,
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                )
+                                              : Text(
+                                                  "This message was deleted by the Community Manager",
+                                                  style: LMFonts
+                                                      .instance.regular
+                                                      .copyWith(
+                                                    fontSize: 9.sp,
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                )
+                                          : replyToConversation != null
+                                              ? Align(
+                                                  alignment: Alignment.topLeft,
+                                                  child: getContent())
+                                              : getContent(),
+                                      const SizedBox(height: 8),
+                                      ((widget.conversation.hasFiles == null ||
+                                                  !widget.conversation
+                                                      .hasFiles!) ||
+                                              (widget.conversation
+                                                          .attachmentsUploaded !=
+                                                      null &&
+                                                  widget.conversation
+                                                      .attachmentsUploaded!))
+                                          ? Text(
+                                              "${isEdited ? 'Edited  ' : ''}${widget.conversation.createdAt}",
+                                              style: LMFonts.instance.regular
+                                                  .copyWith(
+                                                fontSize: 8.sp,
+                                                color: kGreyColor,
+                                              ),
+                                            )
+                                          : Icon(
+                                              Icons.timer_outlined,
+                                              size: 8.sp,
+                                            ),
+                                    ],
+                                  ),
+                                ),
+                                isSent!
+                                    ? CustomPaint(
+                                        painter: BubbleTriangle(),
+                                      )
+                                    : const SizedBox(),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    direction: SwipeDirection.startToEnd,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(
-                            right: isSent! ? 2.5.w : 0,
-                            // vertical: 0.5..h,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: isSent!
-                                ? MainAxisAlignment.end
-                                : MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              !isSent!
-                                  ? PictureOrInitial(
-                                      fallbackText: widget.sender.name,
-                                      imageUrl: widget.sender.imageUrl,
-                                      size: 32.sp,
-                                      fontSize: 14.sp,
-                                    )
-                                  : const SizedBox(),
-                              const SizedBox(width: 6),
-                              !isSent!
-                                  ? Transform(
-                                      alignment: Alignment.center,
-                                      transform: Matrix4.rotationY(3.14),
-                                      child: CustomPaint(
-                                        painter: BubbleTriangle(),
-                                      ),
-                                    )
-                                  : const SizedBox(),
-                              Container(
-                                constraints: BoxConstraints(
-                                  minHeight: 4.h,
-                                  minWidth: 10.w,
-                                  maxWidth: 60.w,
-                                ),
-                                padding: const EdgeInsets.all(12.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: isSent!
-                                      ? CrossAxisAlignment.end
-                                      : CrossAxisAlignment.start,
-                                  children: [
-                                    Visibility(
-                                      visible: replyToConversation != null &&
-                                          !isDeleted,
-                                      maintainState: true,
-                                      maintainSize: false,
-                                      child: _getReplyConversation(),
-                                    ),
-                                    replyToConversation != null
-                                        ? const SizedBox(height: 8)
-                                        : const SizedBox(),
-                                    isSent!
-                                        ? const SizedBox()
-                                        : Text(
-                                            widget.sender.name,
-                                            style: LMFonts.instance.medium
-                                                .copyWith(
-                                              fontSize: 10.sp,
-                                              color: isSent!
-                                                  ? Colors.black
-                                                      .withOpacity(0.6)
-                                                  : LMTheme.headerColor,
-                                            ),
-                                          ),
-                                    isSent!
-                                        ? const SizedBox()
-                                        : const SizedBox(height: 6),
-                                    isDeleted
-                                        ? conversation!.deletedByUserId ==
-                                                conversation!.userId
-                                            ? Text(
-                                                conversation!.userId ==
-                                                        loggedInUser.id
-                                                    ? 'You deleted this message'
-                                                    : "This message was deleted",
-                                                style: LMFonts.instance.regular
-                                                    .copyWith(
-                                                  fontSize: 9.sp,
-                                                  fontStyle: FontStyle.italic,
-                                                ),
-                                              )
-                                            : Text(
-                                                "This message was deleted by the Community Manager",
-                                                style: LMFonts.instance.regular
-                                                    .copyWith(
-                                                  fontSize: 9.sp,
-                                                  fontStyle: FontStyle.italic,
-                                                ),
-                                              )
-                                        : replyToConversation != null
-                                            ? Align(
-                                                alignment: Alignment.topLeft,
-                                                child: getContent())
-                                            : getContent(),
-                                    const SizedBox(height: 8),
-                                    ((widget.conversation.hasFiles == null ||
-                                                !widget
-                                                    .conversation.hasFiles!) ||
-                                            (widget.conversation
-                                                        .attachmentsUploaded !=
-                                                    null &&
-                                                widget.conversation
-                                                    .attachmentsUploaded!))
-                                        ? Text(
-                                            "${isEdited ? 'Edited  ' : ''}${widget.conversation.createdAt}",
-                                            style: LMFonts.instance.regular
-                                                .copyWith(
-                                              fontSize: 8.sp,
-                                              color: kGreyColor,
-                                            ),
-                                          )
-                                        : Icon(
-                                            Icons.timer_outlined,
-                                            size: 8.sp,
-                                          ),
-                                  ],
-                                ),
-                              ),
-                              isSent!
-                                  ? CustomPaint(
-                                      painter: BubbleTriangle(),
-                                    )
-                                  : const SizedBox(),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),
-            ),
-            ((conversation!.hasReactions ?? false) &&
-                    (conversation!.conversationReactions != null &&
-                        conversation!.conversationReactions!.isNotEmpty))
-                ? ValueListenableBuilder(
-                    valueListenable: rebuildReactionsBar,
-                    builder: (context, _, __) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              backgroundColor: Colors.transparent,
-                              elevation: 5,
-                              useSafeArea: true,
-                              builder: (context) => ReactionBottomSheet(
-                                mappedReactions: mappedReactions,
-                                userMeta: userMeta,
-                                currentUser: loggedInUser,
-                                chatActionBloc: chatActionBloc!,
-                                conversation: conversation!,
-                              ),
-                            );
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: <Widget>[
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 3),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0)),
-                                child: Text(
-                                    '${conversation!.conversationReactions![0].reaction} ${mappedReactions[conversation!.conversationReactions![0].reaction]!.length}'),
-                              ),
-                              conversation!.conversationReactions!.length >= 2
-                                  ? Container(
-                                      margin: const EdgeInsets.only(left: 4.0),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 3),
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(10.0)),
-                                      child: Text(
-                                          '${conversation!.conversationReactions![1].reaction} ${mappedReactions[conversation!.conversationReactions![1].reaction]!.length}'),
-                                    )
-                                  : const SizedBox(),
-                              kHorizontalPaddingSmall,
-                              conversation!.conversationReactions!.length > 2
-                                  ? Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(
-                                          10.0,
-                                        ),
-                                      ),
-                                      child: const Text('...'),
-                                    )
-                                  : const SizedBox(),
-                            ],
+              ((conversation!.hasReactions ?? false) &&
+                      (conversation!.conversationReactions != null &&
+                          conversation!.conversationReactions!.isNotEmpty))
+                  ? ValueListenableBuilder(
+                      valueListenable: rebuildReactionsBar,
+                      builder: (context, _, __) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          margin: EdgeInsets.only(
+                            left: isSent! ? 0 : 32,
                           ),
-                        ),
-                      );
-                    })
-                : const SizedBox(),
-          ],
-        ),
+                          child: GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                backgroundColor: Colors.transparent,
+                                elevation: 5,
+                                useSafeArea: true,
+                                builder: (context) => ReactionBottomSheet(
+                                  mappedReactions: mappedReactions,
+                                  userMeta: userMeta,
+                                  currentUser: loggedInUser,
+                                  chatActionBloc: chatActionBloc!,
+                                  conversation: conversation!,
+                                ),
+                              );
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 3),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                          BorderRadius.circular(10.0)),
+                                  child: Text(
+                                      '${conversation!.conversationReactions![0].reaction} ${mappedReactions[conversation!.conversationReactions![0].reaction]!.length}'),
+                                ),
+                                conversation!.conversationReactions!.length >= 2
+                                    ? Container(
+                                        margin:
+                                            const EdgeInsets.only(left: 4.0),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 3),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(10.0)),
+                                        child: Text(
+                                            '${conversation!.conversationReactions![1].reaction} ${mappedReactions[conversation!.conversationReactions![1].reaction]!.length}'),
+                                      )
+                                    : const SizedBox(),
+                                kHorizontalPaddingSmall,
+                                conversation!.conversationReactions!.length > 2
+                                    ? Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            10.0,
+                                          ),
+                                        ),
+                                        child: const Text('...'),
+                                      )
+                                    : const SizedBox(),
+                              ],
+                            ),
+                          ),
+                        );
+                      })
+                  : const SizedBox(),
+            ],
+          ),
+          IgnorePointer(
+            child: SizedBox(
+              height: getHeightOfWidget(_chatBubbleKey),
+              child: CustomPopupMenu(
+                pressType: PressType.longPress,
+                controller: reactionBarController,
+                enablePassEvent: true,
+                verticalMargin: -5,
+                arrowColor: kWhiteColor,
+                barrierColor: Colors.transparent,
+                menuBuilder: () => ReactionBar(
+                  chatroomId: widget.chatroom.id,
+                  conversation: conversation!,
+                  replyToConversation: replyToConversation,
+                  loggedinUser: loggedInUser,
+                ),
+                child: SizedBox(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
