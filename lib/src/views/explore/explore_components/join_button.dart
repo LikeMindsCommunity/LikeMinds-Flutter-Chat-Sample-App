@@ -5,6 +5,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/custom_dialog.dart';
 
 class JoinButton extends StatelessWidget {
   final Function() onTap;
@@ -19,9 +20,38 @@ class JoinButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isJoined = chatroom.followStatus ?? false;
-    return chatroom.isSecret != null && !chatroom.isSecret!
-        ? GestureDetector(
-            onTap: onTap,
+    return isJoined == false && chatroom.isSecret != null && chatroom.isSecret!
+        ? Container(
+            decoration: BoxDecoration(
+                border: Border.all(
+                  color: LMBranding.instance.headerColor,
+                ),
+                shape: BoxShape.circle),
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(
+                Icons.lock,
+                size: 24,
+                color: LMBranding.instance.headerColor,
+              ),
+            ),
+          )
+        : GestureDetector(
+            onTap: () {
+              isJoined
+                  ? showDialog(
+                      context: context,
+                      builder: (context) => LMCustomDialog(
+                          title: "Leave chatroom",
+                          content: chatroom.isSecret != null &&
+                                  chatroom.isSecret!
+                              ? 'Are you sure you want to leave this private group? To join back, you\'ll need to reach out to the admin'
+                              : 'Are you sure you want to leave this group?',
+                          actionText: 'Confirm',
+                          onActionPressed: onTap),
+                    )
+                  : onTap();
+            },
             child: Container(
               decoration: BoxDecoration(
                 color: isJoined
@@ -61,21 +91,6 @@ class JoinButton extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ),
-          )
-        : Container(
-            decoration: BoxDecoration(
-                border: Border.all(
-                  color: LMBranding.instance.headerColor,
-                ),
-                shape: BoxShape.circle),
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                Icons.lock,
-                size: 24,
-                color: isJoined ? LMBranding.instance.headerColor : kWhiteColor,
               ),
             ),
           );

@@ -28,6 +28,7 @@ class ChatroomMenu extends StatefulWidget {
 class _ChatroomMenuState extends State<ChatroomMenu> {
   CustomPopupMenuController? _controller;
   List<ChatroomAction>? chatroomActions;
+  final User user = UserLocalPreference.instance.fetchUserData();
 
   ValueNotifier<bool> rebuildChatroomMenu = ValueNotifier(false);
 
@@ -38,6 +39,8 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
     chatroomActions = widget.chatroomActions;
     _controller = CustomPopupMenuController();
   }
+
+  void removeFollowIfSecretChatroom() {}
 
   @override
   Widget build(BuildContext context) {
@@ -108,10 +111,28 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
         leaveChatroom();
         break;
       case 15:
-        leaveChatroom();
+        joinChatroom();
         break;
       default:
         unimplemented();
+    }
+  }
+
+  void joinChatroom() async {
+    final response = await locator<LikeMindsService>()
+        .followChatroom((FollowChatroomRequestBuilder()
+              ..chatroomId(widget.chatroom.id)
+              ..memberId(user.id)
+              ..value(true))
+            .build());
+    if (response.success) {
+      widget.chatroom.isGuest = false;
+      widget.chatroom.followStatus = true;
+      Fluttertoast.showToast(msg: "Chatroom joined");
+      _controller!.hideMenu();
+      homeBloc?.add(UpdateHomeEvent());
+    } else {
+      Fluttertoast.showToast(msg: response.errorMessage!);
     }
   }
 
@@ -150,8 +171,8 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
   }
 
   void leaveChatroom() async {
-    final User user = UserLocalPreference.instance.fetchUserData();
-    if (!(widget.chatroom.isSecret ?? false)) {
+    if (widget.chatroom.isSecret == null ||
+        widget.chatroom.isSecret! == false) {
       final response = await locator<LikeMindsService>()
           .followChatroom((FollowChatroomRequestBuilder()
                 ..chatroomId(widget.chatroom.id)
@@ -160,11 +181,10 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
               .build());
       if (response.success) {
         widget.chatroom.isGuest = true;
-        // _controller.hideMenu();
+        widget.chatroom.followStatus = false;
         Fluttertoast.showToast(msg: "Chatroom left");
         _controller!.hideMenu();
         homeBloc?.add(UpdateHomeEvent());
-        // router.pop();
       } else {
         Fluttertoast.showToast(msg: response.errorMessage!);
       }
@@ -172,11 +192,12 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
       final response = await locator<LikeMindsService>()
           .deleteParticipant((DeleteParticipantRequestBuilder()
                 ..chatroomId(widget.chatroom.id)
+                ..memberId(user.userUniqueId)
                 ..isSecret(true))
               .build());
       if (response.success) {
         widget.chatroom.isGuest = true;
-        // _controller.hideMenu();
+        widget.chatroom.followStatus = false;
         Fluttertoast.showToast(msg: "Chatroom left");
         _controller!.hideMenu();
         homeBloc?.add(UpdateHomeEvent());
@@ -185,14 +206,5 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
         Fluttertoast.showToast(msg: response.errorMessage!);
       }
     }
-    // final response =
-    //     await locator<LikeMindsService>().leaveChatroom(LeaveChatroomRequest(
-    //   chatroomId: chatroom.id,
-    // ));
-    // if (response.success) {
-    //   toast("Chatroom left");
-    // } else {
-    //   toast(response.errorMessage!);
-    // }
   }
 }

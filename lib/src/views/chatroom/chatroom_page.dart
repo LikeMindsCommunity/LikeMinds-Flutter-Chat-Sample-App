@@ -364,7 +364,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 if (state is ChatroomLoaded) {
                   chatroom = state.getChatroomResponse.chatroom!;
                   lastConversationId =
-                      state.getChatroomResponse.lastConversationId!;
+                      state.getChatroomResponse.lastConversationId ?? 0;
                   chatActionBloc?.add(
                     NewConversation(
                       chatroomId: chatroom!.id,

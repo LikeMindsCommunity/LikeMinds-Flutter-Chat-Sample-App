@@ -274,7 +274,7 @@ class _ChatItemState extends State<ChatItem> {
   }
 
   void leaveChatroom() async {
-    if (chatroom.isSecret ?? false) {
+    if (chatroom.isSecret == null || chatroom.isSecret! == false) {
       final response = await locator<LikeMindsService>()
           .followChatroom((FollowChatroomRequestBuilder()
                 ..chatroomId(chatroom.id)
@@ -289,6 +289,7 @@ class _ChatItemState extends State<ChatItem> {
       final response = await locator<LikeMindsService>()
           .deleteParticipant((DeleteParticipantRequestBuilder()
                 ..chatroomId(chatroom.id)
+                ..memberId(user.userUniqueId)
                 ..isSecret(true))
               .build());
       if (response.success) {

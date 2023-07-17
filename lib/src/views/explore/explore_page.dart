@@ -180,7 +180,6 @@ class _ExplorePageState extends State<ExplorePage> {
         const Spacer(),
       ],
       bodyChildren: [
-        const SizedBox(height: 8),
         Row(
           children: [
             GestureDetector(
@@ -208,84 +207,86 @@ class _ExplorePageState extends State<ExplorePage> {
                   }),
             ),
             const Spacer(),
-            pinnedChatroomCount == 0
-                ? const SizedBox()
-                : GestureDetector(
-                    onTap: () {
-                      pinnedChatroom = !pinnedChatroom;
-                      rebuildPin.value = !rebuildPin.value;
-                      refreshExploreFeed();
-                      debugPrint("Pin button tapped");
-                    },
-                    child: ValueListenableBuilder(
-                        valueListenable: rebuildPin,
-                        builder: (context, _, __) {
-                          return pinnedChatroom
-                              ? Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10.0, vertical: 5.0),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25),
-                                    border: Border.all(
-                                      color: LMTheme.buttonColor,
-                                    ),
-                                  ),
-                                  child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Container(
-                                          height: 18.sp,
-                                          width: 18.sp,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: LMTheme.buttonColor,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.push_pin,
-                                            size: 10.sp,
-                                            color: LMTheme.buttonColor,
-                                          ),
-                                        ),
-                                        kHorizontalPaddingSmall,
-                                        Text(
-                                          'Pinned',
-                                          style: LMTheme.medium.copyWith(
-                                              color: LMTheme.buttonColor),
-                                        ),
-                                        kHorizontalPaddingSmall,
-                                        SizedBox(
-                                          height: 18.sp,
-                                          width: 18.sp,
-                                          child: Icon(
-                                            CupertinoIcons.xmark,
-                                            size: 12.sp,
-                                            color: LMTheme.buttonColor,
-                                          ),
-                                        ),
-                                      ]),
-                                )
-                              : Container(
-                                  height: 18.sp,
-                                  width: 18.sp,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: LMTheme.buttonColor,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.push_pin,
-                                    size: 10.sp,
+            ValueListenableBuilder(
+              valueListenable: rebuildPin,
+              builder: (context, _, __) {
+                return pinnedChatroomCount <= 3
+                    ? const SizedBox()
+                    : GestureDetector(
+                        onTap: () {
+                          pinnedChatroom = !pinnedChatroom;
+                          rebuildPin.value = !rebuildPin.value;
+                          refreshExploreFeed();
+                          debugPrint("Pin button tapped");
+                        },
+                        child: pinnedChatroom
+                            ? Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 5.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  border: Border.all(
                                     color: LMTheme.buttonColor,
                                   ),
-                                );
-                        })),
+                                ),
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Container(
+                                        height: 18.sp,
+                                        width: 18.sp,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: LMTheme.buttonColor,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.push_pin,
+                                          size: 10.sp,
+                                          color: LMTheme.buttonColor,
+                                        ),
+                                      ),
+                                      kHorizontalPaddingSmall,
+                                      Text(
+                                        'Pinned',
+                                        style: LMTheme.medium.copyWith(
+                                            color: LMTheme.buttonColor),
+                                      ),
+                                      kHorizontalPaddingSmall,
+                                      SizedBox(
+                                        height: 18.sp,
+                                        width: 18.sp,
+                                        child: Icon(
+                                          CupertinoIcons.xmark,
+                                          size: 12.sp,
+                                          color: LMTheme.buttonColor,
+                                        ),
+                                      ),
+                                    ]),
+                              )
+                            : Container(
+                                height: 18.sp,
+                                width: 18.sp,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: LMTheme.buttonColor,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.push_pin,
+                                  size: 10.sp,
+                                  color: LMTheme.buttonColor,
+                                ),
+                              ),
+                      );
+              },
+            ),
           ],
         ),
         kVerticalPaddingXLarge,
@@ -311,6 +312,7 @@ class _ExplorePageState extends State<ExplorePage> {
                     _page,
                   );
                 }
+                rebuildPin.value = !rebuildPin.value;
               } else if (state is ExploreError) {
                 exploreFeedPagingController.error = state.errorMessage;
               }
@@ -332,9 +334,11 @@ class _ExplorePageState extends State<ExplorePage> {
                       chatroom: item,
                       refresh: () => refresh(),
                       onTap: () {
-                        LMRealtime.instance.chatroomId = item.id;
-                        router.push("/chatroom/${item.id}");
-                        markRead(item.id);
+                        if (item.isSecret == null || item.isSecret == false) {
+                          LMRealtime.instance.chatroomId = item.id;
+                          router.push("/chatroom/${item.id}");
+                          markRead(item.id);
+                        }
                       },
                     ),
                   ),

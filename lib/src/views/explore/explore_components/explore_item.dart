@@ -6,6 +6,7 @@ import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_components/join_button.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class ExploreItem extends StatefulWidget {
   const ExploreItem({
@@ -95,7 +96,9 @@ class _ExploreItemState extends State<ExploreItem> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    widget.chatroom.answersCount.toString(),
+                                    widget.chatroom.totalResponseCount
+                                            ?.toString() ??
+                                        '0',
                                     style: GoogleFonts.roboto(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
@@ -116,15 +119,30 @@ class _ExploreItemState extends State<ExploreItem> {
                                 chatroom: widget.chatroom,
                                 onTap: () async {
                                   if (widget.chatroom.followStatus == true) {
-                                    LMResponse response =
-                                        await locator<LikeMindsService>()
-                                            .followChatroom(
-                                                (FollowChatroomRequestBuilder()
-                                                      ..chatroomId(
-                                                          widget.chatroom.id)
-                                                      ..memberId(user.id)
-                                                      ..value(false))
-                                                    .build());
+                                    LMResponse response;
+                                    if (widget.chatroom.isSecret == null ||
+                                        widget.chatroom.isSecret! == false) {
+                                      response = await locator<
+                                              LikeMindsService>()
+                                          .followChatroom(
+                                              (FollowChatroomRequestBuilder()
+                                                    ..chatroomId(
+                                                        widget.chatroom.id)
+                                                    ..memberId(user.id)
+                                                    ..value(false))
+                                                  .build());
+                                    } else {
+                                      response = await locator<
+                                              LikeMindsService>()
+                                          .deleteParticipant(
+                                              (DeleteParticipantRequestBuilder()
+                                                    ..chatroomId(
+                                                        widget.chatroom.id)
+                                                    ..memberId(
+                                                        user.userUniqueId)
+                                                    ..isSecret(true))
+                                                  .build());
+                                    }
                                     widget.chatroom.followStatus = false;
                                     isJoinedNotifier.value =
                                         !isJoinedNotifier.value;
@@ -132,6 +150,8 @@ class _ExploreItemState extends State<ExploreItem> {
                                       widget.chatroom.followStatus = true;
                                       isJoinedNotifier.value =
                                           !isJoinedNotifier.value;
+                                      toast(response.errorMessage ??
+                                          'An error occurred');
                                     }
                                   } else {
                                     LMResponse response =
@@ -150,6 +170,8 @@ class _ExploreItemState extends State<ExploreItem> {
                                       widget.chatroom.followStatus = false;
                                       isJoinedNotifier.value =
                                           !isJoinedNotifier.value;
+                                      toast(response.errorMessage ??
+                                          'An error occurred');
                                     }
                                   }
                                 },
