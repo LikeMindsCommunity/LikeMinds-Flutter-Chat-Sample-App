@@ -20,22 +20,8 @@ class JoinButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isJoined = chatroom.followStatus ?? false;
-    return isJoined == false && chatroom.isSecret != null && chatroom.isSecret!
-        ? Container(
-            decoration: BoxDecoration(
-                border: Border.all(
-                  color: LMBranding.instance.headerColor,
-                ),
-                shape: BoxShape.circle),
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                Icons.lock,
-                size: 24,
-                color: LMBranding.instance.headerColor,
-              ),
-            ),
-          )
+    return chatroom.isSecret != null && chatroom.isSecret!
+        ? const SizedBox()
         : GestureDetector(
             onTap: () {
               isJoined

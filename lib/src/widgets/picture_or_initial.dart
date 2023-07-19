@@ -32,48 +32,48 @@ class PictureOrInitial extends StatelessWidget {
             : backgroundColor ?? LMTheme.headerColor,
         shape: BoxShape.circle,
       ),
-      child: Center(
-        child: imageUrl != null && imageUrl!.isNotEmpty
-            ? CachedNetworkImage(
-                imageUrl: imageUrl!,
-                imageBuilder: (context, imageProvider) => Container(
-                  height: size ?? 42.sp,
-                  width: size ?? 42.sp,
-                  decoration: BoxDecoration(
-                    color: LMBranding.instance.headerColor,
-                    borderRadius: BorderRadius.circular(21.sp),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
+      child: imageUrl != null && imageUrl!.isNotEmpty
+          ? CachedNetworkImage(
+              imageUrl: imageUrl!,
+              imageBuilder: (context, imageProvider) => Container(
+                height: size ?? 42.sp,
+                width: size ?? 42.sp,
+                decoration: BoxDecoration(
+                  color: LMBranding.instance.headerColor,
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                // placeholder: (context, url) => Container(
-                //   height: size ?? 42.sp,
-                //   width: size ?? 42.sp,
-                //   decoration: BoxDecoration(
-                //     color: kGreyColor,
-                //     borderRadius: BorderRadius.circular(
-                //       size ?? 42.sp,
-                //     ),
-                //   ),
-                // ),
-                progressIndicatorBuilder: (context, url, progress) =>
-                    mediaShimmer(
-                  isPP: true,
-                ),
-                errorWidget: (context, url, error) => mediaErrorWidget(
-                  isPP: true,
-                ),
-              )
-            : Text(
+              ),
+              // placeholder: (context, url) => Container(
+              //   height: size ?? 42.sp,
+              //   width: size ?? 42.sp,
+              //   decoration: BoxDecoration(
+              //     color: kGreyColor,
+              //     borderRadius: BorderRadius.circular(
+              //       size ?? 42.sp,
+              //     ),
+              //   ),
+              // ),
+              progressIndicatorBuilder: (context, url, progress) =>
+                  mediaShimmer(
+                isPP: true,
+              ),
+              errorWidget: (context, url, error) => mediaErrorWidget(
+                isPP: true,
+              ),
+            )
+          : Center(
+              child: Text(
                 getInitials(fallbackText),
                 style: LMFonts.instance.bold.copyWith(
                   fontSize: fontSize ?? 12.sp,
                   color: Colors.white,
                 ),
               ),
-      ),
+            ),
     );
   }
 }

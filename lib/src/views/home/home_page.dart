@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/chat_item.dart';
+import 'package:likeminds_chat_mm_fl/src/views/home/home_components/explore_spaces_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/skeleton_list.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
@@ -121,84 +122,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        GestureDetector(
-          onTap: () {
-            router.push(exploreRoute);
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 4.w,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(
-                  height: 42.sp,
-                  width: 42.sp,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        kAssetExploreIcon,
-                        color: LMTheme.buttonColor,
-                        width: 8.w,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 4.w,
-                  ),
-                  child: Text(
-                    'Explore chatrooms',
-                    style: LMTheme.bold.copyWith(fontSize: 12.sp),
-                  ),
-                ),
-                const Spacer(),
-                FutureBuilder(
-                    future: locator<LikeMindsService>().getExploreTabCount(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Container();
-                      }
-                      if (snapshot.connectionState == ConnectionState.done &&
-                          snapshot.hasData) {
-                        if (snapshot.data!.success) {
-                          GetExploreTabCountResponse response =
-                              snapshot.data!.data!;
-                          if (response.unseenChannelCount == 0) {
-                            return Container();
-                          } else {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                                vertical: 4.0,
-                              ),
-                              decoration: BoxDecoration(
-                                  color: LMTheme.buttonColor,
-                                  borderRadius: BorderRadius.circular(
-                                    10.0,
-                                  ),
-                                  shape: BoxShape.rectangle),
-                              child: Text(
-                                '${response.unseenChannelCount} new',
-                                style:
-                                    LMTheme.bold.copyWith(color: kWhiteColor),
-                              ),
-                            );
-                          }
-                        } else {
-                          const SizedBox();
-                        }
-                      }
-                      return const SizedBox();
-                    })
-              ],
-            ),
-          ),
-        ),
+        const ExploreSpacesBar(),
         Expanded(
           child: BlocConsumer<HomeBloc, HomeState>(
             bloc: homeBloc,

@@ -1,3 +1,4 @@
+import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -28,6 +29,7 @@ class _ExplorePageState extends State<ExplorePage> {
   late Spaces _spaces;
   PagingController<int, ChatRoom> exploreFeedPagingController =
       PagingController<int, ChatRoom>(firstPageKey: 1);
+  CustomPopupMenuController _controller = CustomPopupMenuController();
   ValueNotifier<bool> rebuildSpaces = ValueNotifier(false);
   ValueNotifier<bool> rebuildPin = ValueNotifier(false);
   ExploreBloc? exploreBloc;
@@ -112,9 +114,14 @@ class _ExplorePageState extends State<ExplorePage> {
   Future onChoosingModal(context) => showModalBottomSheet(
         context: context,
         builder: (context) {
-          return SizedBox(
-            height: 30.h,
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ListTile(
                   title: const Text("Newest"),
@@ -171,20 +178,68 @@ class _ExplorePageState extends State<ExplorePage> {
         const bb.BackButton(),
         const SizedBox(width: 24),
         Text(
-          "Explore chatrooms",
-          style: GoogleFonts.montserrat(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-          ),
+          "Explore Chatrooms",
+          style: LMTheme.medium.copyWith(fontSize: 13.sp),
         ),
         const Spacer(),
       ],
       bodyChildren: [
+        kVerticalPaddingSmall,
         Row(
           children: [
-            GestureDetector(
-              //TODO: Add popup menu for choosing space
-              onTap: () async => await onChoosingModal(context),
+            CustomPopupMenu(
+              pressType: PressType.singleClick,
+              controller: _controller,
+              showArrow: false,
+              menuBuilder: () => Container(
+                width: 50.w,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: const Text("Newest"),
+                      onTap: () {
+                        _controller.hideMenu();
+                        _spaces = Spaces.newest;
+                        rebuildSpaces.value = !rebuildSpaces.value;
+                        refreshExploreFeed();
+                      },
+                    ),
+                    ListTile(
+                      title: const Text("Recently Active"),
+                      onTap: () {
+                        _controller.hideMenu();
+                        _spaces = Spaces.active;
+                        rebuildSpaces.value = !rebuildSpaces.value;
+                        refreshExploreFeed();
+                      },
+                    ),
+                    ListTile(
+                      title: const Text("Most Participants"),
+                      onTap: () {
+                        _controller.hideMenu();
+                        _spaces = Spaces.mostParticipants;
+                        rebuildSpaces.value = !rebuildSpaces.value;
+                        refreshExploreFeed();
+                      },
+                    ),
+                    ListTile(
+                      title: const Text("Most Messages"),
+                      onTap: () {
+                        _controller.hideMenu();
+                        _spaces = Spaces.mostMessages;
+                        rebuildSpaces.value = !rebuildSpaces.value;
+                        refreshExploreFeed();
+                      },
+                    ),
+                  ],
+                ),
+              ),
               child: ValueListenableBuilder(
                   valueListenable: rebuildSpaces,
                   builder: (context, _, __) {
@@ -328,8 +383,6 @@ class _ExplorePageState extends State<ExplorePage> {
                   padding: EdgeInsets.zero,
                   physics: const ClampingScrollPhysics(),
                   builderDelegate: PagedChildBuilderDelegate<ChatRoom>(
-                    noMoreItemsIndicatorBuilder: (context) =>
-                        const SizedBox(height: 80),
                     itemBuilder: (context, item, index) => ExploreItem(
                       chatroom: item,
                       refresh: () => refresh(),
