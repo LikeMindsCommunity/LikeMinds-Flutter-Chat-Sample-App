@@ -19,8 +19,10 @@ import 'package:likeminds_chat_mm_fl/src/utils/simple_bloc_observer.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/tagging/tagging_textfield_ta.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/poll_creation_bottom_sheet.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/media_utils.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/chatbar_attachment_button.dart';
 
 class ChatBar extends StatefulWidget {
   final ChatRoom chatroom;
@@ -300,42 +302,13 @@ class _ChatBarState extends State<ChatBar> {
                                                         );
                                                       }
                                                     }
-                                                  },
-                                                  child: SizedBox(
-                                                    width: 25.w,
-                                                    height: 12.h,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 40.sp,
-                                                          height: 40.sp,
-                                                          decoration: BoxDecoration(
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              color: LMBranding
-                                                                  .instance
-                                                                  .buttonColor),
-                                                          child: Icon(
-                                                              Icons
-                                                                  .camera_alt_outlined,
-                                                              color:
-                                                                  kWhiteColor,
-                                                              size: 25.sp),
-                                                        ),
-                                                        kVerticalPaddingMedium,
-                                                        Text(
-                                                          "Camera",
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: lmBranding
-                                                              .fonts.medium,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
+                                                  }
+                                                },
+                                                child:
+                                                    getChatBarAttachmentButton(
+                                                  LMTheme.buttonColor,
+                                                  "Camera",
+                                                  Icons.camera_alt_outlined,
                                                 ),
                                                 GestureDetector(
                                                   onTap: () async {
@@ -386,45 +359,28 @@ class _ChatBarState extends State<ChatBar> {
                                                         );
                                                       }
                                                     }
-                                                  },
-                                                  child: SizedBox(
-                                                    width: 25.w,
-                                                    height: 12.h,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 40.sp,
-                                                          height: 40.sp,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            color: LMBranding
-                                                                .instance
-                                                                .buttonColor,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons.photo_library,
-                                                            color: kWhiteColor,
-                                                            size: 25.sp,
-                                                          ),
-                                                        ),
-                                                        kVerticalPaddingMedium,
-                                                        Text(
-                                                          "Gallery",
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: lmBranding
-                                                              .fonts.medium,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
+                                                    if (pickedMediaFiles
+                                                        .isNotEmpty) {
+                                                      router.pushNamed(
+                                                        "media_forward",
+                                                        extra: pickedMediaFiles,
+                                                        params: {
+                                                          'chatroomId': widget
+                                                              .chatroom.id
+                                                              .toString()
+                                                        },
+                                                      );
+                                                    }
+                                                  }
+                                                },
+                                                child:
+                                                    getChatBarAttachmentButton(
+                                                  LMTheme.buttonColor,
+                                                  "Gallery",
+                                                  Icons.photo_library,
                                                 ),
-                                                GestureDetector(
+                                              ),
+                                              GestureDetector(
                                                   onTap: () async {
                                                     _popupMenuController
                                                         .hideMenu();
@@ -448,48 +404,50 @@ class _ChatBarState extends State<ChatBar> {
                                                       }
                                                     }
                                                   },
-                                                  child: SizedBox(
-                                                    width: 25.w,
-                                                    height: 12.h,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 40.sp,
-                                                          height: 40.sp,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            color: LMBranding
-                                                                .instance
-                                                                .buttonColor,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons
-                                                                .file_copy_outlined,
-                                                            color: kWhiteColor,
-                                                            size: 25.sp,
-                                                          ),
-                                                        ),
-                                                        kVerticalPaddingMedium,
-                                                        Text(
-                                                          "Document",
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: lmBranding
-                                                              .fonts.medium,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
+                                                  child: getChatBarAttachmentButton(
+                                                      LMTheme.buttonColor,
+                                                      "Document",
+                                                      Icons
+                                                          .file_copy_outlined)),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  _popupMenuController
+                                                      .hideMenu();
+                                                  showBottomSheet(
+                                                    context: context,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    elevation: 10,
+                                                    builder: (context) =>
+                                                        const PollCreationBottomSheet(),
+                                                  );
+                                                },
+                                                child:
+                                                    getChatBarAttachmentButton(
+                                                  LMTheme.buttonColor,
+                                                  "Polls",
+                                                  Icons.bar_chart_rounded,
                                                 ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+                                              ),
+                                              getChatBarAttachmentButton(
+                                                kWhiteColor,
+                                                "",
+                                                null,
+                                              ),
+                                              getChatBarAttachmentButton(
+                                                kWhiteColor,
+                                                "",
+                                                null,
+                                              ),
+                                            ],
+                                          )
+                                        ],
                                       ),
                                     ),
                                   ),
