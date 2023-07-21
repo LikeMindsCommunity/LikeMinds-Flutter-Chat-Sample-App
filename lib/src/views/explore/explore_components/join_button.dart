@@ -3,8 +3,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/custom_dialog.dart';
 
 class JoinButton extends StatelessWidget {
@@ -19,7 +21,7 @@ class JoinButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isJoined = chatroom.followStatus ?? false;
+    bool isJoined = chatroom.followStatus!;
     return chatroom.isSecret != null && chatroom.isSecret!
         ? const SizedBox()
         : GestureDetector(
@@ -40,9 +42,10 @@ class JoinButton extends StatelessWidget {
             },
             child: Container(
               decoration: BoxDecoration(
-                color: isJoined
-                    ? LMBranding.instance.headerColor.withAlpha(30)
-                    : LMBranding.instance.headerColor,
+                color: isJoined ? null : LMBranding.instance.headerColor,
+                border: isJoined
+                    ? Border.all(color: LMTheme.buttonColor, width: 1.2)
+                    : null,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Padding(
@@ -64,11 +67,11 @@ class JoinButton extends StatelessWidget {
                                 ? LMBranding.instance.headerColor
                                 : kWhiteColor,
                           ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text(
                       isJoined ? "Joined" : "Join",
                       style: GoogleFonts.roboto(
-                        fontSize: 16,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                         color: isJoined
                             ? LMBranding.instance.headerColor

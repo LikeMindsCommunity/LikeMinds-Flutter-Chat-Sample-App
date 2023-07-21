@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
@@ -47,6 +46,7 @@ class _ExploreItemState extends State<ExploreItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Stack(
+                clipBehavior: Clip.none,
                 children: [
                   SizedBox(
                     height: 17.w,
@@ -56,10 +56,35 @@ class _ExploreItemState extends State<ExploreItem> {
                       imageUrl: chatroom!.chatroomImageUrl,
                     ),
                   ),
+                  chatroom!.externalSeen != null && !chatroom!.externalSeen!
+                      ? Positioned(
+                          bottom: -12,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4.0,
+                                horizontal: 8.0,
+                              ),
+                              decoration: BoxDecoration(
+                                  color: LMTheme.buttonColor,
+                                  borderRadius: BorderRadius.circular(4)),
+                              child: Text(
+                                'NEW',
+                                style: LMTheme.medium.copyWith(
+                                  color: kWhiteColor,
+                                  fontSize: 8.sp,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
                   chatroom!.isPinned != null && chatroom!.isPinned!
                       ? Positioned(
-                          bottom: 0,
-                          right: 0,
+                          bottom: 7,
+                          right: -7,
                           child: Container(
                             padding: const EdgeInsets.all(2.0),
                             decoration: const BoxDecoration(
@@ -106,9 +131,11 @@ class _ExploreItemState extends State<ExploreItem> {
                               ),
                               const SizedBox(height: 4),
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Icon(
-                                    Icons.people_outline,
+                                    CupertinoIcons.person_2,
+                                    //Icons.people_outline,
                                     color: kGrey3Color,
                                     size: 18,
                                   ),
@@ -122,7 +149,7 @@ class _ExploreItemState extends State<ExploreItem> {
                                   ),
                                   const SizedBox(width: 12),
                                   const Icon(
-                                    Icons.message_outlined,
+                                    CupertinoIcons.chat_bubble,
                                     color: kGrey3Color,
                                     size: 18,
                                   ),

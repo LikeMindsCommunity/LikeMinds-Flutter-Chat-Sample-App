@@ -91,6 +91,22 @@ class _ChatBarState extends State<ChatBar> {
     super.dispose();
   }
 
+  bool checkIfSecretAndJoined() {
+    if (widget.chatroom.isSecret == null) {
+      return true;
+    } else {
+      if (widget.chatroom.isSecret!) {
+        if (widget.chatroom.followStatus!) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    }
+  }
+
   bool checkIfAnnouncementChannel() {
     if (getMemberState.member!.state != 1 && widget.chatroom.type == 7) {
       return false;
@@ -106,6 +122,8 @@ class _ChatBarState extends State<ChatBar> {
       return 'Only Community Managers can respond here';
     } else if (!MemberRightCheck.checkRespondRights(getMemberState)) {
       return 'The community managers have restricted you from responding here';
+    } else if (!checkIfSecretAndJoined()) {
+      return "Join this chat room to participate in this chat room.";
     } else {
       return "Write something here";
     }
@@ -145,10 +163,14 @@ class _ChatBarState extends State<ChatBar> {
     chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Column(
       children: [
-        replyToConversation != null && checkIfAnnouncementChannel()
+        replyToConversation != null &&
+                checkIfAnnouncementChannel() &&
+                checkIfSecretAndJoined()
             ? _getReplyConversation()
             : const SizedBox(),
-        editConversation != null && checkIfAnnouncementChannel()
+        editConversation != null &&
+                checkIfAnnouncementChannel() &&
+                checkIfSecretAndJoined()
             ? _getEditConversation()
             : const SizedBox(),
         Container(
@@ -165,7 +187,10 @@ class _ChatBarState extends State<ChatBar> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  width: checkIfAnnouncementChannel() ? 80.w : 90.w,
+                  width:
+                      checkIfAnnouncementChannel() && checkIfSecretAndJoined()
+                          ? 80.w
+                          : 90.w,
                   constraints: BoxConstraints(
                     // minHeight: 4.h,
                     minHeight: 12.w,
@@ -202,7 +227,8 @@ class _ChatBarState extends State<ChatBar> {
                             controller: _textEditingController,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              enabled: checkIfAnnouncementChannel(),
+                              enabled: checkIfAnnouncementChannel() &&
+                                  checkIfSecretAndJoined(),
                               hintMaxLines: 2,
                               hintStyle: LMTheme.medium.copyWith(
                                 color: kGreyColor,
@@ -213,7 +239,7 @@ class _ChatBarState extends State<ChatBar> {
                             focusNode: _focusNode,
                           ),
                         ),
-                        checkIfAnnouncementChannel()
+                        checkIfAnnouncementChannel() && checkIfSecretAndJoined()
                             ? CustomPopupMenu(
                                 controller: _popupMenuController,
                                 arrowColor: Colors.white,
@@ -487,7 +513,7 @@ class _ChatBarState extends State<ChatBar> {
                   ),
                 ),
                 SizedBox(width: 2.w),
-                checkIfAnnouncementChannel()
+                checkIfAnnouncementChannel() && checkIfSecretAndJoined()
                     ? GestureDetector(
                         onTap: checkIfAnnouncementChannel()
                             ? () {
@@ -527,10 +553,11 @@ class _ChatBarState extends State<ChatBar> {
                                               replyToConversation),
                                     );
                                   }
-                                  if (widget.chatroom.isGuest ?? false) {
+                                  if (widget.chatroom.followStatus != null &&
+                                      !widget.chatroom.followStatus!) {
                                     Fluttertoast.showToast(
                                         msg: "Chatroom joined");
-                                    widget.chatroom.isGuest = false;
+                                    widget.chatroom.followStatus = true;
                                   }
                                   _textEditingController.clear();
                                   userTags = [];

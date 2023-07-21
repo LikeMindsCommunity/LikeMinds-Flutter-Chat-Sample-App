@@ -40,8 +40,6 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
     _controller = CustomPopupMenuController();
   }
 
-  void removeFollowIfSecretChatroom() {}
-
   @override
   Widget build(BuildContext context) {
     homeBloc = BlocProvider.of<HomeBloc>(context);
@@ -108,10 +106,10 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
         muteChatroom(action);
         break;
       case 9:
-        leaveChatroom();
+        joinChatroom();
         break;
       case 15:
-        joinChatroom();
+        leaveChatroom();
         break;
       default:
         unimplemented();
@@ -128,7 +126,7 @@ class _ChatroomMenuState extends State<ChatroomMenu> {
     if (response.success) {
       widget.chatroom.isGuest = false;
       widget.chatroom.followStatus = true;
-      Fluttertoast.showToast(msg: "Chatroom joined");
+      Fluttertoast.showToast(msg: "Chatroom join");
       _controller!.hideMenu();
       homeBloc?.add(UpdateHomeEvent());
     } else {

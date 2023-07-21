@@ -186,6 +186,7 @@ class _ExplorePageState extends State<ExplorePage> {
       bodyChildren: [
         kVerticalPaddingSmall,
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomPopupMenu(
               pressType: PressType.singleClick,
@@ -202,7 +203,10 @@ class _ExplorePageState extends State<ExplorePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ListTile(
-                      title: const Text("Newest"),
+                      title: Text(
+                        "Newest",
+                        style: LMTheme.medium,
+                      ),
                       onTap: () {
                         _controller.hideMenu();
                         _spaces = Spaces.newest;
@@ -211,7 +215,10 @@ class _ExplorePageState extends State<ExplorePage> {
                       },
                     ),
                     ListTile(
-                      title: const Text("Recently Active"),
+                      title: Text(
+                        "Recently Active",
+                        style: LMTheme.medium,
+                      ),
                       onTap: () {
                         _controller.hideMenu();
                         _spaces = Spaces.active;
@@ -220,7 +227,10 @@ class _ExplorePageState extends State<ExplorePage> {
                       },
                     ),
                     ListTile(
-                      title: const Text("Most Participants"),
+                      title: Text(
+                        "Most Participants",
+                        style: LMTheme.medium,
+                      ),
                       onTap: () {
                         _controller.hideMenu();
                         _spaces = Spaces.mostParticipants;
@@ -229,7 +239,10 @@ class _ExplorePageState extends State<ExplorePage> {
                       },
                     ),
                     ListTile(
-                      title: const Text("Most Messages"),
+                      title: Text(
+                        "Most Messages",
+                        style: LMTheme.medium,
+                      ),
                       onTap: () {
                         _controller.hideMenu();
                         _spaces = Spaces.mostMessages;
@@ -330,13 +343,13 @@ class _ExplorePageState extends State<ExplorePage> {
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: LMTheme.buttonColor,
+                                    color: kDarkGreyColor,
                                   ),
                                 ),
                                 child: Icon(
                                   Icons.push_pin,
                                   size: 10.sp,
-                                  color: LMTheme.buttonColor,
+                                  color: kDarkGreyColor,
                                 ),
                               ),
                       );
@@ -383,15 +396,18 @@ class _ExplorePageState extends State<ExplorePage> {
                   padding: EdgeInsets.zero,
                   physics: const ClampingScrollPhysics(),
                   builderDelegate: PagedChildBuilderDelegate<ChatRoom>(
+                    noItemsFoundIndicatorBuilder: (context) => Center(
+                        child: Text(
+                      "Opps, no chatrooms found!",
+                      style: LMTheme.medium,
+                    )),
                     itemBuilder: (context, item, index) => ExploreItem(
                       chatroom: item,
                       refresh: () => refresh(),
                       onTap: () {
-                        if (item.isSecret == null || item.isSecret == false) {
-                          LMRealtime.instance.chatroomId = item.id;
-                          router.push("/chatroom/${item.id}");
-                          markRead(item.id);
-                        }
+                        LMRealtime.instance.chatroomId = item.id;
+                        router.push("/chatroom/${item.id}");
+                        markRead(item.id);
                       },
                     ),
                   ),
