@@ -96,11 +96,7 @@ class _ChatBarState extends State<ChatBar> {
       return true;
     } else {
       if (widget.chatroom.isSecret!) {
-        if (widget.chatroom.followStatus!) {
-          return true;
-        } else {
-          return false;
-        }
+        return widget.chatroom.followStatus!;
       } else {
         return true;
       }
