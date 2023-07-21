@@ -107,7 +107,8 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   void addReaction(Reaction reaction) {
-    if (conversation!.hasReactions == false ||
+    if (conversation!.hasReactions == null ||
+        conversation!.hasReactions == false ||
         conversation!.conversationReactions == null) {
       conversation!.hasReactions = true;
       conversation!.conversationReactions = [reaction];
@@ -471,81 +472,85 @@ class _ChatBubbleState extends State<ChatBubble> {
                   ),
                 ),
               ),
-              ((conversation!.hasReactions ?? false) &&
-                      (conversation!.conversationReactions != null &&
-                          conversation!.conversationReactions!.isNotEmpty))
-                  ? ValueListenableBuilder(
-                      valueListenable: rebuildReactionsBar,
-                      builder: (context, _, __) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          margin: EdgeInsets.only(
-                            left: isSent! ? 0 : 32,
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                backgroundColor: Colors.transparent,
-                                elevation: 5,
-                                useSafeArea: true,
-                                builder: (context) => ReactionBottomSheet(
-                                  mappedReactions: mappedReactions,
-                                  userMeta: userMeta,
-                                  currentUser: loggedInUser,
-                                  chatActionBloc: chatActionBloc!,
-                                  conversation: conversation!,
-                                ),
-                              );
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 3),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius:
-                                          BorderRadius.circular(10.0)),
-                                  child: Text(
-                                      '${conversation!.conversationReactions![0].reaction} ${mappedReactions[conversation!.conversationReactions![0].reaction]!.length}'),
-                                ),
-                                conversation!.conversationReactions!.length >= 2
-                                    ? Container(
-                                        margin:
-                                            const EdgeInsets.only(left: 4.0),
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 3),
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(10.0)),
-                                        child: Text(
-                                            '${conversation!.conversationReactions![1].reaction} ${mappedReactions[conversation!.conversationReactions![1].reaction]!.length}'),
-                                      )
-                                    : const SizedBox(),
-                                kHorizontalPaddingSmall,
-                                conversation!.conversationReactions!.length > 2
-                                    ? Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 3),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            10.0,
-                                          ),
-                                        ),
-                                        child: const Text('...'),
-                                      )
-                                    : const SizedBox(),
-                              ],
+              ValueListenableBuilder(
+                  valueListenable: rebuildReactionsBar,
+                  builder: (context, _, __) {
+                    return ((conversation!.hasReactions ?? false) &&
+                            (conversation!.conversationReactions != null &&
+                                conversation!
+                                    .conversationReactions!.isNotEmpty))
+                        ? Container(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            margin: EdgeInsets.only(
+                              left: isSent! ? 0 : 32,
                             ),
-                          ),
-                        );
-                      })
-                  : const SizedBox(),
+                            child: GestureDetector(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: Colors.transparent,
+                                  elevation: 5,
+                                  useSafeArea: true,
+                                  builder: (context) => ReactionBottomSheet(
+                                    mappedReactions: mappedReactions,
+                                    userMeta: userMeta,
+                                    currentUser: loggedInUser,
+                                    chatActionBloc: chatActionBloc!,
+                                    conversation: conversation!,
+                                  ),
+                                );
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: <Widget>[
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 3),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(10.0)),
+                                    child: Text(
+                                        '${conversation!.conversationReactions![0].reaction} ${mappedReactions[conversation!.conversationReactions![0].reaction]!.length}'),
+                                  ),
+                                  conversation!.conversationReactions!.length >=
+                                          2
+                                      ? Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 4.0),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 3),
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0)),
+                                          child: Text(
+                                              '${conversation!.conversationReactions![1].reaction} ${mappedReactions[conversation!.conversationReactions![1].reaction]!.length}'),
+                                        )
+                                      : const SizedBox(),
+                                  kHorizontalPaddingSmall,
+                                  conversation!.conversationReactions!.length >
+                                          2
+                                      ? Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              10.0,
+                                            ),
+                                          ),
+                                          child: const Text('...'),
+                                        )
+                                      : const SizedBox(),
+                                ],
+                              ),
+                            ),
+                          )
+                        : const SizedBox();
+                  })
             ],
           ),
           IgnorePointer(
@@ -564,7 +569,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                   replyToConversation: replyToConversation,
                   loggedinUser: loggedInUser,
                 ),
-                child: SizedBox(),
+                child: const SizedBox(),
               ),
             ),
           ),

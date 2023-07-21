@@ -161,29 +161,6 @@ class _ChatroomPageState extends State<ChatroomPage> {
     List<Conversation> conversationList =
         pagedListController.itemList ?? <Conversation>[];
 
-    // if (conversationList.isNotEmpty &&
-    //     conversationList.first.date != conversation.date) {
-    //   conversationList.insert(
-    //     0,
-    //     Conversation(
-    //       isTimeStamp: true,
-    //       id: 1,
-    //       hasFiles: false,
-    //       attachmentCount: 0,
-    //       attachmentsUploaded: false,
-    //       createdEpoch: conversation.createdEpoch,
-    //       chatroomId: chatroom!.id,
-    //       date: conversation.date,
-    //       memberId: conversation.memberId,
-    //       userId: conversation.userId,
-    //       temporaryId: conversation.temporaryId,
-    //       answer: conversation.date ?? '',
-    //       communityId: chatroom!.communityId!,
-    //       createdAt: conversation.createdAt,
-    //       header: conversation.header,
-    //     ),
-    //   );
-    // }
     conversationList.insert(0, conversation);
     if (conversationList.length >= 500) {
       conversationList.removeLast();
