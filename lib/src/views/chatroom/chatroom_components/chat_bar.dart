@@ -28,6 +28,7 @@ class ChatBar extends StatefulWidget {
   final List<Media>? replyConversationAttachments;
   final Conversation? editConversation;
   final Map<int, User?>? userMeta;
+  final FocusNode focusNode;
   final Function() scrollToBottom;
 
   const ChatBar({
@@ -38,6 +39,7 @@ class ChatBar extends StatefulWidget {
     this.editConversation,
     required this.scrollToBottom,
     this.userMeta,
+    required this.focusNode,
   });
 
   @override
@@ -68,7 +70,7 @@ class _ChatBarState extends State<ChatBar> {
     Bloc.observer = SimpleBlocObserver();
     _popupMenuController = CustomPopupMenuController();
     _textEditingController = TextEditingController();
-    _focusNode = FocusNode();
+    _focusNode = widget.focusNode;
     imagePicker = ImagePicker();
     filePicker = FilePicker.platform;
     super.initState();
@@ -86,7 +88,6 @@ class _ChatBarState extends State<ChatBar> {
   void dispose() {
     _popupMenuController.dispose();
     _textEditingController.dispose();
-    _focusNode.dispose();
     replyToConversation = null;
     super.dispose();
   }
@@ -171,7 +172,6 @@ class _ChatBarState extends State<ChatBar> {
             : const SizedBox(),
         Container(
           width: 100.w,
-          color: kGreyColor.withOpacity(0.2),
           padding: EdgeInsets.symmetric(
             horizontal: 3.w,
             vertical: 12,
@@ -606,7 +606,7 @@ class _ChatBarState extends State<ChatBar> {
     return Container(
       height: 10.h,
       width: 100.w,
-      color: kGreyColor.withOpacity(0.1),
+      color: kWhiteColor,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 3.w),
         child: Row(
@@ -670,7 +670,7 @@ class _ChatBarState extends State<ChatBar> {
     return Container(
       height: 8.h,
       width: 100.w,
-      color: kGreyColor.withOpacity(0.1),
+      color: kWhiteColor,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 3.w),
         child: Row(

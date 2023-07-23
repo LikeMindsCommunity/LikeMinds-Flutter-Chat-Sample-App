@@ -56,6 +56,8 @@ class GgetMultipleDocPreviewState extends State<GetMultipleDocPreview> {
       builder: (context, _, __) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             ListView.builder(
               shrinkWrap: true,

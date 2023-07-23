@@ -8,7 +8,6 @@ import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
-import 'package:likeminds_chat_mm_fl/src/utils/tagging/helpers/tagging_helper.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 
 part 'chat_action_event.dart';
@@ -20,57 +19,64 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
   int? lastConversationId;
 
   ChatActionBloc() : super(ConversationInitial()) {
-    on<NewConversation>((event, emit) {
-      int chatroomId = event.chatroomId;
-      lastConversationId = event.conversationId;
+    on<NewConversation>(
+      (event, emit) {
+        int chatroomId = event.chatroomId;
+        lastConversationId = event.conversationId;
 
-      realTime.onValue.listen((event) {
-        if (event.snapshot.value != null) {
-          final response = event.snapshot.value as Map;
-          final conversationId = int.parse(response["collabcard"]["answer_id"]);
-          if (lastConversationId != null &&
-              conversationId != lastConversationId) {
-            add(UpdateConversationList(
-              chatroomId: chatroomId,
-              conversationId: conversationId,
-            ));
+        realTime.onValue.listen(
+          (event) {
+            if (event.snapshot.value != null) {
+              final response = event.snapshot.value as Map;
+              final conversationId =
+                  int.parse(response["collabcard"]["answer_id"]);
+              if (lastConversationId != null &&
+                  conversationId != lastConversationId) {
+                add(UpdateConversationList(
+                  chatroomId: chatroomId,
+                  conversationId: conversationId,
+                ));
+              }
+            }
+          },
+        );
+      },
+    );
+    on<UpdateConversationList>(
+      (event, emit) async {
+        if (lastConversationId != null &&
+            event.conversationId != lastConversationId) {
+          int maxTimestamp = DateTime.now().millisecondsSinceEpoch;
+          final response = await locator<LikeMindsService>()
+              .getConversation((GetConversationRequestBuilder()
+                    ..chatroomId(event.chatroomId)
+                    ..minTimestamp(0)
+                    ..maxTimestamp(maxTimestamp)
+                    ..page(1)
+                    ..pageSize(200)
+                    ..conversationId(event.conversationId))
+                  .build());
+          if (response.success) {
+            Conversation realTimeConversation =
+                response.data!.conversationData!.first;
+            if (response.data!.conversationMeta != null &&
+                realTimeConversation.replyId != null) {
+              Conversation? replyConversationObject = response.data!
+                  .conversationMeta![realTimeConversation.replyId.toString()];
+              realTimeConversation.replyConversationObject =
+                  replyConversationObject;
+            }
+            emit(
+              UpdateConversation(
+                response: realTimeConversation,
+              ),
+            );
+
+            lastConversationId = event.conversationId;
           }
         }
-      });
-    });
-    on<UpdateConversationList>((event, emit) async {
-      if (lastConversationId != null &&
-          event.conversationId != lastConversationId) {
-        int maxTimestamp = DateTime.now().millisecondsSinceEpoch;
-        final response = await locator<LikeMindsService>()
-            .getConversation((GetConversationRequestBuilder()
-                  ..chatroomId(event.chatroomId)
-                  ..minTimestamp(0)
-                  ..maxTimestamp(maxTimestamp)
-                  ..page(1)
-                  ..pageSize(200)
-                  ..conversationId(event.conversationId))
-                .build());
-        if (response.success) {
-          Conversation realTimeConversation =
-              response.data!.conversationData!.first;
-          if (response.data!.conversationMeta != null &&
-              realTimeConversation.replyId != null) {
-            Conversation? replyConversationObject = response.data!
-                .conversationMeta![realTimeConversation.replyId.toString()];
-            realTimeConversation.replyConversationObject =
-                replyConversationObject;
-          }
-          emit(
-            UpdateConversation(
-              response: realTimeConversation,
-            ),
-          );
-
-          lastConversationId = event.conversationId;
-        }
-      }
-    });
+      },
+    );
     on<PostConversation>((event, emit) async {
       await mapPostConversationFunction(
         event,
@@ -95,6 +101,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     );
     on<EditingConversation>(
       (event, emit) async {
+        emit(RemoveConversationToolBarState());
         emit(EditConversationState(
           chatroomId: event.chatroomId,
           conversationId: event.conversationId,
@@ -102,15 +109,87 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         ));
       },
     );
-    on<EditRemove>((event, emit) => emit(EditRemoveState()));
-    on<ReplyConversation>((event, emit) async {
-      emit(ReplyConversationState(
-        chatroomId: event.chatroomId,
-        conversationId: event.conversationId,
-        conversation: event.replyConversation,
-      ));
-    });
-    on<ReplyRemove>((event, emit) => emit(ReplyRemoveState()));
+    on<EditRemove>(
+      (event, emit) {
+        emit(EditRemoveState());
+        emit(RemoveConversationToolBarState());
+      },
+    );
+    on<ReplyConversation>(
+      (event, emit) async {
+        emit(RemoveConversationToolBarState());
+        emit(
+          ReplyConversationState(
+            chatroomId: event.chatroomId,
+            conversationId: event.conversationId,
+            conversation: event.replyConversation,
+          ),
+        );
+      },
+    );
+    on<ReplyRemove>(
+      (event, emit) {
+        emit(ReplyRemoveState());
+        emit(RemoveConversationToolBarState());
+      },
+    );
+    on<DeleteConversation>(
+      (event, emit) async {
+        emit(RemoveConversationToolBarState());
+        final response = await locator<LikeMindsService>()
+            .deleteConversation((DeleteConversationRequestBuilder()
+                  ..conversationIds(
+                      event.deleteConversationRequest.conversationIds)
+                  ..reason("Delete"))
+                .build());
+        if (response.success) {
+          emit(ConversationDelete(response.data!));
+        } else {
+          emit(ConversationDeleteError(
+              response.errorMessage ?? 'An error occured'));
+        }
+      },
+    );
+    on<ConversationToolBar>(
+      (event, emit) {
+        emit(ConversationToolBarState(
+          conversation: event.conversation,
+          showReactionBar: event.showReactionBar,
+          showReactionKeyboard: event.showReactionKeyboard,
+          replyConversation: event.replyConversation,
+        ));
+      },
+    );
+    on<RemoveConversationToolBar>(
+        (event, emit) => emit(RemoveConversationToolBarState()));
+    on<PutReaction>(
+      (event, emit) async {
+        emit(RemoveConversationToolBarState());
+        emit(PutReactionState(event.putReactionRequest));
+        LMResponse response = await locator<LikeMindsService>()
+            .putReaction(event.putReactionRequest);
+        if (!response.success) {
+          emit(PutReactionError(
+            response.errorMessage ?? 'An error occured',
+            event.putReactionRequest,
+          ));
+        }
+      },
+    );
+    on<DeleteReaction>(
+      (event, emit) async {
+        emit(RemoveConversationToolBarState());
+        emit(DeleteReactionState(event.deleteReactionRequest));
+        LMResponse response = await locator<LikeMindsService>()
+            .deleteReaction(event.deleteReactionRequest);
+        if (!response.success) {
+          emit(DeleteReactionError(
+            response.errorMessage ?? 'An error occured',
+            event.deleteReactionRequest,
+          ));
+        }
+      },
+    );
   }
 
   mapEditConversation(
@@ -360,21 +439,3 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     }
   }
 }
-
-// realTime.onValue.listen((rtEvent) {
-//       on<NewConversation>((event, emit) {
-//         int chatroomId = event.chatroomId;
-//         lastConversationId = event.conversationId;
-//         if (rtEvent.snapshot.value != null) {
-//           final response = rtEvent.snapshot.value as Map;
-//           final conversationId = int.parse(response["collabcard"]["answer_id"]);
-//           if (lastConversationId != null &&
-//               conversationId != lastConversationId) {
-//             add(UpdateConversationList(
-//               chatroomId: chatroomId,
-//               conversationId: conversationId,
-//             ));
-//           }
-//         }
-//       });
-//     });
