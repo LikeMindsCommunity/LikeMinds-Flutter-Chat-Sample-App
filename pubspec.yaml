@@ -82,6 +82,8 @@ flutter:
   # To add assets to your package, add an assets section, like this:
   assets:
     - packages/likeminds_chat_mm_fl/assets/icons/doc_pdf.svg
+    - packages/likeminds_chat_mm_fl/assets/icons/explore.svg
+    - packages/likeminds_chat_mm_fl/assets/icons/notification_check.svg
   #
   # For details regarding assets in packages, see
   # https://flutter.dev/assets-and-images/#from-packages

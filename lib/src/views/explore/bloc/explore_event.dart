@@ -4,6 +4,15 @@ abstract class ExploreEvent {}
 
 class InitExploreEvent extends ExploreEvent {}
 
+class GetExplore extends ExploreEvent {
+  final GetExploreFeedRequest getExploreFeedRequest;
+
+  GetExplore({required this.getExploreFeedRequest});
+
+  @override
+  List<Object> get props => [getExploreFeedRequest.toJson()];
+}
+
 class RefreshExploreEvent extends ExploreEvent {}
 
 class PinSpaceEvent extends ExploreEvent {

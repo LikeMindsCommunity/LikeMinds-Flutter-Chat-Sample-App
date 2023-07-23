@@ -1,11 +1,17 @@
+import 'package:flutter_svg/svg.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/chat_item.dart';
+import 'package:likeminds_chat_mm_fl/src/views/home/home_components/explore_spaces_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/home_components/skeleton_list.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
@@ -116,59 +122,55 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
+        const ExploreSpacesBar(),
         Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(top: 1.h),
-            child: BlocConsumer<HomeBloc, HomeState>(
-              bloc: homeBloc,
-              listener: (context, state) {
-                updatePagingControllers(state);
-              },
-              buildWhen: (previous, current) {
-                if (previous is HomeLoaded && current is HomeLoading) {
-                  return false;
-                } else if (previous is UpdateHomeFeed &&
-                    current is HomeLoading) {
-                  return false;
-                }
-                return true;
-              },
-              builder: (context, state) {
-                if (state is HomeLoading) {
-                  return const SkeletonChatList();
-                } else if (state is HomeError) {
-                  return Center(
-                    child: Text(state.message),
-                  );
-                } else if (state is HomeLoaded ||
-                    state is UpdateHomeFeed ||
-                    state is UpdatedHomeFeed) {
-                  return SafeArea(
-                    top: false,
-                    child: ValueListenableBuilder(
-                        valueListenable: rebuildPagedList,
-                        builder: (context, _, __) {
-                          return PagedListView<int, ChatItem>(
-                            pagingController: homeFeedPagingController,
-                            padding: EdgeInsets.zero,
-                            physics: const ClampingScrollPhysics(),
-                            builderDelegate:
-                                PagedChildBuilderDelegate<ChatItem>(
-                              newPageProgressIndicatorBuilder: (_) =>
-                                  const SizedBox(),
-                              noItemsFoundIndicatorBuilder: (context) =>
-                                  const SizedBox(),
-                              itemBuilder: (context, item, index) {
-                                return item;
-                              },
-                            ),
-                          );
-                        }),
-                  );
-                }
-                return const SizedBox();
-              },
-            ),
+          child: BlocConsumer<HomeBloc, HomeState>(
+            bloc: homeBloc,
+            listener: (context, state) {
+              updatePagingControllers(state);
+            },
+            buildWhen: (previous, current) {
+              if (previous is HomeLoaded && current is HomeLoading) {
+                return false;
+              } else if (previous is UpdateHomeFeed && current is HomeLoading) {
+                return false;
+              }
+              return true;
+            },
+            builder: (context, state) {
+              if (state is HomeLoading) {
+                return const SkeletonChatList();
+              } else if (state is HomeError) {
+                return Center(
+                  child: Text(state.message),
+                );
+              } else if (state is HomeLoaded ||
+                  state is UpdateHomeFeed ||
+                  state is UpdatedHomeFeed) {
+                return SafeArea(
+                  top: false,
+                  child: ValueListenableBuilder(
+                      valueListenable: rebuildPagedList,
+                      builder: (context, _, __) {
+                        return PagedListView<int, ChatItem>(
+                          pagingController: homeFeedPagingController,
+                          padding: EdgeInsets.zero,
+                          physics: const ClampingScrollPhysics(),
+                          builderDelegate: PagedChildBuilderDelegate<ChatItem>(
+                            newPageProgressIndicatorBuilder: (_) =>
+                                const SizedBox(),
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const SizedBox(),
+                            itemBuilder: (context, item, index) {
+                              return item;
+                            },
+                          ),
+                        );
+                      }),
+                );
+              }
+              return const SizedBox();
+            },
           ),
         ),
       ],

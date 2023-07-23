@@ -4,6 +4,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/analytics/analytics.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_state.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_utils.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -281,6 +282,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
       }
       List<Conversation>? conversationData =
           state.getConversationResponse.conversationData;
+      filterOutStateMessage(conversationData ?? []);
       conversationData = addTimeStampInConversationList(
           conversationData, chatroom!.communityId!);
       if (state.getConversationResponse.conversationData == null ||
@@ -364,7 +366,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 if (state is ChatroomLoaded) {
                   chatroom = state.getChatroomResponse.chatroom!;
                   lastConversationId =
-                      state.getChatroomResponse.lastConversationId!;
+                      state.getChatroomResponse.lastConversationId ?? 0;
                   chatActionBloc?.add(
                     NewConversation(
                       chatroomId: chatroom!.id,

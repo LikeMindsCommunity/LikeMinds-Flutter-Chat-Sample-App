@@ -37,6 +37,9 @@ abstract class ILikeMindsService {
   Future<LMResponse<GetParticipantsResponse>> getParticipants(
       GetParticipantsRequest request);
   Future<LMResponse<TagResponseModel>> getTaggingList(TagRequestModel request);
+  Future<LMResponse<GetExploreFeedResponse>> getExploreFeed(
+      GetExploreFeedRequest request);
+  Future<LMResponse<GetExploreTabCountResponse>> getExploreTabCount();
 }
 
 class LikeMindsService implements ILikeMindsService {
@@ -165,5 +168,16 @@ class LikeMindsService implements ILikeMindsService {
   @override
   Future<LMResponse<TagResponseModel>> getTaggingList(TagRequestModel request) {
     return client.getTaggingList(request);
+  }
+
+  @override
+  Future<LMResponse<GetExploreFeedResponse>> getExploreFeed(
+      GetExploreFeedRequest request) {
+    return client.getExploreFeed(request);
+  }
+
+  @override
+  Future<LMResponse<GetExploreTabCountResponse>> getExploreTabCount() {
+    return client.getExploreTabCount();
   }
 }

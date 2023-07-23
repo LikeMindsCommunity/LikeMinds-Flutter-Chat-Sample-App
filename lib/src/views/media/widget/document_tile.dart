@@ -105,7 +105,7 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
                   bottom: 0,
                   child: Container(
                     height: 70,
-                    width: 54.w,
+                    width: 55.w,
                     decoration: BoxDecoration(
                       color: kWhiteColor,
                       border: Border.all(color: kGreyWebBGColor, width: 1),

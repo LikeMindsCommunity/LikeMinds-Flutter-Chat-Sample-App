@@ -1,25 +1,41 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_components/join_button.dart';
-import 'package:likeminds_chat_mm_fl/src/views/explore/models/space_model.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
+import 'package:overlay_support/overlay_support.dart';
 
-class ExploreItem extends StatelessWidget {
+class ExploreItem extends StatefulWidget {
   const ExploreItem({
     Key? key,
-    required this.space,
+    required this.chatroom,
     required this.onTap,
     required this.refresh,
   }) : super(key: key);
 
-  final SpaceModel space;
+  final ChatRoom chatroom;
   final Function() onTap;
   final Function() refresh;
 
   @override
+  State<ExploreItem> createState() => _ExploreItemState();
+}
+
+class _ExploreItemState extends State<ExploreItem> {
+  ValueNotifier<bool> isJoinedNotifier = ValueNotifier(false);
+  ChatRoom? chatroom;
+  User user = UserLocalPreference.instance.fetchUserData();
+
+  @override
   Widget build(BuildContext context) {
+    chatroom = widget.chatroom;
     return GestureDetector(
       onTap: () {
-        onTap();
+        widget.onTap();
       },
       child: SizedBox(
         height: 120,
@@ -27,24 +43,76 @@ class ExploreItem extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                  height: 64,
-                  width: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        space.imageUrl,
-                      ),
-                      fit: BoxFit.cover,
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SizedBox(
+                    height: 17.w,
+                    width: 17.w,
+                    child: PictureOrInitial(
+                      fallbackText: chatroom!.header,
+                      imageUrl: chatroom!.chatroomImageUrl,
                     ),
-                  )),
+                  ),
+                  chatroom!.externalSeen != null && !chatroom!.externalSeen!
+                      ? Positioned(
+                          bottom: -12,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4.0,
+                                horizontal: 8.0,
+                              ),
+                              decoration: BoxDecoration(
+                                  color: LMTheme.buttonColor,
+                                  borderRadius: BorderRadius.circular(4)),
+                              child: Text(
+                                'NEW',
+                                style: LMTheme.medium.copyWith(
+                                  color: kWhiteColor,
+                                  fontSize: 8.sp,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                  chatroom!.isPinned != null && chatroom!.isPinned!
+                      ? Positioned(
+                          bottom: 7,
+                          right: -7,
+                          child: Container(
+                            padding: const EdgeInsets.all(2.0),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: kWhiteColor,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(3.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: LMTheme.buttonColor,
+                              ),
+                              child: Icon(
+                                Icons.push_pin,
+                                color: kWhiteColor,
+                                size: 10.sp,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ],
+              ),
               const SizedBox(width: 18),
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
@@ -53,43 +121,44 @@ class ExploreItem extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                space.name,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                                chatroom!.header,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: LMTheme.medium.copyWith(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    Icons.people_outline,
-                                    color: Colors.grey[600],
+                                  const Icon(
+                                    CupertinoIcons.person_2,
+                                    //Icons.people_outline,
+                                    color: kGrey3Color,
                                     size: 18,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    space.members.toString(),
-                                    style: GoogleFonts.roboto(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.grey[600],
+                                    chatroom!.participantCount.toString(),
+                                    style: LMTheme.medium.copyWith(
+                                      color: kGrey3Color,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(width: 12),
-                                  Icon(
-                                    Icons.message_outlined,
-                                    color: Colors.grey[600],
+                                  const Icon(
+                                    CupertinoIcons.chat_bubble,
+                                    color: kGrey3Color,
                                     size: 18,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    space.messages.toString(),
-                                    style: GoogleFonts.roboto(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.grey[600],
+                                    chatroom!.totalResponseCount?.toString() ??
+                                        '0',
+                                    style: LMTheme.medium.copyWith(
+                                      color: kGrey3Color,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -99,24 +168,76 @@ class ExploreItem extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        JoinButton(
-                          isJoined: space.isJoined,
-                          onTap: () {
-                            space.isJoined = !space.isJoined;
-                            refresh();
-                          },
-                        ),
+                        ValueListenableBuilder(
+                            valueListenable: isJoinedNotifier,
+                            builder: (context, _, __) {
+                              return JoinButton(
+                                chatroom: chatroom!,
+                                onTap: () async {
+                                  if (chatroom!.followStatus == true) {
+                                    LMResponse response;
+                                    if (chatroom!.isSecret == null ||
+                                        chatroom!.isSecret! == false) {
+                                      response = await locator<
+                                              LikeMindsService>()
+                                          .followChatroom(
+                                              (FollowChatroomRequestBuilder()
+                                                    ..chatroomId(chatroom!.id)
+                                                    ..memberId(user.id)
+                                                    ..value(false))
+                                                  .build());
+                                    } else {
+                                      response = await locator<
+                                              LikeMindsService>()
+                                          .deleteParticipant(
+                                              (DeleteParticipantRequestBuilder()
+                                                    ..chatroomId(chatroom!.id)
+                                                    ..memberId(
+                                                        user.userUniqueId)
+                                                    ..isSecret(true))
+                                                  .build());
+                                    }
+                                    chatroom!.followStatus = false;
+                                    isJoinedNotifier.value =
+                                        !isJoinedNotifier.value;
+                                    if (!response.success) {
+                                      chatroom!.followStatus = true;
+                                      isJoinedNotifier.value =
+                                          !isJoinedNotifier.value;
+                                      toast(response.errorMessage ??
+                                          'An error occurred');
+                                    }
+                                  } else {
+                                    LMResponse response =
+                                        await locator<LikeMindsService>()
+                                            .followChatroom(
+                                                (FollowChatroomRequestBuilder()
+                                                      ..chatroomId(chatroom!.id)
+                                                      ..memberId(user.id)
+                                                      ..value(true))
+                                                    .build());
+                                    chatroom!.followStatus = true;
+                                    isJoinedNotifier.value =
+                                        !isJoinedNotifier.value;
+                                    if (!response.success) {
+                                      chatroom!.followStatus = false;
+                                      isJoinedNotifier.value =
+                                          !isJoinedNotifier.value;
+                                      toast(response.errorMessage ??
+                                          'An error occurred');
+                                    }
+                                  }
+                                },
+                              );
+                            }),
                         const SizedBox(width: 4),
                       ],
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      space.description,
-                      style: GoogleFonts.roboto(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey[600],
-                      ),
+                      chatroom!.title,
+                      style: LMTheme.regular.copyWith(color: kGrey3Color),
+                      textAlign: TextAlign.left,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
