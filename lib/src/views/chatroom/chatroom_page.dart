@@ -478,7 +478,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               itemBuilder: (context, item, index) {
                                 if (item.isTimeStamp != null &&
                                         item.isTimeStamp! ||
-                                    item.state != 0 && item.state != null) {
+                                    item.state != null &&
+                                        (item.state != 0 && item.state != 10)) {
                                   return Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [

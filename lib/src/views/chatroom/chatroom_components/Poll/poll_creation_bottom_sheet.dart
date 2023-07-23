@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_validator.dart';
 
 class PollCreationBottomSheet extends StatefulWidget {
   final Color? backgroundColor;
@@ -35,6 +38,10 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
   bool _isAnonymousPoll = false;
   bool _showLiveResults = false;
   DateTime? expiryDate;
+  String? formattedExpiryDate;
+  String votingType = usersCanVoteForList[0];
+  String numVotesAllowed = numOfVotes[0];
+  Timer? _timer;
 
   TextEditingController pollQuestionController = TextEditingController();
   TextEditingController pollExpiryController = TextEditingController();
@@ -53,6 +60,24 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
         widget.headerStyle ?? LMTheme.bold.copyWith(color: LMTheme.buttonColor);
     subHeaderStyle =
         widget.subHeaderStyle ?? LMTheme.medium.copyWith(color: kBlackColor);
+    pollQuestionController.addListener(() {
+      if (_timer?.isActive ?? false) _timer?.cancel();
+      _timer = Timer(const Duration(milliseconds: 500), () {
+        setState(() {});
+      });
+    });
+  }
+
+  setPollVotingType(String updatedVotingType) {
+    setState(() {
+      votingType = updatedVotingType;
+    });
+  }
+
+  setNumVotesAllowed(String updatedNumOfVotesAllowed) {
+    setState(() {
+      numVotesAllowed = updatedNumOfVotesAllowed;
+    });
   }
 
   @override
@@ -123,8 +148,11 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                             ),
                           ),
                           kVerticalPaddingSmall,
-                          getOptionsTile(pollQuestionController, subHeaderStyle,
-                              PollCreationStringConstants.pollQuestionHint),
+                          getOptionsTile(
+                            pollQuestionController,
+                            subHeaderStyle,
+                            PollCreationStringConstants.pollQuestionHint,
+                          ),
                         ],
                       ),
                     ),
@@ -159,11 +187,10 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                     children: [
                                       Expanded(
                                         child: getOptionsTile(
-                                          pollOptionsControllerList[index],
-                                          subHeaderStyle,
-                                          PollCreationStringConstants
-                                              .optionHint,
-                                        ),
+                                            pollOptionsControllerList[index],
+                                            subHeaderStyle,
+                                            PollCreationStringConstants
+                                                .optionHint),
                                       ),
                                       SizedBox(
                                         width: 10.w,
@@ -240,8 +267,9 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                         }
                         if (pickedTime != null) {
                           setState(() {
-                            pollExpiryController.text =
+                            formattedExpiryDate =
                                 "${formatDate(pickedDate!)} ${formatTime(pickedTime!)}";
+                            pollExpiryController.text = formattedExpiryDate!;
                           });
                         }
                       },
@@ -323,6 +351,13 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                     },
                                   ),
                                 ),
+                                kVerticalPaddingMedium,
+                                getVotingType(
+                                  setPollVotingType,
+                                  setNumVotesAllowed,
+                                  votingType,
+                                  numVotesAllowed,
+                                ),
                               ],
                             ),
                           )
@@ -355,7 +390,22 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                     kVerticalPaddingLarge,
                     getTextButton(
                       text: "Post",
-                      backgroundColor: LMTheme.buttonColor,
+                      backgroundColor: PollFieldsValidator.enableSubmitButton(
+                              pollQuestionController.text,
+                              pollOptionsControllerList.length)
+                          ? LMTheme.buttonColor
+                          : kLightGreyColor,
+                      onTap: () {
+                        if (PollFieldsValidator.validatePollSheet(
+                          pollQuestionController.text,
+                          pollOptionsControllerList,
+                          pollExpiryController.text,
+                        )) {
+                          Navigator.pop(context);
+                        } else {
+                          return;
+                        }
+                      },
                       borderRadius: 20,
                       padding: EdgeInsets.symmetric(
                         horizontal: 15.w,

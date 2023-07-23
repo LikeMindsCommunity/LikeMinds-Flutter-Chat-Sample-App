@@ -302,13 +302,13 @@ class _ChatBarState extends State<ChatBar> {
                                                         );
                                                       }
                                                     }
-                                                  }
-                                                },
-                                                child:
-                                                    getChatBarAttachmentButton(
-                                                  LMTheme.buttonColor,
-                                                  "Camera",
-                                                  Icons.camera_alt_outlined,
+                                                  },
+                                                  child:
+                                                      getChatBarAttachmentButton(
+                                                    LMTheme.buttonColor,
+                                                    "Camera",
+                                                    Icons.camera_alt_outlined,
+                                                  ),
                                                 ),
                                                 GestureDetector(
                                                   onTap: () async {
@@ -359,28 +359,15 @@ class _ChatBarState extends State<ChatBar> {
                                                         );
                                                       }
                                                     }
-                                                    if (pickedMediaFiles
-                                                        .isNotEmpty) {
-                                                      router.pushNamed(
-                                                        "media_forward",
-                                                        extra: pickedMediaFiles,
-                                                        params: {
-                                                          'chatroomId': widget
-                                                              .chatroom.id
-                                                              .toString()
-                                                        },
-                                                      );
-                                                    }
-                                                  }
-                                                },
-                                                child:
-                                                    getChatBarAttachmentButton(
-                                                  LMTheme.buttonColor,
-                                                  "Gallery",
-                                                  Icons.photo_library,
+                                                  },
+                                                  child:
+                                                      getChatBarAttachmentButton(
+                                                    LMTheme.buttonColor,
+                                                    "Gallery",
+                                                    Icons.photo_library,
+                                                  ),
                                                 ),
-                                              ),
-                                              GestureDetector(
+                                                GestureDetector(
                                                   onTap: () async {
                                                     _popupMenuController
                                                         .hideMenu();
@@ -404,50 +391,53 @@ class _ChatBarState extends State<ChatBar> {
                                                       }
                                                     }
                                                   },
-                                                  child: getChatBarAttachmentButton(
-                                                      LMTheme.buttonColor,
-                                                      "Document",
-                                                      Icons
-                                                          .file_copy_outlined)),
-                                            ],
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              GestureDetector(
-                                                onTap: () {
-                                                  _popupMenuController
-                                                      .hideMenu();
-                                                  showBottomSheet(
-                                                    context: context,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    elevation: 10,
-                                                    builder: (context) =>
-                                                        const PollCreationBottomSheet(),
-                                                  );
-                                                },
-                                                child:
-                                                    getChatBarAttachmentButton(
-                                                  LMTheme.buttonColor,
-                                                  "Polls",
-                                                  Icons.bar_chart_rounded,
+                                                  child:
+                                                      getChatBarAttachmentButton(
+                                                    LMTheme.buttonColor,
+                                                    "Document",
+                                                    Icons.file_copy_outlined,
+                                                  ),
                                                 ),
-                                              ),
-                                              getChatBarAttachmentButton(
-                                                kWhiteColor,
-                                                "",
-                                                null,
-                                              ),
-                                              getChatBarAttachmentButton(
-                                                kWhiteColor,
-                                                "",
-                                                null,
-                                              ),
-                                            ],
-                                          )
-                                        ],
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _popupMenuController
+                                                        .hideMenu();
+                                                    showBottomSheet(
+                                                        context: context,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        elevation: 5,
+                                                        enableDrag: true,
+                                                        builder: (context) =>
+                                                            const PollCreationBottomSheet());
+                                                  },
+                                                  child:
+                                                      getChatBarAttachmentButton(
+                                                    LMTheme.buttonColor,
+                                                    "Polls",
+                                                    Icons.bar_chart_rounded,
+                                                  ),
+                                                ),
+                                                getChatBarAttachmentButton(
+                                                  kWhiteColor,
+                                                  "",
+                                                  null,
+                                                ),
+                                                getChatBarAttachmentButton(
+                                                  kWhiteColor,
+                                                  "",
+                                                  null,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

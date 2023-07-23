@@ -176,7 +176,12 @@ class ConversationToolBar extends ChatActionEvent {
 
 class RemoveConversationToolBar extends ChatActionEvent {
   // To remove the conversation tool bar from the chatroom
-  String timeChecker = DateTime.now().toString();
+  final String timeChecker = DateTime.now().toString();
   @override
   List<Object> get props => [timeChecker];
+}
+
+class PostPoll extends ChatActionEvent {
+  @override
+  List<Object> get props => [];
 }

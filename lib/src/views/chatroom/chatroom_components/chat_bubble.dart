@@ -10,6 +10,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/poll_bubble.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bottom_sheet.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/helper/reaction_helper.dart';
@@ -363,101 +364,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                         ),
                                       )
                                     : const SizedBox(),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    minHeight: 4.h,
-                                    minWidth: 10.w,
-                                    maxWidth: 60.w,
-                                  ),
-                                  padding: const EdgeInsets.all(12.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: isSent!
-                                        ? CrossAxisAlignment.end
-                                        : CrossAxisAlignment.start,
-                                    children: [
-                                      Visibility(
-                                        visible: replyToConversation != null &&
-                                            !isDeleted,
-                                        maintainState: true,
-                                        maintainSize: false,
-                                        child: _getReplyConversation(),
-                                      ),
-                                      replyToConversation != null
-                                          ? const SizedBox(height: 8)
-                                          : const SizedBox(),
-                                      isSent!
-                                          ? const SizedBox()
-                                          : Text(
-                                              widget.sender.name,
-                                              style: LMFonts.instance.medium
-                                                  .copyWith(
-                                                fontSize: 10.sp,
-                                                color: isSent!
-                                                    ? Colors.black
-                                                        .withOpacity(0.6)
-                                                    : LMTheme.headerColor,
-                                              ),
-                                            ),
-                                      isSent!
-                                          ? const SizedBox()
-                                          : const SizedBox(height: 6),
-                                      isDeleted
-                                          ? conversation!.deletedByUserId ==
-                                                  conversation!.userId
-                                              ? Text(
-                                                  conversation!.userId ==
-                                                          loggedInUser.id
-                                                      ? 'You deleted this message'
-                                                      : "This message was deleted",
-                                                  style: LMFonts
-                                                      .instance.regular
-                                                      .copyWith(
-                                                    fontSize: 9.sp,
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                )
-                                              : Text(
-                                                  "This message was deleted by the Community Manager",
-                                                  style: LMFonts
-                                                      .instance.regular
-                                                      .copyWith(
-                                                    fontSize: 9.sp,
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                )
-                                          : replyToConversation != null
-                                              ? Align(
-                                                  alignment: Alignment.topLeft,
-                                                  child: getContent())
-                                              : getContent(),
-                                      const SizedBox(height: 8),
-                                      ((widget.conversation.hasFiles == null ||
-                                                  !widget.conversation
-                                                      .hasFiles!) ||
-                                              (widget.conversation
-                                                          .attachmentsUploaded !=
-                                                      null &&
-                                                  widget.conversation
-                                                      .attachmentsUploaded!))
-                                          ? Text(
-                                              "${isEdited ? 'Edited  ' : ''}${widget.conversation.createdAt}",
-                                              style: LMFonts.instance.regular
-                                                  .copyWith(
-                                                fontSize: 8.sp,
-                                                color: kGreyColor,
-                                              ),
-                                            )
-                                          : Icon(
-                                              Icons.timer_outlined,
-                                              size: 8.sp,
-                                            ),
-                                    ],
-                                  ),
-                                ),
+                                mapStateToBubble(conversation!.state!),
                                 isSent!
                                     ? CustomPaint(
                                         painter: BubbleTriangle(),
@@ -631,7 +538,90 @@ class _ChatBubbleState extends State<ChatBubble> {
     setState(() {});
   }
 
-  void selectMessage(String messageId) {}
+  Widget mapStateToBubble(int state) {
+    if (state == 10) {
+      return PollBubble(
+        pollConversation: conversation!,
+      );
+    } else {
+      return Container(
+        constraints: BoxConstraints(
+          minHeight: 4.h,
+          minWidth: 10.w,
+          maxWidth: 60.w,
+        ),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          crossAxisAlignment:
+              isSent! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Visibility(
+              visible: replyToConversation != null && !isDeleted,
+              maintainState: true,
+              maintainSize: false,
+              child: _getReplyConversation(),
+            ),
+            replyToConversation != null
+                ? const SizedBox(height: 8)
+                : const SizedBox(),
+            isSent!
+                ? const SizedBox()
+                : Text(
+                    widget.sender.name,
+                    style: LMFonts.instance.medium.copyWith(
+                      fontSize: 10.sp,
+                      color: isSent!
+                          ? Colors.black.withOpacity(0.6)
+                          : LMTheme.headerColor,
+                    ),
+                  ),
+            isSent! ? const SizedBox() : const SizedBox(height: 6),
+            isDeleted
+                ? conversation!.deletedByUserId == conversation!.userId
+                    ? Text(
+                        conversation!.userId == loggedInUser.id
+                            ? 'You deleted this message'
+                            : "This message was deleted",
+                        style: LMFonts.instance.regular.copyWith(
+                          fontSize: 9.sp,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      )
+                    : Text(
+                        "This message was deleted by the Community Manager",
+                        style: LMFonts.instance.regular.copyWith(
+                          fontSize: 9.sp,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      )
+                : replyToConversation != null
+                    ? Align(alignment: Alignment.topLeft, child: getContent())
+                    : getContent(),
+            const SizedBox(height: 8),
+            ((widget.conversation.hasFiles == null ||
+                        !widget.conversation.hasFiles!) ||
+                    (widget.conversation.attachmentsUploaded != null &&
+                        widget.conversation.attachmentsUploaded!))
+                ? Text(
+                    "${isEdited ? 'Edited  ' : ''}${widget.conversation.createdAt}",
+                    style: LMFonts.instance.regular.copyWith(
+                      fontSize: 8.sp,
+                      color: kGreyColor,
+                    ),
+                  )
+                : Icon(
+                    Icons.timer_outlined,
+                    size: 8.sp,
+                  ),
+          ],
+        ),
+      );
+    }
+  }
 
   Widget getContent() {
     Widget expandableText = ExpandableText(
