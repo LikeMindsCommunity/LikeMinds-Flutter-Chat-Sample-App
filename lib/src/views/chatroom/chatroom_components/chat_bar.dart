@@ -409,13 +409,17 @@ class _ChatBarState extends State<ChatBar> {
                                                     _popupMenuController
                                                         .hideMenu();
                                                     showBottomSheet(
-                                                        context: context,
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        elevation: 5,
-                                                        enableDrag: true,
-                                                        builder: (context) =>
-                                                            const PollCreationBottomSheet());
+                                                      context: context,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      elevation: 5,
+                                                      enableDrag: true,
+                                                      builder: (context) =>
+                                                          PollCreationBottomSheet(
+                                                        chatroomId:
+                                                            widget.chatroom.id,
+                                                      ),
+                                                    );
                                                   },
                                                   child:
                                                       getChatBarAttachmentButton(

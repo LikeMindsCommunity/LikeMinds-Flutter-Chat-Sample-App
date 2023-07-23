@@ -1,13 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/poll_mapping.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_validator.dart';
 
 class PollCreationBottomSheet extends StatefulWidget {
+  final int chatroomId;
   final Color? backgroundColor;
   final Color? inputBoxColor;
   final TextStyle? headerStyle;
@@ -15,6 +21,7 @@ class PollCreationBottomSheet extends StatefulWidget {
 
   const PollCreationBottomSheet({
     Key? key,
+    required this.chatroomId,
     this.backgroundColor,
     this.inputBoxColor,
     this.headerStyle,
@@ -36,7 +43,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
   bool _showAdvancedOptions = false;
   bool _allowAddOptions = false;
   bool _isAnonymousPoll = false;
-  bool _showLiveResults = false;
+  bool _dontShowLiveResults = false;
   DateTime? expiryDate;
   String? formattedExpiryDate;
   String votingType = usersCanVoteForList[0];
@@ -82,6 +89,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    ChatActionBloc chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return Container(
       height: 100.h,
       alignment: Alignment.bottomCenter,
@@ -270,6 +278,13 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                             formattedExpiryDate =
                                 "${formatDate(pickedDate!)} ${formatTime(pickedTime!)}";
                             pollExpiryController.text = formattedExpiryDate!;
+                            expiryDate = DateTime(
+                              pickedDate.day,
+                              pickedDate.month,
+                              pickedDate.year,
+                              pickedTime.hour,
+                              pickedTime.minute,
+                            );
                           });
                         }
                       },
@@ -336,7 +351,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                 ),
                                 kVerticalPaddingMedium,
                                 getToggleButtonWithText(
-                                  status: _showLiveResults,
+                                  status: _dontShowLiveResults,
                                   text: Text(
                                     'Don\'t show live results',
                                     overflow: TextOverflow.ellipsis,
@@ -347,7 +362,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                   onChanged: (bool toggleUpdateValue) =>
                                       setState(
                                     () {
-                                      _showLiveResults = toggleUpdateValue;
+                                      _dontShowLiveResults = toggleUpdateValue;
                                     },
                                   ),
                                 ),
@@ -401,6 +416,30 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                           pollOptionsControllerList,
                           pollExpiryController.text,
                         )) {
+                          List<PollOption> pollOption = [];
+                          for (TextEditingController controller
+                              in pollOptionsControllerList) {
+                            pollOption.add(PollOption(text: controller.text));
+                          }
+                          chatActionBloc.add(PostPollConversation(
+                              (PostPollConversationRequestBuilder()
+                                    ..allowAddOption(_allowAddOptions)
+                                    ..chatroomId(widget.chatroomId)
+                                    ..expiryTime(
+                                        expiryDate!.millisecondsSinceEpoch)
+                                    ..isAnonymous(_isAnonymousPoll)
+                                    ..multipleSelectNo(
+                                        noOfVotes(numVotesAllowed))
+                                    ..multipleSelectState(
+                                        toIntPollMultiSelectState(votingType))
+                                    ..pollType(toIntPollType(_showLiveResults))
+                                    ..polls(pollOption)
+                                    ..state(10)
+                                    ..text(pollQuestionController.text)
+                                    ..temporaryId(DateTime.now()
+                                        .millisecondsSinceEpoch
+                                        .toString()))
+                                  .build()));
                           Navigator.pop(context);
                         } else {
                           return;

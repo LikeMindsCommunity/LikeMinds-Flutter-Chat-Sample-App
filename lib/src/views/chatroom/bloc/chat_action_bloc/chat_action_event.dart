@@ -181,7 +181,10 @@ class RemoveConversationToolBar extends ChatActionEvent {
   List<Object> get props => [timeChecker];
 }
 
-class PostPoll extends ChatActionEvent {
+class PostPollConversation extends ChatActionEvent {
+  final PostPollConversationRequest postPollConversationRequest;
+
+  PostPollConversation(this.postPollConversationRequest);
   @override
-  List<Object> get props => [];
+  List<Object> get props => [postPollConversationRequest];
 }

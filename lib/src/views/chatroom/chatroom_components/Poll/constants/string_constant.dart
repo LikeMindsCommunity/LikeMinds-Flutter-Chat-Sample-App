@@ -28,6 +28,7 @@ class PollBubbleStringConstants {
   static const String addAnOption = "+ Add an option";
   static const String userAddedOption = "Added by you";
   static const String addNewPollOption = "Add new poll option";
+  static const String pollResults = "Poll Results";
   static const String addNewPollOptionDescription =
       "Enter an option that you think is missing in this poll. This can not be undone.";
   static const String typeNewOption = "Type new option";

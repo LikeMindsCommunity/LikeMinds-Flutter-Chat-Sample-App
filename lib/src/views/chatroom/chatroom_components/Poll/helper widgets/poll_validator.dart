@@ -1,7 +1,6 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
-import 'package:overlay_support/overlay_support.dart';
 
 class PollFieldsValidator {
   static bool enableSubmitButton(String title, int optionCount) {

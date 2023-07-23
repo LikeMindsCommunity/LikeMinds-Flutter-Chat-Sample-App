@@ -1,8 +1,10 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:intl/intl.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
 Widget getDropDownText(String text) {
   return Row(
@@ -162,4 +164,48 @@ String formatTime(TimeOfDay timeOfDay) {
   String hour = timeOfDay.hour.toString().padLeft(2, '0');
   String minute = timeOfDay.minute.toString().padLeft(2, '0');
   return "$hour:$minute";
+}
+
+Widget getPollResultTile(User user) {
+  return Container(
+    width: 100.w,
+    margin: const EdgeInsets.only(top: 10.0),
+    padding: const EdgeInsets.symmetric(
+      horizontal: 20.0,
+    ),
+    child: Row(
+      children: <Widget>[
+        PictureOrInitial(
+          fallbackText: "Error occured",
+          imageUrl: user.imageUrl,
+          backgroundColor: LMTheme.buttonColor,
+          size: 15.w,
+        ),
+        kHorizontalPaddingLarge,
+        Expanded(
+          child: Container(
+            height: 15.w,
+            decoration: const BoxDecoration(
+                border:
+                    Border(bottom: BorderSide(color: kGreyColor, width: 0.5))),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  user.name,
+                  style: LMTheme.medium,
+                ),
+                kVerticalPaddingMedium,
+                Text(
+                  user.memberSince ?? '',
+                  style: LMTheme.medium.copyWith(color: kGreyColor),
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    ),
+  );
 }

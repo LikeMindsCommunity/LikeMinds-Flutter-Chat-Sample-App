@@ -1,5 +1,7 @@
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
@@ -103,7 +105,9 @@ class _PollBubbleState extends State<PollBubble> {
           Align(
             alignment: Alignment.topLeft,
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                router.push(pollResultRoute, extra: pollConversation!);
+              },
               style: ButtonStyle(
                 padding: MaterialStateProperty.all(EdgeInsets.zero),
               ),
@@ -116,8 +120,7 @@ class _PollBubbleState extends State<PollBubble> {
               ),
             ),
           ),
-          pollConversation!.poll!.multipleSelectNum != null &&
-                  pollConversation!.poll!.multipleSelectNum! > 1
+          pollConversation!.pollType == 1
               ? getTextButton(
                   text: "SUBMIT VOTE",
                   borderRadius: 16.0,

@@ -1,6 +1,7 @@
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
 
 class PollEndTile extends StatelessWidget {
@@ -12,6 +13,9 @@ class PollEndTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateTime endTime =
+        DateTime.fromMillisecondsSinceEpoch(pollConversation.poll!.expiryTime!);
+
     return SizedBox(
       width: 60.w,
       child: Row(
@@ -32,7 +36,7 @@ class PollEndTile extends StatelessWidget {
             ),
           ),
           getTextButton(
-              text: "Ends in days",
+              text: "Ends in ${getExpiryTimeString(endTime)}",
               textStyle: LMTheme.medium.copyWith(
                 color: kWhiteColor,
                 fontSize: 8.sp,

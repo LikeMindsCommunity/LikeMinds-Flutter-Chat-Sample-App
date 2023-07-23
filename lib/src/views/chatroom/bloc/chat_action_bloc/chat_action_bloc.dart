@@ -42,6 +42,14 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         );
       },
     );
+    on<PostPollConversation>(
+      (event, emit) async {
+        LMResponse response = await locator<LikeMindsService>()
+            .postPollConversation(event.postPollConversationRequest);
+        if (response.success) {
+        } else if (response.errorMessage != null) {}
+      },
+    );
     on<UpdateConversationList>(
       (event, emit) async {
         if (lastConversationId != null &&
@@ -377,44 +385,21 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     }
   }
 
-  mapPostConversationFunction(
-      PostConversation event, Emitter<ChatActionState> emit) async {
+  mapPostPollConversation(
+      PostPollConversation event, Emitter<ChatActionState> emit) async {
     try {
-      DateTime dateTime = DateTime.now();
-      User user = UserLocalPreference.instance.fetchUserData();
-      Conversation conversation = Conversation(
-        answer: event.postConversationRequest.text,
-        chatroomId: event.postConversationRequest.chatroomId,
-        createdAt: "",
-        header: "",
-        date: "${dateTime.day} ${dateTime.month} ${dateTime.year}",
-        replyId: event.postConversationRequest.replyId,
-        attachmentCount: event.postConversationRequest.attachmentCount,
-        replyConversationObject: event.replyConversation,
-        hasFiles: event.postConversationRequest.hasFiles,
-        member: user,
-        temporaryId: event.postConversationRequest.temporaryId,
-        id: 1,
-      );
-      emit(LocalConversation(conversation));
       LMResponse<PostConversationResponse> response =
-          await locator<LikeMindsService>().postConversation(
-        event.postConversationRequest,
+          await locator<LikeMindsService>().postPollConversation(
+        event.postPollConversationRequest,
       );
-
       if (response.success) {
         if (response.data!.success) {
-          Conversation conversation = response.data!.conversation!;
-          if (conversation.replyId != null ||
-              conversation.replyConversation != null) {
-            conversation.replyConversationObject = event.replyConversation;
-          }
           emit(ConversationPosted(response.data!));
         } else {
           emit(
             ChatActionError(
               response.data!.errorMessage!,
-              event.postConversationRequest.temporaryId,
+              event.postPollConversationRequest.temporaryId,
             ),
           );
           return false;
@@ -423,7 +408,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         emit(
           ChatActionError(
             response.errorMessage!,
-            event.postConversationRequest.temporaryId,
+            event.postPollConversationRequest.temporaryId,
           ),
         );
         return false;
@@ -432,10 +417,72 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
       emit(
         ChatActionError(
           "An error occurred",
+          event.postPollConversationRequest.temporaryId,
+        ),
+      );
+      return false;
+    }
+  }
+}
+
+mapPostConversationFunction(
+    PostConversation event, Emitter<ChatActionState> emit) async {
+  try {
+    DateTime dateTime = DateTime.now();
+    User user = UserLocalPreference.instance.fetchUserData();
+    Conversation conversation = Conversation(
+      answer: event.postConversationRequest.text,
+      chatroomId: event.postConversationRequest.chatroomId,
+      createdAt: "",
+      header: "",
+      date: "${dateTime.day} ${dateTime.month} ${dateTime.year}",
+      replyId: event.postConversationRequest.replyId,
+      attachmentCount: event.postConversationRequest.attachmentCount,
+      replyConversationObject: event.replyConversation,
+      hasFiles: event.postConversationRequest.hasFiles,
+      member: user,
+      temporaryId: event.postConversationRequest.temporaryId,
+      id: 1,
+    );
+    emit(LocalConversation(conversation));
+    LMResponse<PostConversationResponse> response =
+        await locator<LikeMindsService>().postConversation(
+      event.postConversationRequest,
+    );
+
+    if (response.success) {
+      if (response.data!.success) {
+        Conversation conversation = response.data!.conversation!;
+        if (conversation.replyId != null ||
+            conversation.replyConversation != null) {
+          conversation.replyConversationObject = event.replyConversation;
+        }
+        emit(ConversationPosted(response.data!));
+      } else {
+        emit(
+          ChatActionError(
+            response.data!.errorMessage!,
+            event.postConversationRequest.temporaryId,
+          ),
+        );
+        return false;
+      }
+    } else {
+      emit(
+        ChatActionError(
+          response.errorMessage!,
           event.postConversationRequest.temporaryId,
         ),
       );
       return false;
     }
+  } catch (e) {
+    emit(
+      ChatActionError(
+        "An error occurred",
+        event.postConversationRequest.temporaryId,
+      ),
+    );
+    return false;
   }
 }
