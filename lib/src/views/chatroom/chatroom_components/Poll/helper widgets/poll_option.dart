@@ -28,13 +28,13 @@ class _PollOptionListState extends State<PollOptionList> {
       itemCount: pollConversation!.poll!.pollViewDataList!.length,
       itemBuilder: (context, index) => PollOption(
         pollViewData: pollConversation!.poll!.pollViewDataList![index],
-        onTap: (PollViewData selectedIOption) {},
+        onTap: widget.onTap,
       ),
     );
   }
 }
 
-class PollOption extends StatelessWidget {
+class PollOption extends StatefulWidget {
   final PollViewData pollViewData;
   final Function(PollViewData) onTap;
   const PollOption({
@@ -44,9 +44,18 @@ class PollOption extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<PollOption> createState() => _PollOptionState();
+}
+
+class _PollOptionState extends State<PollOption> {
+  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onTap(pollViewData),
+      onTap: () {
+        widget.pollViewData.isSelected = !widget.pollViewData.isSelected!;
+        widget.onTap(widget.pollViewData);
+        setState(() {});
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,24 +63,28 @@ class PollOption extends StatelessWidget {
             width: 60.w,
             padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              color: pollViewData.isSelected! ? kPrimaryColor : kWhiteColor,
+              color:
+                  widget.pollViewData.isSelected! ? kPrimaryColor : kWhiteColor,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: pollViewData.isSelected! ? kPrimaryColor : kGreyColor,
+                color: widget.pollViewData.isSelected!
+                    ? kPrimaryColor
+                    : kGreyColor,
                 width: 1,
               ),
             ),
             child: Text(
-              pollViewData.text,
+              widget.pollViewData.text,
               style: LMTheme.medium.copyWith(
-                color: pollViewData.isSelected! ? kWhiteColor : kGreyColor,
+                color:
+                    widget.pollViewData.isSelected! ? kWhiteColor : kGreyColor,
                 fontSize: 8.sp,
               ),
             ),
           ),
           kVerticalPaddingXSmall,
           Text(
-            "${pollViewData.noVotes!} ${pollViewData.noVotes! > 1 ? "votes" : "vote"}",
+            "${widget.pollViewData.noVotes!} ${widget.pollViewData.noVotes! > 1 ? "votes" : "vote"}",
             style: LMTheme.medium.copyWith(
               color: kGreyColor,
               fontSize: 8.sp,

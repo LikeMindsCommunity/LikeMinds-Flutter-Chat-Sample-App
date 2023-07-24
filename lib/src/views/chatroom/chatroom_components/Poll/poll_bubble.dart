@@ -5,6 +5,7 @@ import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/utils.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/bloc/poll_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/add_option_bottom_sheet.dart';
@@ -57,6 +58,20 @@ class _PollBubbleState extends State<PollBubble> {
               element.id == state.addPollOptionRequest.temporaryId);
           setState(() {});
         }
+        if (state is SubmittedPoll) {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            elevation: 5,
+            enableDrag: true,
+            useSafeArea: true,
+            isScrollControlled: true,
+            builder: (context) => const PollSubmissionBottomSheet(),
+          );
+        }
+        if (state is PollSubmitError) {
+          toast(state.errorMessage);
+        }
       },
       child: Container(
         width: 60.w,
@@ -84,9 +99,17 @@ class _PollBubbleState extends State<PollBubble> {
             kVerticalPaddingLarge,
             PollOptionList(
               pollConversation: pollConversation!,
-              onTap: (PollViewData selectedOption) {},
+              onTap: (PollViewData selectedOption) {
+                if (selectedOptions.contains(selectedOption)) {
+                  selectedOptions.remove(selectedOption);
+                } else {
+                  selectedOptions.add(selectedOption);
+                }
+              },
             ),
-            pollConversation!.poll!.allowAddOption!
+            pollConversation!.poll!.allowAddOption! &&
+                    !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
+                        pollConversation!.poll!.expiryTime!))
                 ? getTextButton(
                     width: 60.w,
                     alignment: Alignment.center,
@@ -154,7 +177,9 @@ class _PollBubbleState extends State<PollBubble> {
                 ),
               ),
             ),
-            pollConversation!.pollType == 1
+            pollConversation!.pollType == 1 &&
+                    !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
+                        pollConversation!.poll!.expiryTime!))
                 ? getTextButton(
                     text: "SUBMIT VOTE",
                     borderRadius: 16.0,
@@ -163,18 +188,17 @@ class _PollBubbleState extends State<PollBubble> {
                       width: 1.2,
                     ),
                     onTap: () async {
-                      showModalBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        elevation: 5,
-                        enableDrag: true,
-                        useSafeArea: true,
-                        isScrollControlled: true,
-                        builder: (context) => const PollSubmissionBottomSheet(),
-                      );
+                      SubmitPollRequest request = (SubmitPollRequestBuilder()
+                            ..conversationId(pollConversation!.id)
+                            ..polls(selectedOptions))
+                          .build();
+                      pollBloc.add(SubmitPoll(submitPollRequest: request));
                     },
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0))
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                  )
                 : const SizedBox(),
           ],
         ),

@@ -279,9 +279,9 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                 "${formatDate(pickedDate!)} ${formatTime(pickedTime!)}";
                             pollExpiryController.text = formattedExpiryDate!;
                             expiryDate = DateTime(
-                              pickedDate.day,
-                              pickedDate.month,
                               pickedDate.year,
+                              pickedDate.month,
+                              pickedDate.day,
                               pickedTime.hour,
                               pickedTime.minute,
                             );
