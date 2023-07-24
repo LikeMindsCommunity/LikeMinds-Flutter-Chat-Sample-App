@@ -20,7 +20,8 @@ Widget getDropDownText(String text) {
   );
 }
 
-Widget getPollDropDownMenu(List<String> options, Function onTap) {
+Widget getPollDropDownMenu(CustomPopupMenuController controller,
+    List<String> options, Function onTap) {
   return Container(
     constraints: BoxConstraints(maxHeight: 30.h, maxWidth: 40.w),
     decoration: BoxDecoration(
@@ -35,6 +36,7 @@ Widget getPollDropDownMenu(List<String> options, Function onTap) {
         return ListTile(
           title: Text(options[index]),
           onTap: () {
+            controller.hideMenu();
             onTap(options[index]);
           },
         );
@@ -123,6 +125,8 @@ Widget getTextButton({
 
 Widget getVotingType(Function onTypeSelect, Function onNumVotesSelect,
     String votingType, String numVotes) {
+  CustomPopupMenuController voteTypeController = CustomPopupMenuController();
+  CustomPopupMenuController numVotesController = CustomPopupMenuController();
   return SizedBox(
     width: 90.w,
     child: Column(
@@ -135,15 +139,17 @@ Widget getVotingType(Function onTypeSelect, Function onNumVotesSelect,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             CustomPopupMenu(
-              menuBuilder: () =>
-                  getPollDropDownMenu(usersCanVoteForList, onTypeSelect),
+              controller: voteTypeController,
+              menuBuilder: () => getPollDropDownMenu(
+                  voteTypeController, usersCanVoteForList, onTypeSelect),
               pressType: PressType.singleClick,
               child: getDropDownText(votingType),
             ),
             const Text("="),
             CustomPopupMenu(
-              menuBuilder: () =>
-                  getPollDropDownMenu(numOfVotes, onNumVotesSelect),
+              controller: numVotesController,
+              menuBuilder: () => getPollDropDownMenu(
+                  numVotesController, numOfVotes, onNumVotesSelect),
               pressType: PressType.singleClick,
               child: getDropDownText(numVotes),
             ),
@@ -176,7 +182,7 @@ Widget getPollResultTile(User user) {
     child: Row(
       children: <Widget>[
         PictureOrInitial(
-          fallbackText: "Error occured",
+          fallbackText: user.name,
           imageUrl: user.imageUrl,
           backgroundColor: LMTheme.buttonColor,
           size: 15.w,

@@ -432,7 +432,8 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                         noOfVotes(numVotesAllowed))
                                     ..multipleSelectState(
                                         toIntPollMultiSelectState(votingType))
-                                    ..pollType(toIntPollType(_showLiveResults))
+                                    ..pollType(
+                                        toIntPollType(_dontShowLiveResults))
                                     ..polls(pollOption)
                                     ..state(10)
                                     ..text(pollQuestionController.text)

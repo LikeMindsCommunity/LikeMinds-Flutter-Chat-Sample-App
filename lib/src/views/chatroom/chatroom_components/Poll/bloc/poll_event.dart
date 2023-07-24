@@ -27,19 +27,6 @@ class GetPollUsers extends PollEvents {
   List<Object?> get props => [getPollUsersRequest];
 }
 
-class PostPollConversation extends PollEvents {
-  final PostPollConversationRequest postConversationRequest;
-
-  PostPollConversation(
-    this.postConversationRequest,
-  );
-
-  @override
-  List<Object?> get props => [
-        postConversationRequest,
-      ];
-}
-
 class AddPollOption extends PollEvents {
   final AddPollOptionRequest addPollOptionRequest;
 

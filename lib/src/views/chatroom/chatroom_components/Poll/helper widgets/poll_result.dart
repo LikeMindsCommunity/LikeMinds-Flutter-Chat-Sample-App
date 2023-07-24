@@ -26,10 +26,19 @@ class _PollResultState extends State<PollResult> {
 
   Widget getPollResultTab(
     PollViewData pollViewData,
+    int noOfOptions,
     int selectedPollId,
   ) {
+    double widthOfTab = 0;
+    if (noOfOptions == 2) {
+      widthOfTab = 50.w;
+    } else if (noOfOptions >= 3) {
+      widthOfTab = 33.w;
+    } else {
+      widthOfTab = 30.w;
+    }
     return Container(
-      width: 25.w,
+      width: widthOfTab,
       decoration: BoxDecoration(
           border: selectedPollId == pollViewData.id
               ? Border(
@@ -38,13 +47,17 @@ class _PollResultState extends State<PollResult> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            pollViewData.text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: LMTheme.medium.copyWith(
-              color: kGreyColor,
-              fontSize: 8.sp,
+          SizedBox(
+            width: widthOfTab / 1.5,
+            child: Text(
+              pollViewData.text,
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: LMTheme.medium.copyWith(
+                color: kGreyColor,
+                fontSize: 8.sp,
+              ),
             ),
           ),
           kVerticalPaddingMedium,
@@ -136,6 +149,7 @@ class _PollResultState extends State<PollResult> {
                           },
                           child: getPollResultTab(
                             pollConversation!.poll!.pollViewDataList![index],
+                            pollConversation!.poll!.pollViewDataList!.length,
                             selectedPollId!,
                           ),
                         )),

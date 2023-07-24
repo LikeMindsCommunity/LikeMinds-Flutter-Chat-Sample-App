@@ -441,6 +441,7 @@ mapPostConversationFunction(
       replyConversationObject: event.replyConversation,
       hasFiles: event.postConversationRequest.hasFiles,
       member: user,
+      state: 0,
       temporaryId: event.postConversationRequest.temporaryId,
       id: 1,
     );

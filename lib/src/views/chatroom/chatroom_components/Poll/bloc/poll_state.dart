@@ -65,32 +65,6 @@ class SubmittedPoll extends PollState {
       ];
 }
 
-class PollConversationPosted extends PollState {
-  final PostPollConversationResponse postPollConversationResponse;
-
-  PollConversationPosted({
-    required this.postPollConversationResponse,
-  });
-
-  @override
-  List<Object?> get props => [
-        postPollConversationResponse,
-      ];
-}
-
-class PollOptionAdded extends PollState {
-  final AddPollOptionResponse addPollOptionResponse;
-
-  PollOptionAdded({
-    required this.addPollOptionResponse,
-  });
-
-  @override
-  List<Object?> get props => [
-        addPollOptionResponse,
-      ];
-}
-
 class PollSubmitError extends PollState {
   final String errorMessage;
   final SubmitPollRequest submitPollRequest;
@@ -107,18 +81,37 @@ class PollSubmitError extends PollState {
       ];
 }
 
+class PollOptionAdded extends PollState {
+  final AddPollOptionResponse addPollOptionResponse;
+  final int conversationId;
+
+  PollOptionAdded({
+    required this.addPollOptionResponse,
+    required this.conversationId,
+  });
+
+  @override
+  List<Object?> get props => [
+        addPollOptionResponse,
+        conversationId,
+      ];
+}
+
 class PollOptionError extends PollState {
   final String errorMessage;
   final AddPollOptionRequest addPollOptionRequest;
+  final int conversationId;
 
   PollOptionError({
     required this.errorMessage,
     required this.addPollOptionRequest,
+    required this.conversationId,
   });
 
   @override
   List<Object?> get props => [
         errorMessage,
         addPollOptionRequest,
+        conversationId,
       ];
 }
