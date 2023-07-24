@@ -18,6 +18,8 @@ void filterOutStateMessage(List<Conversation> conversationList) {
     return element.state != null &&
         (element.state == ConversationMessageState.memberJoinedOpenChatroom ||
             element.state == ConversationMessageState.memberLeftOpenChatroom ||
-            element.state == ConversationMessageState.memberLeftSecretChatroom);
+            element.state ==
+                ConversationMessageState.memberLeftSecretChatroom ||
+            element.state == ConversationMessageState.poll);
   });
 }
