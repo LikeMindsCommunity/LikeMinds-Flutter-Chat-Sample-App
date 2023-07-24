@@ -5,6 +5,7 @@ import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/chatroom/conversation_state.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -78,6 +79,10 @@ class _HomePageState extends State<HomePage> {
       homeFeedPagingController.nextPageKey = _pageKey;
       homeFeedPagingController.itemList = chatItems;
     }
+
+    homeFeedPagingController.itemList?.sort((ChatItem a, ChatItem b) {
+      return b.conversation.lastUpdated!.compareTo(a.conversation.lastUpdated!);
+    });
   }
 
   @override

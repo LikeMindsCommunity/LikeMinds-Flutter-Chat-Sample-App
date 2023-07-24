@@ -1,4 +1,6 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
@@ -6,6 +8,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/explore_components/join_button.dart';
+import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 import 'package:overlay_support/overlay_support.dart';
 
@@ -33,6 +36,7 @@ class _ExploreItemState extends State<ExploreItem> {
   @override
   Widget build(BuildContext context) {
     chatroom = widget.chatroom;
+    HomeBloc homeBloc = BlocProvider.of<HomeBloc>(context);
     return GestureDetector(
       onTap: () {
         widget.onTap();
@@ -206,6 +210,9 @@ class _ExploreItemState extends State<ExploreItem> {
                                           !isJoinedNotifier.value;
                                       toast(response.errorMessage ??
                                           'An error occurred');
+                                    } else {
+                                      toast("Chatroom left");
+                                      homeBloc.add(UpdateHomeEvent());
                                     }
                                   } else {
                                     LMResponse response =
@@ -225,6 +232,9 @@ class _ExploreItemState extends State<ExploreItem> {
                                           !isJoinedNotifier.value;
                                       toast(response.errorMessage ??
                                           'An error occurred');
+                                    } else {
+                                      toast("Chatroom joined");
+                                      homeBloc.add(UpdateHomeEvent());
                                     }
                                   }
                                 },
