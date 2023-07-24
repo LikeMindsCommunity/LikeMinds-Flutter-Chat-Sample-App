@@ -13,6 +13,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/ch
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bottom_sheet.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/helper/reaction_helper.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/document/document_preview_factory.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/bubble_triangle.dart';
@@ -167,27 +168,30 @@ class _ChatBubbleState extends State<ChatBubble> {
       bloc: chatActionBloc,
       listener: (context, state) {
         if (state is ConversationToolBarState) {
-          if (state.conversation.id == conversation!.id) {
-            isSelected = true;
-            if (state.showReactionBar) {
-              if (!reactionBarController.menuIsShowing) {
-                reactionBarController.showMenu();
+          if (state.selectedConversation.length == 1) {
+            if (state.selectedConversation.first.id == conversation!.id) {
+              isSelected = true;
+              if (state.showReactionBar) {
+                if (!reactionBarController.menuIsShowing) {
+                  reactionBarController.showMenu();
+                }
+              } else {
+                if (reactionBarController.menuIsShowing) {
+                  reactionBarController.hideMenu();
+                }
               }
-            } else {
+              _isSelected.value = !_isSelected.value;
+            } else if (state.selectedConversation.first.id !=
+                conversation!.id) {
+              if (isSelected == true) {
+                isSelected = false;
+                _isSelected.value = !_isSelected.value;
+              }
               if (reactionBarController.menuIsShowing) {
                 reactionBarController.hideMenu();
               }
             }
-            _isSelected.value = !_isSelected.value;
-          } else if (state.conversation.id != conversation!.id) {
-            if (isSelected == true) {
-              isSelected = false;
-              _isSelected.value = !_isSelected.value;
-            }
-            if (reactionBarController.menuIsShowing) {
-              reactionBarController.hideMenu();
-            }
-          }
+          } else {}
         }
         if (state is RemoveConversationToolBarState) {
           isSelected = false;
@@ -258,8 +262,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                   _isSelected.value = !_isSelected.value;
                   chatActionBloc!.add(
                     ConversationToolBar(
-                      conversation: conversation!,
-                      replyConversation: replyToConversation,
+                      selectedConversation: [conversation!],
                     ),
                   );
                 },
@@ -272,12 +275,34 @@ class _ChatBubbleState extends State<ChatBubble> {
                   // _reactionController.showMenu();
                   chatActionBloc!.add(
                     ConversationToolBar(
-                      conversation: conversation!,
-                      replyConversation: replyToConversation,
+                      selectedConversation: [conversation!],
                     ),
                   );
                 },
-                onTap: () {},
+                onTap: () {
+                  if (chatActionBloc!.state is ConversationToolBarState) {
+                    ConversationToolBarState state =
+                        chatActionBloc!.state as ConversationToolBarState;
+                    List<Conversation> selectedConversation =
+                        state.selectedConversation;
+                    if (selectedConversation.contains(conversation!)) {
+                      selectedConversation.remove(conversation!);
+                      isSelected = false;
+                      _isSelected.value = !_isSelected.value;
+                    } else {
+                      selectedConversation.add(conversation!);
+                      isSelected = true;
+                      _isSelected.value = !_isSelected.value;
+                    }
+                    chatActionBloc!.add(ConversationToolBar(
+                      selectedConversation: selectedConversation,
+                      showReactionBar: selectedConversation.length > 1
+                          ? false
+                          : state.showReactionBar,
+                      showReactionKeyboard: state.showReactionKeyboard,
+                    ));
+                  }
+                },
                 child: ValueListenableBuilder(
                   valueListenable: _isSelected,
                   builder:

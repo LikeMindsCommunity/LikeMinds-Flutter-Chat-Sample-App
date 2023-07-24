@@ -115,8 +115,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
           if (state.showReactionBar == true) {
             chatActionBloc!.add(
               ConversationToolBar(
-                conversation: state.conversation,
-                replyConversation: state.replyConversation,
+                selectedConversation: state.selectedConversation,
                 showReactionKeyboard: state.showReactionKeyboard,
                 showReactionBar: false,
               ),
@@ -614,12 +613,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                           icon: Icon(
                                             Icons.close,
                                             size: 16.sp,
-                                            color: Colors.red,
+                                            color: LMTheme.buttonColor,
                                           ),
                                         ),
                                         SizedBox(width: 2.w),
                                         Text(
-                                          '1',
+                                          childState.selectedConversation.length
+                                              .toString(),
                                           style: LMTheme.medium.copyWith(
                                             fontSize: 12.sp,
                                           ),
@@ -627,45 +627,88 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                         const Spacer(),
                                         Row(
                                           children: [
+                                            childState.selectedConversation
+                                                        .length ==
+                                                    1
+                                                ? IconButton(
+                                                    onPressed: () {
+                                                      if (chatActionBloc ==
+                                                          null) {
+                                                        return;
+                                                      }
+                                                      chatActionBloc?.add(
+                                                        ReplyConversation(
+                                                          chatroomId:
+                                                              chatroom!.id,
+                                                          conversationId: childState
+                                                              .selectedConversation
+                                                              .first
+                                                              .id,
+                                                          replyConversation:
+                                                              childState
+                                                                  .selectedConversation
+                                                                  .first,
+                                                        ),
+                                                      );
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.reply,
+                                                      size: 16.sp,
+                                                      color:
+                                                          LMTheme.buttonColor,
+                                                    ),
+                                                  )
+                                                : const SizedBox(),
                                             IconButton(
                                               onPressed: () {
-                                                if (chatActionBloc == null) {
-                                                  return;
+                                                if (childState
+                                                        .selectedConversation
+                                                        .length ==
+                                                    1) {
+                                                  Clipboard.setData(
+                                                    ClipboardData(
+                                                      text: TaggingHelper
+                                                              .convertRouteToTag(
+                                                                  childState
+                                                                      .selectedConversation
+                                                                      .first
+                                                                      .answer) ??
+                                                          '',
+                                                    ),
+                                                  ).then((value) {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            "Copied to clipboard");
+                                                  });
+                                                } else {
+                                                  List<String> answerList =
+                                                      childState
+                                                          .selectedConversation
+                                                          .map((e) {
+                                                    String name =
+                                                        userMeta[e.userId]!
+                                                            .name;
+                                                    String timeStamp =
+                                                        "[${e.date}, ${e.createdAt}]";
+                                                    String text = TaggingHelper
+                                                            .convertRouteToTag(
+                                                                e.answer) ??
+                                                        '';
+                                                    return "$timeStamp $name: $text";
+                                                  }).toList();
+                                                  Clipboard.setData(
+                                                    ClipboardData(
+                                                      text:
+                                                          answerList.join('\n'),
+                                                    ),
+                                                  ).then((value) {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            "Copied to clipboard");
+                                                  });
                                                 }
-                                                chatActionBloc?.add(
-                                                  ReplyConversation(
-                                                    chatroomId: chatroom!.id,
-                                                    conversationId: childState
-                                                        .conversation.id,
-                                                    replyConversation:
-                                                        childState.conversation,
-                                                  ),
-                                                );
-                                              },
-                                              icon: Icon(
-                                                Icons.reply,
-                                                size: 16.sp,
-                                                color: LMTheme.buttonColor,
-                                              ),
-                                            ),
-                                            IconButton(
-                                              onPressed: () {
                                                 chatActionBloc!.add(
                                                     RemoveConversationToolBar());
-                                                Clipboard.setData(
-                                                  ClipboardData(
-                                                    text: TaggingHelper
-                                                            .convertRouteToTag(
-                                                                childState
-                                                                    .conversation
-                                                                    .answer) ??
-                                                        '',
-                                                  ),
-                                                ).then((value) {
-                                                  Fluttertoast.showToast(
-                                                      msg:
-                                                          "Copied to clipboard");
-                                                });
                                               },
                                               icon: Icon(
                                                 Icons.copy,
@@ -673,8 +716,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                 color: LMTheme.buttonColor,
                                               ),
                                             ),
-                                            checkEditPermissions(
-                                                    childState.conversation)
+                                            checkEditPermissions(childState
+                                                        .selectedConversation
+                                                        .first) &&
+                                                    childState
+                                                            .selectedConversation
+                                                            .length ==
+                                                        1
                                                 ? IconButton(
                                                     onPressed: () {
                                                       if (chatActionBloc ==
@@ -685,13 +733,14 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                         EditingConversation(
                                                           chatroomId:
                                                               chatroom!.id,
-                                                          conversationId:
-                                                              childState
-                                                                  .conversation
-                                                                  .id,
+                                                          conversationId: childState
+                                                              .selectedConversation
+                                                              .first
+                                                              .id,
                                                           editConversation:
                                                               childState
-                                                                  .conversation,
+                                                                  .selectedConversation
+                                                                  .first,
                                                         ),
                                                       );
                                                     },
@@ -703,8 +752,13 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                     ),
                                                   )
                                                 : const SizedBox(),
-                                            checkDeletePermissions(
-                                                    childState.conversation)
+                                            checkDeletePermissions(childState
+                                                        .selectedConversation
+                                                        .first) &&
+                                                    childState
+                                                            .selectedConversation
+                                                            .length ==
+                                                        1
                                                 ? IconButton(
                                                     onPressed: () {
                                                       if (chatActionBloc ==
@@ -716,7 +770,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                                           (DeleteConversationRequestBuilder()
                                                                 ..conversationIds([
                                                                   childState
-                                                                      .conversation
+                                                                      .selectedConversation
+                                                                      .first
                                                                       .id
                                                                 ])
                                                                 ..reason(
@@ -944,9 +999,10 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 child: SafeArea(
                                   bottom: true,
                                   child: flutterEmojiPicker(
-                                      TextEditingController(),
-                                      chatActionBloc!,
-                                      state.conversation),
+                                    TextEditingController(),
+                                    chatActionBloc!,
+                                    state.selectedConversation.first,
+                                  ),
                                 ),
                               );
                             }

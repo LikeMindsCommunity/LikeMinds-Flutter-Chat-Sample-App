@@ -191,20 +191,21 @@ class EditRemoveState extends ChatActionState {
 }
 
 class ConversationToolBarState extends ChatActionState {
-  final Conversation conversation;
+  final List<Conversation> selectedConversation;
   final Conversation? replyConversation;
   final bool showReactionKeyboard;
   final bool showReactionBar;
   final String stateTime = DateTime.now().toString();
 
   ConversationToolBarState(
-      {required this.conversation,
+      {required this.selectedConversation,
       this.replyConversation,
       this.showReactionBar = true,
       required this.showReactionKeyboard});
 
   @override
-  List<Object> get props => [conversation, showReactionKeyboard, stateTime];
+  List<Object> get props =>
+      [selectedConversation, showReactionKeyboard, stateTime];
 }
 
 class PutReactionState extends ChatActionState {
