@@ -626,23 +626,24 @@ class _ChatBarState extends State<ChatBar> {
     return SizedBox(
       height: 10.h,
       width: 80.w,
-      child: Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Container(
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              color: kGreyColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 1.w,
-                  color: LMTheme.buttonColor,
-                ),
-                kHorizontalPaddingMedium,
-                Column(
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            color: kGreyColor.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 1.w,
+                color: LMTheme.buttonColor,
+              ),
+              kHorizontalPaddingMedium,
+              SizedBox(
+                width: 50.w,
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -665,18 +666,18 @@ class _ChatBarState extends State<ChatBar> {
                     ),
                   ],
                 ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () {
-                    chatActionBloc!.add(ReplyRemove());
-                  },
-                  icon: const Icon(
-                    Icons.close,
-                    color: kGreyColor,
-                  ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  chatActionBloc!.add(ReplyRemove());
+                },
+                icon: const Icon(
+                  Icons.close,
+                  color: kGreyColor,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -687,23 +688,24 @@ class _ChatBarState extends State<ChatBar> {
     return SizedBox(
       height: 10.h,
       width: 80.w,
-      child: Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Container(
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              color: kGreyColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 1.w,
-                  color: LMTheme.buttonColor,
-                ),
-                kHorizontalPaddingMedium,
-                Column(
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            color: kGreyColor.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 1.w,
+                color: LMTheme.buttonColor,
+              ),
+              kHorizontalPaddingMedium,
+              SizedBox(
+                width: 50.w,
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -731,19 +733,19 @@ class _ChatBarState extends State<ChatBar> {
                     ),
                   ],
                 ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () {
-                    chatActionBloc!.add(EditRemove());
-                    _textEditingController.clear();
-                  },
-                  icon: const Icon(
-                    Icons.close,
-                    color: kGreyColor,
-                  ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  chatActionBloc!.add(EditRemove());
+                  _textEditingController.clear();
+                },
+                icon: const Icon(
+                  Icons.close,
+                  color: kGreyColor,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
