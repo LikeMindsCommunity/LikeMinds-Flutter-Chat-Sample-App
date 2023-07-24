@@ -297,13 +297,17 @@ class _ChatBubbleState extends State<ChatBubble> {
                       isSelected = true;
                       _isSelected.value = !_isSelected.value;
                     }
-                    chatActionBloc!.add(ConversationToolBar(
-                      selectedConversation: selectedConversation,
-                      showReactionBar: selectedConversation.length > 1
-                          ? false
-                          : state.showReactionBar,
-                      showReactionKeyboard: state.showReactionKeyboard,
-                    ));
+                    if (selectedConversation.isEmpty) {
+                      chatActionBloc!.add(RemoveConversationToolBar());
+                    } else {
+                      chatActionBloc!.add(ConversationToolBar(
+                        selectedConversation: selectedConversation,
+                        showReactionBar: selectedConversation.length > 1
+                            ? false
+                            : state.showReactionBar,
+                        showReactionKeyboard: state.showReactionKeyboard,
+                      ));
+                    }
                   }
                 },
                 child: ValueListenableBuilder(
