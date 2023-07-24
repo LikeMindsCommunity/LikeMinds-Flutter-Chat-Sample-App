@@ -14,6 +14,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bar.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Reaction/reaction_bottom_sheet.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/helper/reaction_helper.dart';
+import 'package:likeminds_chat_mm_fl/src/views/conversation/bloc/conversation_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/document/document_preview_factory.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/bubble_triangle.dart';
@@ -168,27 +169,30 @@ class _ChatBubbleState extends State<ChatBubble> {
       bloc: chatActionBloc,
       listener: (context, state) {
         if (state is ConversationToolBarState) {
-          if (state.conversation.id == conversation!.id) {
-            isSelected = true;
-            if (state.showReactionBar) {
-              if (!reactionBarController.menuIsShowing) {
-                reactionBarController.showMenu();
+          if (state.selectedConversation.length == 1) {
+            if (state.selectedConversation.first.id == conversation!.id) {
+              isSelected = true;
+              if (state.showReactionBar) {
+                if (!reactionBarController.menuIsShowing) {
+                  reactionBarController.showMenu();
+                }
+              } else {
+                if (reactionBarController.menuIsShowing) {
+                  reactionBarController.hideMenu();
+                }
               }
-            } else {
+              _isSelected.value = !_isSelected.value;
+            } else if (state.selectedConversation.first.id !=
+                conversation!.id) {
+              if (isSelected == true) {
+                isSelected = false;
+                _isSelected.value = !_isSelected.value;
+              }
               if (reactionBarController.menuIsShowing) {
                 reactionBarController.hideMenu();
               }
             }
-            _isSelected.value = !_isSelected.value;
-          } else if (state.conversation.id != conversation!.id) {
-            if (isSelected == true) {
-              isSelected = false;
-              _isSelected.value = !_isSelected.value;
-            }
-            if (reactionBarController.menuIsShowing) {
-              reactionBarController.hideMenu();
-            }
-          }
+          } else {}
         }
         if (state is RemoveConversationToolBarState) {
           isSelected = false;
@@ -205,6 +209,9 @@ class _ChatBubbleState extends State<ChatBubble> {
             reaction: state.putReactionRequest.reaction,
             userId: loggedInUser.id,
           );
+          if (!userMeta!.containsKey(loggedInUser.id)) {
+            userMeta![loggedInUser.id] = loggedInUser;
+          }
           addReaction(addedReaction);
         }
         if (state is PutReactionError &&
@@ -259,8 +266,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                   _isSelected.value = !_isSelected.value;
                   chatActionBloc!.add(
                     ConversationToolBar(
-                      conversation: conversation!,
-                      replyConversation: replyToConversation,
+                      selectedConversation: [conversation!],
                     ),
                   );
                 },
@@ -273,12 +279,38 @@ class _ChatBubbleState extends State<ChatBubble> {
                   // _reactionController.showMenu();
                   chatActionBloc!.add(
                     ConversationToolBar(
-                      conversation: conversation!,
-                      replyConversation: replyToConversation,
+                      selectedConversation: [conversation!],
                     ),
                   );
                 },
-                onTap: () {},
+                onTap: () {
+                  if (chatActionBloc!.state is ConversationToolBarState) {
+                    ConversationToolBarState state =
+                        chatActionBloc!.state as ConversationToolBarState;
+                    List<Conversation> selectedConversation =
+                        state.selectedConversation;
+                    if (selectedConversation.contains(conversation!)) {
+                      selectedConversation.remove(conversation!);
+                      isSelected = false;
+                      _isSelected.value = !_isSelected.value;
+                    } else {
+                      selectedConversation.add(conversation!);
+                      isSelected = true;
+                      _isSelected.value = !_isSelected.value;
+                    }
+                    if (selectedConversation.isEmpty) {
+                      chatActionBloc!.add(RemoveConversationToolBar());
+                    } else {
+                      chatActionBloc!.add(ConversationToolBar(
+                        selectedConversation: selectedConversation,
+                        showReactionBar: selectedConversation.length > 1
+                            ? false
+                            : state.showReactionBar,
+                        showReactionKeyboard: state.showReactionKeyboard,
+                      ));
+                    }
+                  }
+                },
                 child: ValueListenableBuilder(
                   valueListenable: _isSelected,
                   builder:
@@ -301,15 +333,6 @@ class _ChatBubbleState extends State<ChatBubble> {
                             conversationId: conversation!.id,
                             chatroomId: widget.chatroom.id,
                             replyConversation: conversation!));
-                        // int userId =
-                        //     conversation!.userId ?? conversation!.memberId!;
-                        // if (userId == loggedInUser.id) {
-                        //   conversation!.member = loggedInUser;
-                        // }
-                        // if (conversation!.deletedByUserId != null) {
-                        //   return;
-                        // }
-                        // widget.onReply(conversation!);
                       },
                       background: Padding(
                         padding: EdgeInsets.only(
@@ -382,6 +405,7 @@ class _ChatBubbleState extends State<ChatBubble> {
               ValueListenableBuilder(
                   valueListenable: rebuildReactionsBar,
                   builder: (context, _, __) {
+                    List<String> keys = mappedReactions.keys.toList();
                     return ((conversation!.hasReactions ?? false) &&
                             (conversation!.conversationReactions != null &&
                                 conversation!
@@ -412,18 +436,19 @@ class _ChatBubbleState extends State<ChatBubble> {
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: <Widget>[
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 3),
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(10.0)),
-                                    child: Text(
-                                        '${conversation!.conversationReactions![0].reaction} ${mappedReactions[conversation!.conversationReactions![0].reaction]!.length}'),
-                                  ),
-                                  conversation!.conversationReactions!.length >=
-                                          2
+                                  keys.length >= 2
+                                      ? Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 3),
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0)),
+                                          child: Text(
+                                              '${keys[1]} ${mappedReactions[keys[1]]!.length}'),
+                                        )
+                                      : const SizedBox(),
+                                  keys.length >= 3
                                       ? Container(
                                           margin:
                                               const EdgeInsets.only(left: 4.0),
@@ -434,12 +459,11 @@ class _ChatBubbleState extends State<ChatBubble> {
                                               borderRadius:
                                                   BorderRadius.circular(10.0)),
                                           child: Text(
-                                              '${conversation!.conversationReactions![1].reaction} ${mappedReactions[conversation!.conversationReactions![1].reaction]!.length}'),
+                                              '${keys[2]} ${mappedReactions[keys[2]]!.length}'),
                                         )
                                       : const SizedBox(),
                                   kHorizontalPaddingSmall,
-                                  conversation!.conversationReactions!.length >
-                                          2
+                                  keys.length > 3
                                       ? Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 10, vertical: 3),
@@ -471,7 +495,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                 arrowColor: kWhiteColor,
                 barrierColor: Colors.transparent,
                 menuBuilder: () => ReactionBar(
-                  chatroomId: widget.chatroom.id,
+                  chatroom: widget.chatroom,
                   conversation: conversation!,
                   replyToConversation: replyToConversation,
                   loggedinUser: loggedInUser,

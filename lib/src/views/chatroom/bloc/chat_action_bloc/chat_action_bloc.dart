@@ -161,10 +161,9 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
     on<ConversationToolBar>(
       (event, emit) {
         emit(ConversationToolBarState(
-          conversation: event.conversation,
+          selectedConversation: event.selectedConversation,
           showReactionBar: event.showReactionBar,
           showReactionKeyboard: event.showReactionKeyboard,
-          replyConversation: event.replyConversation,
         ));
       },
     );

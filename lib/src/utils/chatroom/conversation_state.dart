@@ -18,6 +18,19 @@ void filterOutStateMessage(List<Conversation> conversationList) {
     return element.state != null &&
         (element.state == ConversationMessageState.memberJoinedOpenChatroom ||
             element.state == ConversationMessageState.memberLeftOpenChatroom ||
-            element.state == ConversationMessageState.memberLeftSecretChatroom);
+            element.state ==
+                ConversationMessageState.memberLeftSecretChatroom ||
+            element.state == ConversationMessageState.poll);
   });
+}
+
+bool stateMessage(Conversation conversation) {
+  if (conversation.state == ConversationMessageState.memberJoinedOpenChatroom ||
+      conversation.state == ConversationMessageState.memberLeftOpenChatroom ||
+      conversation.state == ConversationMessageState.memberLeftSecretChatroom ||
+      conversation.state == ConversationMessageState.poll) {
+    return false;
+  } else {
+    return true;
+  }
 }

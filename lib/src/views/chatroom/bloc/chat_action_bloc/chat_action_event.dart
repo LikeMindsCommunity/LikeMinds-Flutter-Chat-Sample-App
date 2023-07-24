@@ -157,21 +157,20 @@ class ReplyRemove extends ChatActionEvent {
 }
 
 class ConversationToolBar extends ChatActionEvent {
-  final Conversation conversation;
-  final Conversation? replyConversation;
+  final List<Conversation> selectedConversation;
   final bool showReactionKeyboard;
   final bool showReactionBar;
   final String eventTime = DateTime.now().toString();
 
   ConversationToolBar({
-    required this.conversation,
-    this.replyConversation,
+    required this.selectedConversation,
     this.showReactionBar = true,
     this.showReactionKeyboard = false,
   });
 
   @override
-  List<Object> get props => [conversation, showReactionKeyboard, eventTime];
+  List<Object> get props =>
+      [selectedConversation, showReactionKeyboard, eventTime];
 }
 
 class RemoveConversationToolBar extends ChatActionEvent {
