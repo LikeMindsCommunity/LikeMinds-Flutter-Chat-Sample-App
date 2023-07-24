@@ -37,6 +37,7 @@ class PollBubbleStringConstants {
       "Your vote has been submitted successfully. You can change and resubmit your vote anytime till the voting ends.";
   static const String resultWillBeAnnounced =
       "Results will be announced when voting ends on";
+  static const String pollEnded = "Poll ended";
 }
 
 List<String> usersCanVoteForList = [

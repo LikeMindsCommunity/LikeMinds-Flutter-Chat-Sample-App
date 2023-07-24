@@ -2,6 +2,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
 
 class PollEndTile extends StatelessWidget {
@@ -36,12 +37,15 @@ class PollEndTile extends StatelessWidget {
             ),
           ),
           getTextButton(
-              text: "Ends in ${getExpiryTimeString(endTime)}",
+              text: isPollEnded(endTime)
+                  ? PollBubbleStringConstants.pollEnded
+                  : "Ends in ${getExpiryTimeString(endTime)}",
               textStyle: LMTheme.medium.copyWith(
                 color: kWhiteColor,
                 fontSize: 8.sp,
               ),
-              backgroundColor: LMTheme.buttonColor,
+              backgroundColor:
+                  isPollEnded(endTime) ? Colors.red : LMTheme.buttonColor,
               borderRadius: 10.0,
               padding: const EdgeInsets.all(8.0),
               onTap: null),

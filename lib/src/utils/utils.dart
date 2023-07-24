@@ -24,3 +24,13 @@ String getExpiryTimeString(DateTime expiryTime) {
   }
   return '';
 }
+
+bool isPollEnded(DateTime expiryTime) {
+  DateTime now = DateTime.now();
+  Duration difference = expiryTime.difference(now);
+  if (difference.isNegative) {
+    return true;
+  } else {
+    return false;
+  }
+}

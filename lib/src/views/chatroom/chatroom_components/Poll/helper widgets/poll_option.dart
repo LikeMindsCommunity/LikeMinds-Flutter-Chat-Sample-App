@@ -4,9 +4,11 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class PollOptionList extends StatefulWidget {
   final Conversation pollConversation;
+  final Function(PollViewData) onTap;
   const PollOptionList({
     Key? key,
     required this.pollConversation,
+    required this.onTap,
   }) : super(key: key);
 
   @override

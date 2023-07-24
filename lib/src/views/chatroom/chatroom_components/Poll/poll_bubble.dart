@@ -26,6 +26,7 @@ class PollBubble extends StatefulWidget {
 
 class _PollBubbleState extends State<PollBubble> {
   Conversation? pollConversation;
+  List<PollViewData> selectedOptions = [];
 
   User user = UserLocalPreference.instance.fetchUserData();
 
@@ -81,7 +82,10 @@ class _PollBubbleState extends State<PollBubble> {
               ),
             ),
             kVerticalPaddingLarge,
-            PollOptionList(pollConversation: pollConversation!),
+            PollOptionList(
+              pollConversation: pollConversation!,
+              onTap: (PollViewData selectedOption) {},
+            ),
             pollConversation!.poll!.allowAddOption!
                 ? getTextButton(
                     width: 60.w,
