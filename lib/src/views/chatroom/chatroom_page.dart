@@ -1002,6 +1002,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                     TextEditingController(),
                                     chatActionBloc!,
                                     state.selectedConversation.first,
+                                    currentUser,
+                                    chatroom!,
                                   ),
                                 ),
                               );

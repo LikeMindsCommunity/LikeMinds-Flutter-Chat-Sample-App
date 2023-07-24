@@ -208,6 +208,9 @@ class _ChatBubbleState extends State<ChatBubble> {
             reaction: state.putReactionRequest.reaction,
             userId: loggedInUser.id,
           );
+          if (!userMeta!.containsKey(loggedInUser.id)) {
+            userMeta![loggedInUser.id] = loggedInUser;
+          }
           addReaction(addedReaction);
         }
         if (state is PutReactionError &&
@@ -325,15 +328,6 @@ class _ChatBubbleState extends State<ChatBubble> {
                             conversationId: conversation!.id,
                             chatroomId: widget.chatroom.id,
                             replyConversation: conversation!));
-                        // int userId =
-                        //     conversation!.userId ?? conversation!.memberId!;
-                        // if (userId == loggedInUser.id) {
-                        //   conversation!.member = loggedInUser;
-                        // }
-                        // if (conversation!.deletedByUserId != null) {
-                        //   return;
-                        // }
-                        // widget.onReply(conversation!);
                       },
                       background: Padding(
                         padding: EdgeInsets.only(
@@ -500,6 +494,7 @@ class _ChatBubbleState extends State<ChatBubble> {
               ValueListenableBuilder(
                   valueListenable: rebuildReactionsBar,
                   builder: (context, _, __) {
+                    List<String> keys = mappedReactions.keys.toList();
                     return ((conversation!.hasReactions ?? false) &&
                             (conversation!.conversationReactions != null &&
                                 conversation!
@@ -530,18 +525,19 @@ class _ChatBubbleState extends State<ChatBubble> {
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: <Widget>[
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 3),
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(10.0)),
-                                    child: Text(
-                                        '${conversation!.conversationReactions![0].reaction} ${mappedReactions[conversation!.conversationReactions![0].reaction]!.length}'),
-                                  ),
-                                  conversation!.conversationReactions!.length >=
-                                          2
+                                  keys.length >= 2
+                                      ? Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 3),
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0)),
+                                          child: Text(
+                                              '${keys[1]} ${mappedReactions[keys[1]]!.length}'),
+                                        )
+                                      : const SizedBox(),
+                                  keys.length >= 3
                                       ? Container(
                                           margin:
                                               const EdgeInsets.only(left: 4.0),
@@ -552,12 +548,11 @@ class _ChatBubbleState extends State<ChatBubble> {
                                               borderRadius:
                                                   BorderRadius.circular(10.0)),
                                           child: Text(
-                                              '${conversation!.conversationReactions![1].reaction} ${mappedReactions[conversation!.conversationReactions![1].reaction]!.length}'),
+                                              '${keys[2]} ${mappedReactions[keys[2]]!.length}'),
                                         )
                                       : const SizedBox(),
                                   kHorizontalPaddingSmall,
-                                  conversation!.conversationReactions!.length >
-                                          2
+                                  keys.length > 3
                                       ? Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 10, vertical: 3),
@@ -589,7 +584,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                 arrowColor: kWhiteColor,
                 barrierColor: Colors.transparent,
                 menuBuilder: () => ReactionBar(
-                  chatroomId: widget.chatroom.id,
+                  chatroom: widget.chatroom,
                   conversation: conversation!,
                   replyToConversation: replyToConversation,
                   loggedinUser: loggedInUser,
