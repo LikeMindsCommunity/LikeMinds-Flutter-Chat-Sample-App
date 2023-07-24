@@ -37,8 +37,7 @@ class ReactionBar extends StatelessWidget {
               onTap: (String reaction) async {
                 if (reaction == 'Add') {
                   chatActionBloc.add(ConversationToolBar(
-                    conversation: conversation,
-                    replyConversation: replyToConversation,
+                    selectedConversation: [conversation],
                     showReactionKeyboard: true,
                     showReactionBar: false,
                   ));
