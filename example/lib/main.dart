@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lm_chat_example/cred_screen.dart';
 import 'package:lm_chat_example/environment/env.dart';
 import 'package:lm_chat_example/example_callback.dart';
@@ -114,10 +115,10 @@ Future<String?> setupMessaging() async {
     debugPrint("Token - $token");
     return token.toString();
   } else {
-    toast(
-      'User declined or has not accepted notification permissions',
-      duration: Toast.LENGTH_LONG,
+    Fluttertoast.showToast(
+      msg: 'User declined or has not accepted notification permissions',
     );
+
     return null;
   }
 }
