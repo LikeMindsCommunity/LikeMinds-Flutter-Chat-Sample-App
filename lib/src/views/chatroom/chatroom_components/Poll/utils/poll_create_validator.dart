@@ -2,7 +2,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 
-class PollFieldsValidator {
+class PollCreateValidator {
   static bool enableSubmitButton(String title, int optionCount) {
     if (title.isNotEmpty && optionCount >= 2) {
       return true;

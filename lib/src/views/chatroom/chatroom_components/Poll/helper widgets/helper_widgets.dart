@@ -20,8 +20,9 @@ Widget getDropDownText(String text) {
   );
 }
 
-Widget getPollDropDownMenu(CustomPopupMenuController controller,
-    List<String> options, Function onTap) {
+Widget getPollDropDownMenu(
+    CustomPopupMenuController controller, List<String> options, Function onTap,
+    {int? optionsCount}) {
   return Container(
     constraints: BoxConstraints(maxHeight: 30.h, maxWidth: 40.w),
     decoration: BoxDecoration(
@@ -31,7 +32,7 @@ Widget getPollDropDownMenu(CustomPopupMenuController controller,
     child: ListView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero,
-      itemCount: options.length,
+      itemCount: optionsCount == null ? options.length : optionsCount + 1,
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(options[index]),
@@ -123,8 +124,8 @@ Widget getTextButton({
   );
 }
 
-Widget getVotingType(Function onTypeSelect, Function onNumVotesSelect,
-    String votingType, String numVotes) {
+Widget getVotingType(int optionsCount, Function onTypeSelect,
+    Function onNumVotesSelect, String votingType, String numVotes) {
   CustomPopupMenuController voteTypeController = CustomPopupMenuController();
   CustomPopupMenuController numVotesController = CustomPopupMenuController();
   return SizedBox(
@@ -149,9 +150,12 @@ Widget getVotingType(Function onTypeSelect, Function onNumVotesSelect,
             CustomPopupMenu(
               controller: numVotesController,
               menuBuilder: () => getPollDropDownMenu(
-                  numVotesController, numOfVotes, onNumVotesSelect),
+                  numVotesController, numOfVotes, onNumVotesSelect,
+                  optionsCount: optionsCount),
               pressType: PressType.singleClick,
-              child: getDropDownText(numVotes),
+              child: getDropDownText(
+                numVotes,
+              ),
             ),
           ],
         ),

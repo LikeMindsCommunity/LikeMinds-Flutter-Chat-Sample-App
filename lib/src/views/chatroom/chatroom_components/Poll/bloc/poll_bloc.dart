@@ -18,7 +18,15 @@ class PollBloc extends Bloc<PollEvents, PollState> {
     LMResponse response =
         await locator<LikeMindsService>().submitPoll(event.submitPollRequest);
     if (response.success) {
-    } else if (response.errorMessage != null) {}
+      emit(SubmittedPoll(submitPollResponse: response.data));
+    } else if (response.errorMessage != null) {
+      emit(
+        PollSubmitError(
+          errorMessage: response.errorMessage ?? "An error occurred",
+          submitPollRequest: event.submitPollRequest,
+        ),
+      );
+    }
   }
 
   void mapAddPollOption(AddPollOption event, Emitter<PollState> emit) async {

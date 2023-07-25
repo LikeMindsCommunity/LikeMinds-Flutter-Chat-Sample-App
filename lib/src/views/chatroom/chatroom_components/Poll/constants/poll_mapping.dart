@@ -17,6 +17,19 @@ int toIntPollMultiSelectState(String toIntPollMultiSelectState) {
   }
 }
 
+String toStringMultiSelectState(int multipleSelectState) {
+  switch (multipleSelectState) {
+    case 0:
+      return PollCreationStringConstants.exactlyVotes;
+    case 1:
+      return PollCreationStringConstants.atMaxVotes;
+    case 2:
+      return PollCreationStringConstants.atLeastVotes;
+    default:
+      return PollCreationStringConstants.exactlyVotes;
+  }
+}
+
 int? noOfVotes(String selectedCount) {
   int selectedCountInt = 1;
   for (int i = 0; i < numOfVotes.length; i++) {
@@ -25,7 +38,7 @@ int? noOfVotes(String selectedCount) {
     }
   }
   if (selectedCountInt == 0) {
-    return null;
+    return 1;
   } else {
     return selectedCountInt;
   }

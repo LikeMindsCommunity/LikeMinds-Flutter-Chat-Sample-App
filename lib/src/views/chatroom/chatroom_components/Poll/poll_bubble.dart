@@ -14,6 +14,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_header.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_option.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_submission_bottom_sheet.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/utils/poll_submit_validator.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 class PollBubble extends StatefulWidget {
@@ -27,12 +28,25 @@ class PollBubble extends StatefulWidget {
 
 class _PollBubbleState extends State<PollBubble> {
   Conversation? pollConversation;
+  bool isSubmitted = false;
   List<PollViewData> selectedOptions = [];
 
   User user = UserLocalPreference.instance.fetchUserData();
 
   void initialise() {
     pollConversation = widget.pollConversation;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    for (int i = 0;
+        i < widget.pollConversation.poll!.pollViewDataList!.length;
+        i++) {
+      if (widget.pollConversation.poll!.pollViewDataList![i].isSelected!) {
+        isSubmitted = true;
+      }
+    }
   }
 
   @override
@@ -99,11 +113,26 @@ class _PollBubbleState extends State<PollBubble> {
             kVerticalPaddingLarge,
             PollOptionList(
               pollConversation: pollConversation!,
+              isSubmitted: isSubmitted,
               onTap: (PollViewData selectedOption) {
                 if (selectedOptions.contains(selectedOption)) {
                   selectedOptions.remove(selectedOption);
                 } else {
-                  selectedOptions.add(selectedOption);
+                  if ((pollConversation!.poll!.multipleSelectState == 0 ||
+                          pollConversation!.poll!.multipleSelectState == 1) &&
+                      selectedOptions.length ==
+                          pollConversation!.poll!.multipleSelectNum) {
+                    toast("");
+                  } else {
+                    selectedOptions.add(selectedOption);
+                  }
+                }
+                if (pollConversation!.poll!.pollType == 0) {
+                  PollSubmitValidator.checkInstantPollSubmittion(
+                      context, pollConversation!.poll!, selectedOptions);
+                } else {
+                  PollSubmitValidator.checkDeferredPollSubmition(
+                      pollConversation!.poll!, selectedOptions);
                 }
               },
             ),
@@ -160,7 +189,7 @@ class _PollBubbleState extends State<PollBubble> {
             Align(
               alignment: Alignment.topLeft,
               child: TextButton(
-                onPressed: !pollConversation!.poll!.isAnonymous!
+                onPressed: pollConversation!.poll!.toShowResult!
                     ? () {
                         router.push(pollResultRoute, extra: pollConversation!);
                       }

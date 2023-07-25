@@ -3,7 +3,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_validator.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/utils/poll_create_validator.dart';
 
 class AddPollOptionBottomSheet extends StatefulWidget {
   final Function(String) onOptionAdded;
@@ -105,12 +105,12 @@ class _AddPollOptionBottomSheetState extends State<AddPollOptionBottomSheet> {
                 alignment: Alignment.center,
                 child: getTextButton(
                   text: "Post",
-                  backgroundColor: PollFieldsValidator.validateAddPollOption(
+                  backgroundColor: PollCreateValidator.validateAddPollOption(
                           optionEditingController.text)
                       ? LMTheme.buttonColor
                       : kLightGreyColor,
                   onTap: () {
-                    if (PollFieldsValidator.validateAddPollOption(
+                    if (PollCreateValidator.validateAddPollOption(
                         optionEditingController.text)) {
                       widget.onOptionAdded(optionEditingController.text);
                       Navigator.pop(context);

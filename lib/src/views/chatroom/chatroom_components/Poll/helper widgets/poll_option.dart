@@ -5,9 +5,11 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 class PollOptionList extends StatefulWidget {
   final Conversation pollConversation;
   final Function(PollViewData) onTap;
+  final bool isSubmitted;
   const PollOptionList({
     Key? key,
     required this.pollConversation,
+    required this.isSubmitted,
     required this.onTap,
   }) : super(key: key);
 
@@ -28,6 +30,7 @@ class _PollOptionListState extends State<PollOptionList> {
       itemCount: pollConversation!.poll!.pollViewDataList!.length,
       itemBuilder: (context, index) => PollOption(
         pollViewData: pollConversation!.poll!.pollViewDataList![index],
+        pollConversation: pollConversation,
         onTap: widget.onTap,
       ),
     );
@@ -36,10 +39,12 @@ class _PollOptionListState extends State<PollOptionList> {
 
 class PollOption extends StatefulWidget {
   final PollViewData pollViewData;
+  final Conversation? pollConversation;
   final Function(PollViewData) onTap;
   const PollOption({
     Key? key,
     required this.pollViewData,
+    required this.pollConversation,
     required this.onTap,
   }) : super(key: key);
 
@@ -50,6 +55,7 @@ class PollOption extends StatefulWidget {
 class _PollOptionState extends State<PollOption> {
   @override
   Widget build(BuildContext context) {
+    widget.pollViewData;
     return InkWell(
       onTap: () {
         widget.pollViewData.isSelected = !widget.pollViewData.isSelected!;
@@ -59,37 +65,72 @@ class _PollOptionState extends State<PollOption> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 60.w,
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color:
-                  widget.pollViewData.isSelected! ? kPrimaryColor : kWhiteColor,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: widget.pollViewData.isSelected!
-                    ? kPrimaryColor
-                    : kGreyColor,
-                width: 1,
+          Stack(
+            children: [
+              Container(
+                clipBehavior: Clip.none,
+                height: 45,
+                width: widget.pollConversation!.poll!.toShowResult!
+                    ? widget.pollViewData.percentage == null
+                        ? 0
+                        : widget.pollViewData.percentage! * 60.w
+                    : 0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  color: widget.pollConversation!.poll!.toShowResult!
+                      ? LMTheme.buttonColor.withOpacity(0.3)
+                      : null,
+                ),
               ),
-            ),
-            child: Text(
-              widget.pollViewData.text,
-              style: LMTheme.medium.copyWith(
-                color:
-                    widget.pollViewData.isSelected! ? kWhiteColor : kGreyColor,
-                fontSize: 8.sp,
+              Container(
+                width: 60.w,
+                height: 45,
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: widget.pollViewData.isSelected!
+                        ? LMTheme.buttonColor
+                        : kGreyColor,
+                    width: widget.pollViewData.isSelected! ? 2 : 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 40.w,
+                      child: Text(
+                        widget.pollViewData.text,
+                        style: LMTheme.medium.copyWith(
+                          color: kGreyColor,
+                          fontSize: 8.sp,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    widget.pollViewData.isSelected!
+                        ? Icon(
+                            Icons.check_circle,
+                            color: LMTheme.buttonColor,
+                          )
+                        : const SizedBox(),
+                    kHorizontalPaddingSmall,
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
           kVerticalPaddingXSmall,
-          Text(
-            "${widget.pollViewData.noVotes!} ${widget.pollViewData.noVotes! > 1 ? "votes" : "vote"}",
-            style: LMTheme.medium.copyWith(
-              color: kGreyColor,
-              fontSize: 8.sp,
-            ),
-          ),
+          widget.pollConversation!.poll!.toShowResult!
+              ? Text(
+                  "${widget.pollViewData.noVotes!} ${widget.pollViewData.noVotes! > 1 ? "votes" : "vote"}",
+                  style: LMTheme.medium.copyWith(
+                    color: kGreyColor,
+                    fontSize: 8.sp,
+                  ),
+                )
+              : const SizedBox(),
           kVerticalPaddingMedium,
         ],
       ),

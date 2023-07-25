@@ -10,7 +10,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/ch
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/poll_mapping.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
-import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_validator.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/utils/poll_create_validator.dart';
 
 class PollCreationBottomSheet extends StatefulWidget {
   final int chatroomId;
@@ -222,30 +222,34 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                 ),
                               ),
                               kVerticalPaddingLarge,
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    pollOptionsControllerList
-                                        .add(TextEditingController());
-                                    pollOptionsCount++;
-                                  });
-                                },
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_circle_outline,
-                                      color: LMTheme.buttonColor,
-                                    ),
-                                    kHorizontalPaddingLarge,
-                                    Text(
-                                      PollCreationStringConstants.addOption,
-                                      style: subHeaderStyle?.copyWith(
-                                          color: LMTheme.buttonColor),
+                              pollOptionsCount < 10
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          pollOptionsControllerList
+                                              .add(TextEditingController());
+                                          pollOptionsCount++;
+                                        });
+                                      },
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_circle_outline,
+                                            color: LMTheme.buttonColor,
+                                          ),
+                                          kHorizontalPaddingLarge,
+                                          Text(
+                                            PollCreationStringConstants
+                                                .addOption,
+                                            style: subHeaderStyle?.copyWith(
+                                                color: LMTheme.buttonColor),
+                                          )
+                                        ],
+                                      ),
                                     )
-                                  ],
-                                ),
-                              )
+                                  : const SizedBox()
                             ],
                           ),
                         ],
@@ -368,6 +372,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                                 ),
                                 kVerticalPaddingMedium,
                                 getVotingType(
+                                  pollOptionsCount,
                                   setPollVotingType,
                                   setNumVotesAllowed,
                                   votingType,
@@ -405,13 +410,13 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                     kVerticalPaddingLarge,
                     getTextButton(
                       text: "Post",
-                      backgroundColor: PollFieldsValidator.enableSubmitButton(
+                      backgroundColor: PollCreateValidator.enableSubmitButton(
                               pollQuestionController.text,
                               pollOptionsControllerList.length)
                           ? LMTheme.buttonColor
                           : kLightGreyColor,
                       onTap: () {
-                        if (PollFieldsValidator.validatePollSheet(
+                        if (PollCreateValidator.validatePollSheet(
                           pollQuestionController.text,
                           pollOptionsControllerList,
                           pollExpiryController.text,
