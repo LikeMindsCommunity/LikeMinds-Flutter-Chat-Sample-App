@@ -142,7 +142,7 @@ class LMChat extends StatelessWidget {
     return OverlaySupport.global(
       toastTheme: ToastThemeData(
         textColor: kWhiteColor,
-        background: LMTheme.buttonColor,
+        background: kBlackColor,
         alignment: Alignment.bottomCenter,
       ),
       child: Sizer(

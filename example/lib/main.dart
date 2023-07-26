@@ -11,7 +11,6 @@ import 'package:lm_chat_example/environment/env.dart';
 import 'package:lm_chat_example/example_callback.dart';
 import 'package:lm_chat_example/firebase_options.dart';
 import 'package:lm_chat_example/local_preference.dart';
-import 'package:overlay_support/overlay_support.dart';
 
 import 'package:likeminds_chat_mm_fl/likeminds_chat_mm_fl.dart';
 
