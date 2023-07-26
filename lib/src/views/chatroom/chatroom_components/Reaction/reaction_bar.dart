@@ -1,18 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/helper/reaction_helper.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class ReactionBar extends StatelessWidget {
-  final int? chatroomId;
+  final ChatRoom chatroom;
   final Conversation conversation;
   final Conversation? replyToConversation;
   final User loggedinUser;
 
   const ReactionBar({
     Key? key,
-    required this.chatroomId,
+    required this.chatroom,
     required this.conversation,
     required this.replyToConversation,
     required this.loggedinUser,
@@ -42,6 +46,19 @@ class ReactionBar extends StatelessWidget {
                     showReactionBar: false,
                   ));
                 } else {
+                  if (!chatroom.followStatus!) {
+                    Future<LMResponse> response = locator<LikeMindsService>()
+                        .followChatroom((FollowChatroomRequestBuilder()
+                              ..chatroomId(chatroom.id)
+                              ..memberId(loggedinUser.id)
+                              ..value(true))
+                            .build())
+                      ..then((value) {
+                        if (value.success) {
+                          toast("Chatroom joined");
+                        }
+                      });
+                  }
                   PutReactionRequest request = (PutReactionRequestBuilder()
                         ..conversationId(conversation.id)
                         ..reaction(reaction))

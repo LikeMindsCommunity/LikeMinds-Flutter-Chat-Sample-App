@@ -1,15 +1,35 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:overlay_support/overlay_support.dart';
 
-Widget flutterEmojiPicker(TextEditingController textEditingController,
-    ChatActionBloc chatActionBloc, Conversation conversation) {
+Widget flutterEmojiPicker(
+    TextEditingController textEditingController,
+    ChatActionBloc chatActionBloc,
+    Conversation conversation,
+    User loggedinUser,
+    ChatRoom chatroom) {
   return SizedBox(
     height: 35.h,
     child: EmojiPicker(
-      onEmojiSelected: (category, emoji) {
+      onEmojiSelected: (category, emoji) async {
+        if (!chatroom.followStatus!) {
+          Future<LMResponse> response = locator<LikeMindsService>()
+              .followChatroom((FollowChatroomRequestBuilder()
+                    ..chatroomId(chatroom.id)
+                    ..memberId(loggedinUser.id)
+                    ..value(true))
+                  .build())
+            ..then((value) {
+              if (value.success) {
+                toast("Chatroom joined");
+              }
+            });
+        }
         PutReactionRequest putReactionRequest = (PutReactionRequestBuilder()
               ..conversationId(conversation.id)
               ..reaction(emoji.emoji))
