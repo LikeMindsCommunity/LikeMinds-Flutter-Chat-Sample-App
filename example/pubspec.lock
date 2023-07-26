@@ -313,6 +313,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.2"
+  emoji_picker_flutter:
+    dependency: transitive
+    description:
+      name: emoji_picker_flutter
+      sha256: "1ca31245cc1f7ab5304c68ccda8039f52b9f2372aa4d10803117160fad3faf12"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.1"
   envied:
     dependency: "direct main"
     description:
@@ -598,6 +606,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.2"
+  flutter_portal:
+    dependency: transitive
+    description:
+      name: flutter_portal
+      sha256: "4601b3dc24f385b3761721bd852a3f6c09cddd4e943dd184ed58ee1f43006257"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
   flutter_svg:
     dependency: transitive
     description:
@@ -811,17 +827,17 @@ packages:
     dependency: transitive
     description:
       name: likeminds_chat_fl
-      sha256: ffb3b2dad018a8f7ce357c898af9a1aa055e9542bd69638b637f09a20d6ef46d
+      sha256: "17d32584cbcb9456a417001de87a4a82237edab57cec2bc442337414b9ceeccc"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.3.0"
   likeminds_chat_mm_fl:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "1.2.0"
+    version: "1.3.0"
   lints:
     dependency: transitive
     description:

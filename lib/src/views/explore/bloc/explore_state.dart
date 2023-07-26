@@ -6,8 +6,14 @@ class ExploreInitial extends ExploreState {}
 
 class ExploreLoading extends ExploreState {}
 
-class ExploreLoaded extends ExploreState {
-  final List<SpaceModel> spaces;
+class ExploreError extends ExploreState {
+  final String errorMessage;
 
-  ExploreLoaded(this.spaces);
+  ExploreError(this.errorMessage);
+}
+
+class ExploreLoaded extends ExploreState {
+  final GetExploreFeedResponse getExploreFeedResponse;
+
+  ExploreLoaded(this.getExploreFeedResponse);
 }

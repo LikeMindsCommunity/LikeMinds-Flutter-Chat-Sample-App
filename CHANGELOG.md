@@ -17,3 +17,8 @@ Added document attachment support
 Added edit conversation support
 Added video attachment support
 Fixing an issue with reply
+
+## 1.3.0
+
+Added explore feed
+Added reaction feature
