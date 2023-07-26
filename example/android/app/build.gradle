@@ -81,4 +81,5 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "io.github.NateshR:likemindschat:1.13.1"
 }
