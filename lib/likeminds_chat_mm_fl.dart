@@ -10,6 +10,7 @@ import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/constants/ui_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/credentials/firebase_credentials.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
@@ -20,6 +21,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/bloc/media_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:sizer/sizer.dart';
 
 export 'package:likeminds_chat_mm_fl/src/utils/branding/lm_branding.dart';
@@ -138,53 +140,58 @@ class LMChat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Sizer(
-      builder: ((context, orientation, deviceType) {
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider<ChatActionBloc>(
-              create: (context) => ChatActionBloc(),
-            ),
-            BlocProvider<PollBloc>(
-              create: (context) => PollBloc(),
-            ),
-            BlocProvider<HomeBloc>(
-              create: (context) => HomeBloc(),
-            ),
-            BlocProvider(
-              create: (context) => MediaBloc(),
-            )
-          ],
-          child: FutureBuilder(
-            future: initiateUser(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final user = snapshot.data!.user;
-                LMNotificationHandler.instance.registerDevice(user.id);
-                if (_defaultChatroom != null) {
-                  LMRealtime.instance.chatroomId = _defaultChatroom!;
-                  // router.
+    return OverlaySupport.global(
+      toastTheme: ToastThemeData(
+        textColor: kWhiteColor,
+        background: kBlackColor,
+        alignment: Alignment.bottomCenter,
+      ),
+      child: Sizer(
+        builder: ((context, orientation, deviceType) {
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<ChatActionBloc>(
+                create: (context) => ChatActionBloc(),
+              ),
+              BlocProvider<HomeBloc>(
+                create: (context) => HomeBloc(),
+              ),
+              BlocProvider(
+                create: (context) => MediaBloc(),
+              )
+            ],
+            child: FutureBuilder(
+              future: initiateUser(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final user = snapshot.data!.user;
+                  LMNotificationHandler.instance.registerDevice(user.id);
+                  if (_defaultChatroom != null) {
+                    LMRealtime.instance.chatroomId = _defaultChatroom!;
+                    // router.
+                    return MaterialApp.router(
+                      routerConfig: router
+                        ..go('/chatroom/$_defaultChatroom?isRoot=true'),
+                      debugShowCheckedModeBanner: false,
+                    );
+                  }
+
                   return MaterialApp.router(
-                    routerConfig: router
-                      ..go('/chatroom/$_defaultChatroom?isRoot=true'),
+                    routerConfig: router,
                     debugShowCheckedModeBanner: false,
                   );
                 }
-                return MaterialApp.router(
-                  routerConfig: router,
-                  debugShowCheckedModeBanner: false,
+                return Container(
+                  color: kWhiteColor,
+                  child: Spinner(
+                    color: LMBranding.instance.headerColor,
+                  ),
                 );
-              }
-              return Container(
-                color: kWhiteColor,
-                child: Spinner(
-                  color: LMBranding.instance.headerColor,
-                ),
-              );
-            },
-          ),
-        );
-      }),
+              },
+            ),
+          );
+        }),
+      ),
     );
   }
 }

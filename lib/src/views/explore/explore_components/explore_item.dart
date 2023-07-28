@@ -41,9 +41,9 @@ class _ExploreItemState extends State<ExploreItem> {
       onTap: () {
         widget.onTap();
       },
-      child: SizedBox(
+      child: Container(
         height: 120,
-        // color: Colors.red,
+        color: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(

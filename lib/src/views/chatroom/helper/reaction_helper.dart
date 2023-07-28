@@ -2,13 +2,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
-List<String> reactionEmojis = [
-  '♥️',
-  '😊',
-  '🤓',
-  '😍',
-  '😜',
-];
+List<String> reactionEmojis = ['♥️', '😂', '😮', '😢', '😡', '👍'];
 
 Widget getListOfReactions({required Function onTap}) {
   return Row(
