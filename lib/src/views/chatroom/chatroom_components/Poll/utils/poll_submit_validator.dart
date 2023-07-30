@@ -5,7 +5,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll
 import 'package:overlay_support/overlay_support.dart';
 
 class PollSubmitValidator {
-  static void checkInstantPollSubmittion(BuildContext context,
+  static void checkNonMultiStatePoll(BuildContext context,
       PollInfoData pollInfoData, List<PollViewData> selectedOptions) {
     PollBloc pollBloc = BlocProvider.of<PollBloc>(context);
     // multi select state = exactly
@@ -13,33 +13,11 @@ class PollSubmitValidator {
           ..conversationId(pollInfoData.conversationId!)
           ..polls(selectedOptions))
         .build();
-    if (pollInfoData.multipleSelectState == 0) {
-      if (selectedOptions.length == pollInfoData.multipleSelectNum!) {
-        pollBloc.add(SubmitPoll(submitPollRequest: request));
-      } else {
-        toast("Please select ${pollInfoData.multipleSelectNum} options");
-      }
-    }
-    // multi select state = at max
-    else if (pollInfoData.multipleSelectState == 1) {
-      if (selectedOptions.length <= pollInfoData.multipleSelectNum!) {
-        pollBloc.add(SubmitPoll(submitPollRequest: request));
-      } else {
-        toast("Please select ${pollInfoData.multipleSelectNum} options");
-      }
-    }
-    // multi select state = at least
-    else if (pollInfoData.multipleSelectState == 2) {
-      if (selectedOptions.length >= pollInfoData.multipleSelectNum!) {
-        pollBloc.add(SubmitPoll(submitPollRequest: request));
-      } else {
-        toast(
-            "Please select at least ${pollInfoData.multipleSelectNum} options");
-      }
-    }
+
+    pollBloc.add(SubmitPoll(submitPollRequest: request));
   }
 
-  static bool checkDeferredPollSubmition(
+  static bool checkMultiSelectPoll(
       PollInfoData pollInfoData, List<PollViewData> selectedOptions) {
     // multi select state = exactly
     if (pollInfoData.multipleSelectState == 0) {

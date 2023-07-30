@@ -54,14 +54,33 @@ class PollUsersError extends PollState {
 
 class SubmittedPoll extends PollState {
   final SubmitPollResponse submitPollResponse;
+  final int conversationId;
 
   SubmittedPoll({
     required this.submitPollResponse,
+    required this.conversationId,
   });
 
   @override
   List<Object?> get props => [
         submitPollResponse,
+        conversationId,
+      ];
+}
+
+class UpdatedPoll extends PollState {
+  final GetConversationResponse getConversationResponse;
+  final int conversationId;
+
+  UpdatedPoll({
+    required this.getConversationResponse,
+    required this.conversationId,
+  });
+
+  @override
+  List<Object?> get props => [
+        getConversationResponse,
+        conversationId,
       ];
 }
 

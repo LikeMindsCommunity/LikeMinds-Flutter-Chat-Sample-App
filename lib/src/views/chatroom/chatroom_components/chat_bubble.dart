@@ -566,6 +566,7 @@ class _ChatBubbleState extends State<ChatBubble> {
     if (state == 10) {
       return PollBubble(
         pollConversation: conversation!,
+        chatroomId: widget.chatroom.id,
       );
     } else {
       return Container(

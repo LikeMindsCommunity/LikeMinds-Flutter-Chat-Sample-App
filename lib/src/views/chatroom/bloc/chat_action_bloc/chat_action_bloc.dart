@@ -50,6 +50,35 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         } else if (response.errorMessage != null) {}
       },
     );
+    on<UpdatePollConversation>((event, emit) async {
+      int maxTimestamp = DateTime.now().millisecondsSinceEpoch;
+      final response = await locator<LikeMindsService>()
+          .getConversation((GetConversationRequestBuilder()
+                ..chatroomId(event.chatroomId)
+                ..minTimestamp(0)
+                ..maxTimestamp(maxTimestamp * 1000)
+                ..isLocalDB(false)
+                ..page(1)
+                ..pageSize(200)
+                ..conversationId(event.conversationId))
+              .build());
+      if (response.success) {
+        Conversation realTimeConversation =
+            response.data!.conversationData!.first;
+        if (response.data!.conversationMeta != null &&
+            realTimeConversation.replyId != null) {
+          Conversation? replyConversationObject = response
+              .data!.conversationMeta![realTimeConversation.replyId.toString()];
+          realTimeConversation.replyConversationObject =
+              replyConversationObject;
+        }
+        emit(
+          UpdatedPollConversation(
+            response: realTimeConversation,
+          ),
+        );
+      }
+    });
     on<UpdateConversationList>(
       (event, emit) async {
         if (lastConversationId != null &&
@@ -59,7 +88,8 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
               .getConversation((GetConversationRequestBuilder()
                     ..chatroomId(event.chatroomId)
                     ..minTimestamp(0)
-                    ..maxTimestamp(maxTimestamp)
+                    ..maxTimestamp(maxTimestamp * 1000)
+                    ..isLocalDB(false)
                     ..page(1)
                     ..pageSize(200)
                     ..conversationId(event.conversationId))

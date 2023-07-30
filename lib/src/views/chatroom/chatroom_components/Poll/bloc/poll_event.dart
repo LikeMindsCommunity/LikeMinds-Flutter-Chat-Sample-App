@@ -16,6 +16,17 @@ class SubmitPoll extends PollEvents {
   List<Object?> get props => [submitPollRequest];
 }
 
+class UpdatePoll extends PollEvents {
+  final GetConversationRequest getConversationRequest;
+
+  UpdatePoll({
+    required this.getConversationRequest,
+  });
+
+  @override
+  List<Object?> get props => [getConversationRequest];
+}
+
 class GetPollUsers extends PollEvents {
   final GetPollUsersRequest getPollUsersRequest;
 

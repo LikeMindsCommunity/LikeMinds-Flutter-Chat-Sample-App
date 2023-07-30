@@ -46,8 +46,8 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
   bool _dontShowLiveResults = false;
   DateTime? expiryDate;
   String? formattedExpiryDate;
-  String votingType = usersCanVoteForList[0];
-  String numVotesAllowed = numOfVotes[0];
+  String? votingType;
+  String? numVotesAllowed;
   Timer? _timer;
 
   TextEditingController pollQuestionController = TextEditingController();
@@ -259,6 +259,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                     GestureDetector(
                       onTap: () async {
                         DateTime currentTime = DateTime.now();
+                        currentTime = currentTime.add(const Duration(days: 1));
                         DateTime? pickedDate = await showDatePicker(
                           context: context,
                           initialDate: currentTime,
@@ -271,6 +272,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                         TimeOfDay? pickedTime;
                         if (pickedDate != null) {
                           TimeOfDay currentTime = TimeOfDay.now();
+
                           pickedTime = await showTimePicker(
                             context: context,
                             initialTime: currentTime,

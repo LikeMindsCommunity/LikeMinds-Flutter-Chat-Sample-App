@@ -6,7 +6,9 @@ import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/utils.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/bloc/poll_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/poll_mapping.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/add_option_bottom_sheet.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
@@ -15,11 +17,14 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_option.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/poll_submission_bottom_sheet.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/utils/poll_submit_validator.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/custom_dialog.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 class PollBubble extends StatefulWidget {
   final Conversation pollConversation;
-  const PollBubble({Key? key, required this.pollConversation})
+  final int chatroomId;
+  const PollBubble(
+      {Key? key, required this.pollConversation, required this.chatroomId})
       : super(key: key);
 
   @override
@@ -29,30 +34,38 @@ class PollBubble extends StatefulWidget {
 class _PollBubbleState extends State<PollBubble> {
   Conversation? pollConversation;
   bool isSubmitted = false;
+  bool isEnabled = false;
+  bool isEditing = false;
   List<PollViewData> selectedOptions = [];
 
   User user = UserLocalPreference.instance.fetchUserData();
-
-  void initialise() {
-    pollConversation = widget.pollConversation;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initialise();
   }
 
   @override
-  void initState() {
-    super.initState();
-    for (int i = 0;
-        i < widget.pollConversation.poll!.pollViewDataList!.length;
-        i++) {
-      if (widget.pollConversation.poll!.pollViewDataList![i].isSelected!) {
+  void didUpdateWidget(PollBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    initialise();
+  }
+
+  void initialise() {
+    pollConversation = widget.pollConversation;
+    for (int i = 0; i < pollConversation!.poll!.pollViewDataList!.length; i++) {
+      if (pollConversation!.poll!.pollViewDataList![i].isSelected!) {
         isSubmitted = true;
+        selectedOptions.add(pollConversation!.poll!.pollViewDataList![i]);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    initialise();
     PollBloc pollBloc = BlocProvider.of<PollBloc>(context);
+    ChatActionBloc chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return BlocListener(
       bloc: pollBloc,
       listener: (context, state) {
@@ -72,18 +85,27 @@ class _PollBubbleState extends State<PollBubble> {
               element.id == state.addPollOptionRequest.temporaryId);
           setState(() {});
         }
-        if (state is SubmittedPoll) {
-          showModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.transparent,
-            elevation: 5,
-            enableDrag: true,
-            useSafeArea: true,
-            isScrollControlled: true,
-            builder: (context) => const PollSubmissionBottomSheet(),
-          );
+        if (state is SubmittedPoll &&
+            state.conversationId == pollConversation!.id) {
+          isSubmitted = true;
+          isEditing = false;
+          if (pollConversation!.poll!.pollType == 1) {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              elevation: 5,
+              enableDrag: true,
+              useSafeArea: true,
+              isScrollControlled: true,
+              builder: (context) => const PollSubmissionBottomSheet(),
+            );
+          }
+          chatActionBloc.add(UpdatePollConversation(
+              conversationId: pollConversation!.id,
+              chatroomId: widget.chatroomId));
         }
-        if (state is PollSubmitError) {
+        if (state is PollSubmitError &&
+            state.submitPollRequest.conversationId == pollConversation!.id) {
           toast(state.errorMessage);
         }
       },
@@ -110,33 +132,64 @@ class _PollBubbleState extends State<PollBubble> {
                 textAlign: TextAlign.left,
               ),
             ),
+            pollConversation!.poll!.multipleSelectNum != null &&
+                    pollConversation!.multipleSelectState != null
+                ? Container(
+                    alignment: Alignment.topLeft,
+                    margin: const EdgeInsets.only(top: kPaddingXSmall),
+                    child: Text(
+                      "*Select ${toStringMultiSelectState(pollConversation!.multipleSelectState!)} ${toStringNoOfVotes(pollConversation!.poll!.multipleSelectNum!)}",
+                      style: LMTheme.regular
+                          .copyWith(fontSize: 8.sp, color: kGreyColor),
+                    ),
+                  )
+                : const SizedBox(),
             kVerticalPaddingLarge,
             PollOptionList(
               pollConversation: pollConversation!,
               isSubmitted: isSubmitted,
+              selectedOptions: selectedOptions,
               onTap: (PollViewData selectedOption) {
+                isEditing = !isEditing;
+                setState(() {});
+                if (isPollEnded(DateTime.fromMillisecondsSinceEpoch(
+                    pollConversation!.poll!.expiryTime!))) {
+                  toast("Poll ended, Vote cannot be submitted now");
+                  return;
+                }
+                if (isSubmitted && pollConversation!.poll!.pollType == 0) {
+                  return;
+                }
                 if (selectedOptions.contains(selectedOption)) {
                   selectedOptions.remove(selectedOption);
                 } else {
-                  if ((pollConversation!.poll!.multipleSelectState == 0 ||
+                  if (pollConversation!.poll!.multipleSelectNum != null &&
+                      (pollConversation!.poll!.multipleSelectState == 0 ||
                           pollConversation!.poll!.multipleSelectState == 1) &&
                       selectedOptions.length ==
                           pollConversation!.poll!.multipleSelectNum) {
-                    toast("");
+                    toast(
+                        "Please selected only ${pollConversation!.poll!.multipleSelectNum} options");
                   } else {
-                    selectedOptions.add(selectedOption);
+                    isEditing = true;
+
+                    if (pollConversation!.poll!.multipleSelectState != null) {
+                      selectedOptions.add(selectedOption);
+                      isEnabled = PollSubmitValidator.checkMultiSelectPoll(
+                          pollConversation!.poll!, selectedOptions);
+                      setState(() {});
+                    } else {
+                      selectedOptions = [selectedOption];
+                      PollSubmitValidator.checkNonMultiStatePoll(
+                          context, pollConversation!.poll!, selectedOptions);
+                      setState(() {});
+                    }
                   }
-                }
-                if (pollConversation!.poll!.pollType == 0) {
-                  PollSubmitValidator.checkInstantPollSubmittion(
-                      context, pollConversation!.poll!, selectedOptions);
-                } else {
-                  PollSubmitValidator.checkDeferredPollSubmition(
-                      pollConversation!.poll!, selectedOptions);
                 }
               },
             ),
-            pollConversation!.poll!.allowAddOption! &&
+            (!isSubmitted && pollConversation!.poll!.pollType == 0) &&
+                    pollConversation!.poll!.allowAddOption! &&
                     !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
                         pollConversation!.poll!.expiryTime!))
                 ? getTextButton(
@@ -189,11 +242,23 @@ class _PollBubbleState extends State<PollBubble> {
             Align(
               alignment: Alignment.topLeft,
               child: TextButton(
-                onPressed: pollConversation!.poll!.toShowResult!
+                onPressed: pollConversation!.poll!.toShowResult! &&
+                        pollConversation!.poll!.isAnonymous != true
                     ? () {
                         router.push(pollResultRoute, extra: pollConversation!);
                       }
-                    : null,
+                    : () {
+                        showDialog(
+                            context: context,
+                            builder: (context) => LMCustomDialog(
+                                  title: "Anonymous poll",
+                                  showCancel: false,
+                                  content:
+                                      "This being an anonymous poll, the names of the voters can not be disclosed",
+                                  actionText: "Okay",
+                                  onActionPressed: () {},
+                                ));
+                      },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all(EdgeInsets.zero),
                 ),
@@ -206,22 +271,29 @@ class _PollBubbleState extends State<PollBubble> {
                 ),
               ),
             ),
-            pollConversation!.pollType == 1 &&
+            !(isSubmitted && pollConversation!.poll!.pollType == 0) &&
+                    pollConversation!.poll!.multipleSelectState != null &&
                     !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
                         pollConversation!.poll!.expiryTime!))
                 ? getTextButton(
-                    text: "SUBMIT VOTE",
+                    text:
+                        isSubmitted && !isEditing ? "Edit Vote" : "SUBMIT VOTE",
                     borderRadius: 16.0,
                     border: Border.all(
-                      color: LMTheme.buttonColor,
+                      color: isEnabled ? LMTheme.buttonColor : kGrey2Color,
                       width: 1.2,
                     ),
                     onTap: () async {
-                      SubmitPollRequest request = (SubmitPollRequestBuilder()
-                            ..conversationId(pollConversation!.id)
-                            ..polls(selectedOptions))
-                          .build();
-                      pollBloc.add(SubmitPoll(submitPollRequest: request));
+                      if (isEnabled && (!isSubmitted || isEditing)) {
+                        SubmitPollRequest request = (SubmitPollRequestBuilder()
+                              ..conversationId(pollConversation!.id)
+                              ..polls(selectedOptions))
+                            .build();
+                        pollBloc.add(SubmitPoll(submitPollRequest: request));
+                      } else {
+                        isEditing = !isEditing;
+                        setState(() {});
+                      }
                     },
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
@@ -229,6 +301,28 @@ class _PollBubbleState extends State<PollBubble> {
                     ),
                   )
                 : const SizedBox(),
+            const SizedBox(height: 8),
+            ((pollConversation!.hasFiles == null ||
+                        !pollConversation!.hasFiles!) ||
+                    (pollConversation!.attachmentsUploaded != null &&
+                        pollConversation!.attachmentsUploaded!))
+                ? Align(
+                    alignment: Alignment.topRight,
+                    child: Text(
+                      "${pollConversation!.isEdited! ? 'Edited  ' : ''}${pollConversation!.createdAt}",
+                      style: LMTheme.regular.copyWith(
+                        fontSize: 8.sp,
+                        color: kGreyColor,
+                      ),
+                    ),
+                  )
+                : Align(
+                    alignment: Alignment.topRight,
+                    child: Icon(
+                      Icons.timer_outlined,
+                      size: 8.sp,
+                    ),
+                  ),
           ],
         ),
       ),

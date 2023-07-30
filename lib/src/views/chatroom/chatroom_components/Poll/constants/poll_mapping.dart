@@ -4,7 +4,10 @@ int toIntPollType(bool dontShowLiveResults) {
   return dontShowLiveResults ? 1 : 0;
 }
 
-int toIntPollMultiSelectState(String toIntPollMultiSelectState) {
+int? toIntPollMultiSelectState(String? toIntPollMultiSelectState) {
+  if (toIntPollMultiSelectState == null) {
+    return null;
+  }
   switch (toIntPollMultiSelectState) {
     case PollCreationStringConstants.exactlyVotes:
       return 0;
@@ -20,17 +23,20 @@ int toIntPollMultiSelectState(String toIntPollMultiSelectState) {
 String toStringMultiSelectState(int multipleSelectState) {
   switch (multipleSelectState) {
     case 0:
-      return PollCreationStringConstants.exactlyVotes;
+      return PollCreationStringConstants.exactlyVotes.toLowerCase();
     case 1:
-      return PollCreationStringConstants.atMaxVotes;
+      return PollCreationStringConstants.atMaxVotes.toLowerCase();
     case 2:
-      return PollCreationStringConstants.atLeastVotes;
+      return PollCreationStringConstants.atLeastVotes.toLowerCase();
     default:
-      return PollCreationStringConstants.exactlyVotes;
+      return PollCreationStringConstants.exactlyVotes.toLowerCase();
   }
 }
 
-int? noOfVotes(String selectedCount) {
+int? noOfVotes(String? selectedCount) {
+  if (selectedCount == null) {
+    return null;
+  }
   int selectedCountInt = 1;
   for (int i = 0; i < numOfVotes.length; i++) {
     if (numOfVotes[i] == selectedCount) {
@@ -42,4 +48,8 @@ int? noOfVotes(String selectedCount) {
   } else {
     return selectedCountInt;
   }
+}
+
+String toStringNoOfVotes(int noOfOptions) {
+  return numOfVotes[noOfOptions];
 }

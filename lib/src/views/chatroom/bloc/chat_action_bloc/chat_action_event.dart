@@ -109,6 +109,22 @@ class UpdateConversationList extends ChatActionEvent {
       ];
 }
 
+class UpdatePollConversation extends ChatActionEvent {
+  final int conversationId;
+  final int chatroomId;
+
+  UpdatePollConversation({
+    required this.conversationId,
+    required this.chatroomId,
+  });
+
+  @override
+  List<Object> get props => [
+        conversationId,
+        chatroomId,
+      ];
+}
+
 class PutReaction extends ChatActionEvent {
   final PutReactionRequest putReactionRequest;
 

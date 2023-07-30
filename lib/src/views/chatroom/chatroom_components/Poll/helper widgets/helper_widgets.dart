@@ -125,7 +125,7 @@ Widget getTextButton({
 }
 
 Widget getVotingType(int optionsCount, Function onTypeSelect,
-    Function onNumVotesSelect, String votingType, String numVotes) {
+    Function onNumVotesSelect, String? votingType, String? numVotes) {
   CustomPopupMenuController voteTypeController = CustomPopupMenuController();
   CustomPopupMenuController numVotesController = CustomPopupMenuController();
   return SizedBox(
@@ -144,7 +144,7 @@ Widget getVotingType(int optionsCount, Function onTypeSelect,
               menuBuilder: () => getPollDropDownMenu(
                   voteTypeController, usersCanVoteForList, onTypeSelect),
               pressType: PressType.singleClick,
-              child: getDropDownText(votingType),
+              child: getDropDownText(votingType ?? usersCanVoteForList[0]),
             ),
             const Text("="),
             CustomPopupMenu(
@@ -154,7 +154,7 @@ Widget getVotingType(int optionsCount, Function onTypeSelect,
                   optionsCount: optionsCount),
               pressType: PressType.singleClick,
               child: getDropDownText(
-                numVotes,
+                numVotes ?? numOfVotes[0],
               ),
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
 import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 part 'poll_event.dart';
 part 'poll_state.dart';
@@ -12,13 +13,28 @@ class PollBloc extends Bloc<PollEvents, PollState> {
     on<SubmitPoll>(mapSubmitPollEvent);
     on<AddPollOption>(mapAddPollOption);
     on<GetPollUsers>(mapGetPollUsers);
+    on<UpdatePoll>(mapUpdatePoll);
+  }
+
+  void mapUpdatePoll(UpdatePoll event, Emitter<PollState> emit) async {
+    LMResponse response = await locator<LikeMindsService>()
+        .getConversation(event.getConversationRequest);
+    if (response.success) {
+      emit(UpdatedPoll(
+          getConversationResponse: response.data!,
+          conversationId: event.getConversationRequest.conversationId!));
+    } else {
+      toast(response.errorMessage ?? "An error occurred");
+    }
   }
 
   void mapSubmitPollEvent(SubmitPoll event, Emitter<PollState> emit) async {
     LMResponse response =
         await locator<LikeMindsService>().submitPoll(event.submitPollRequest);
     if (response.success) {
-      emit(SubmittedPoll(submitPollResponse: response.data));
+      emit(SubmittedPoll(
+          submitPollResponse: response.data,
+          conversationId: event.submitPollRequest.conversationId));
     } else if (response.errorMessage != null) {
       emit(
         PollSubmitError(
