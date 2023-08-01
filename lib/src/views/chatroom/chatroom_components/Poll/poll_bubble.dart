@@ -239,7 +239,7 @@ class _PollBubbleState extends State<PollBubble> {
                     },
                   );
                 }),
-            (!isSubmitted && pollConversation!.poll!.pollType == 0) &&
+            !isSubmitted &&
                     pollConversation!.poll!.allowAddOption! &&
                     !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
                         pollConversation!.poll!.expiryTime!))
