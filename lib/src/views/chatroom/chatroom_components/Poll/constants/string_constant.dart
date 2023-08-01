@@ -21,7 +21,7 @@ class PollCreationStringConstants {
 
 class PollBubbleStringConstants {
   static const String instantPoll = "Instant poll";
-  static const String deferredPoll = "Deferred question";
+  static const String deferredPoll = "Deferred poll";
   static const String isAnonymousPoll = "Secret voting";
   static const String isNotAnonymousPoll = "Public voting";
   static const String firstUserToVote = "Be the first to vote";

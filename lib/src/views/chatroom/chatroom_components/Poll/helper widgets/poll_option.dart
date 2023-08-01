@@ -1,4 +1,5 @@
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
@@ -130,11 +131,17 @@ class _PollOptionState extends State<PollOption> {
           ),
           kVerticalPaddingXSmall,
           widget.pollConversation!.poll!.toShowResult!
-              ? Text(
-                  "${widget.pollViewData.noVotes!} ${widget.pollViewData.noVotes! > 1 ? "votes" : "vote"}",
-                  style: LMTheme.medium.copyWith(
-                    color: kGreyColor,
-                    fontSize: 8.sp,
+              ? GestureDetector(
+                  onTap: () {
+                    router.push(pollResultRoute,
+                        extra: widget.pollConversation!);
+                  },
+                  child: Text(
+                    "${widget.pollViewData.noVotes!} ${widget.pollViewData.noVotes! > 1 ? "votes" : "vote"}",
+                    style: LMTheme.medium.copyWith(
+                      color: kGreyColor,
+                      fontSize: 8.sp,
+                    ),
                   ),
                 )
               : const SizedBox(),

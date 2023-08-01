@@ -1,4 +1,5 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
@@ -17,32 +18,6 @@ Widget getDropDownText(String text) {
         color: kGreyColor,
       ),
     ],
-  );
-}
-
-Widget getPollDropDownMenu(
-    CustomPopupMenuController controller, List<String> options, Function onTap,
-    {int? optionsCount}) {
-  return Container(
-    constraints: BoxConstraints(maxHeight: 30.h, maxWidth: 40.w),
-    decoration: BoxDecoration(
-      color: kWhiteColor,
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    child: ListView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
-      itemCount: optionsCount == null ? options.length : optionsCount + 1,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(options[index]),
-          onTap: () {
-            controller.hideMenu();
-            onTap(options[index]);
-          },
-        );
-      },
-    ),
   );
 }
 
@@ -124,10 +99,58 @@ Widget getTextButton({
   );
 }
 
+Widget getSubmitButton({
+  required String text,
+  Color? backgroundColor,
+  Color? enabledColor,
+  double? width,
+  TextStyle? textStyle,
+  EdgeInsets? padding,
+  double? borderRadius,
+  BoxBorder? border,
+  Function()? onTap,
+  Alignment? alignment,
+  TextAlign textAlign = TextAlign.left,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: padding,
+      alignment: alignment,
+      width: width,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: border,
+        borderRadius:
+            borderRadius == null ? null : BorderRadius.circular(borderRadius),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            CupertinoIcons.pencil,
+            color: enabledColor,
+            size: 14.sp,
+          ),
+          kHorizontalPaddingSmall,
+          Text(
+            text,
+            style: textStyle,
+            textAlign: textAlign,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 Widget getVotingType(int optionsCount, Function onTypeSelect,
     Function onNumVotesSelect, String? votingType, String? numVotes) {
   CustomPopupMenuController voteTypeController = CustomPopupMenuController();
   CustomPopupMenuController numVotesController = CustomPopupMenuController();
+  List<String> noOfSelectableVotes = List.generate(optionsCount + 1, (index) {
+    return numOfVotes[index];
+  });
   return SizedBox(
     width: 90.w,
     child: Column(
@@ -139,20 +162,33 @@ Widget getVotingType(int optionsCount, Function onTypeSelect,
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            CustomPopupMenu(
-              controller: voteTypeController,
-              menuBuilder: () => getPollDropDownMenu(
-                  voteTypeController, usersCanVoteForList, onTypeSelect),
-              pressType: PressType.singleClick,
+            PopupMenuButton(
+              onSelected: (value) => onTypeSelect(value),
+              itemBuilder: (context) => usersCanVoteForList
+                  .map(
+                    (e) => PopupMenuItem(
+                      value: e,
+                      child: ListTile(
+                        title: Text(e),
+                      ),
+                    ),
+                  )
+                  .toList(),
               child: getDropDownText(votingType ?? usersCanVoteForList[0]),
             ),
             const Text("="),
-            CustomPopupMenu(
-              controller: numVotesController,
-              menuBuilder: () => getPollDropDownMenu(
-                  numVotesController, numOfVotes, onNumVotesSelect,
-                  optionsCount: optionsCount),
-              pressType: PressType.singleClick,
+            PopupMenuButton(
+              onSelected: (value) => onNumVotesSelect(value),
+              itemBuilder: (context) => noOfSelectableVotes
+                  .map(
+                    (e) => PopupMenuItem(
+                      value: e,
+                      child: ListTile(
+                        title: Text(e),
+                      ),
+                    ),
+                  )
+                  .toList(),
               child: getDropDownText(
                 numVotes ?? numOfVotes[0],
               ),

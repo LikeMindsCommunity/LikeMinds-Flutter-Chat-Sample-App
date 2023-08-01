@@ -1,12 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/bloc/poll_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
+import 'package:swipe_to_action/swipe_to_action.dart';
 
 class PollResult extends StatefulWidget {
   final Conversation pollConversation;
@@ -23,6 +26,8 @@ class _PollResultState extends State<PollResult> {
   List<Widget> tabs = [];
   List<Widget> pages = [];
   int? selectedPollId;
+  int? selectedIndex = 0;
+  int? noOfOptions;
 
   Widget getPollResultTab(
     PollViewData pollViewData,
@@ -37,7 +42,9 @@ class _PollResultState extends State<PollResult> {
     } else {
       widthOfTab = 30.w;
     }
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       width: widthOfTab,
       decoration: BoxDecoration(
           border: selectedPollId == pollViewData.id
@@ -79,7 +86,8 @@ class _PollResultState extends State<PollResult> {
     super.initState();
     pollConversation = widget.pollConversation;
     selectedPollId = pollConversation!.poll!.pollViewDataList![0].id!;
-
+    selectedIndex = 0;
+    noOfOptions = pollConversation!.poll!.pollViewDataList!.length;
     pollBloc.add(GetPollUsers(
         getPollUsersRequest: (GetPollUsersRequestBuilder()
               ..conversationId(widget.pollConversation.id)
@@ -155,31 +163,78 @@ class _PollResultState extends State<PollResult> {
                         )),
               ),
               Expanded(
-                child: BlocConsumer(
-                  bloc: pollBloc,
-                  listener: (context, state) {},
-                  builder: (context, state) {
-                    if (state is PollUsers) {
-                      if (state.getPollUsersResponse.data == null ||
-                          state.getPollUsersResponse.data!.isEmpty) {
-                        return const Center(
-                          child: Text("No Response"),
-                        );
-                      }
-                      return ListView.builder(
-                          itemCount: state.getPollUsersResponse.data!.length,
-                          itemBuilder: (context, index) => getPollResultTile(
-                              state.getPollUsersResponse.data![index]));
-                    } else if (state is PollUsersLoading) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: LMTheme.buttonColor,
-                        ),
-                      );
-                    } else {
-                      return Container();
+                child: Swipeable(
+                  key: Key("${pollConversation!.id}"),
+                  onSwipe: (SwipeDirection direction) {
+                    if (direction == SwipeDirection.startToEnd &&
+                        selectedIndex! > 0) {
+                      selectedIndex = selectedIndex! - 1;
+                      selectedPollId = pollConversation!
+                          .poll!.pollViewDataList![selectedIndex!].id!;
+                      pollBloc.add(GetPollUsers(
+                          getPollUsersRequest: (GetPollUsersRequestBuilder()
+                                ..conversationId(widget.pollConversation.id)
+                                ..pollId(selectedPollId!))
+                              .build()));
+                      setState(() {});
+                    } else if (direction == SwipeDirection.endToStart &&
+                        selectedIndex! < noOfOptions! - 1) {
+                      selectedIndex = selectedIndex! + 1;
+                      selectedPollId = pollConversation!
+                          .poll!.pollViewDataList![selectedIndex!].id!;
+                      pollBloc.add(GetPollUsers(
+                          getPollUsersRequest: (GetPollUsersRequestBuilder()
+                                ..conversationId(widget.pollConversation.id)
+                                ..pollId(selectedPollId!))
+                              .build()));
+                      setState(() {});
                     }
                   },
+                  background: Container(color: Colors.transparent),
+                  child: BlocConsumer(
+                    bloc: pollBloc,
+                    listener: (context, state) {},
+                    builder: (context, state) {
+                      if (state is PollUsers) {
+                        if (state.getPollUsersResponse.data == null ||
+                            state.getPollUsersResponse.data!.isEmpty) {
+                          return Container(
+                            color: Colors.transparent,
+                            width: 100.w,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Image.asset(
+                                  kAssetEmptyScreenIcon,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                                kVerticalPaddingLarge,
+                                Text(
+                                  "No Response",
+                                  style: LMTheme.medium,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                            itemCount: state.getPollUsersResponse.data!.length,
+                            itemBuilder: (context, index) => getPollResultTile(
+                                state.getPollUsersResponse.data![index]));
+                      } else if (state is PollUsersLoading) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: LMTheme.buttonColor,
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    },
+                  ),
                 ),
               ),
             ],

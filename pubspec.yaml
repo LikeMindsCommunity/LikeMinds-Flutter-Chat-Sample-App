@@ -83,6 +83,7 @@ flutter:
   # To add assets to your package, add an assets section, like this:
   assets:
     - packages/likeminds_chat_mm_fl/assets/icons/doc_pdf.svg
+    - packages/likeminds_chat_mm_fl/assets/icons/empty_screen.png
     - packages/likeminds_chat_mm_fl/assets/icons/explore.svg
     - packages/likeminds_chat_mm_fl/assets/icons/notification_check.svg
   #

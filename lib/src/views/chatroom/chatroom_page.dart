@@ -336,7 +336,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
     int index = conversationList
         .indexWhere((element) => element.id == editedConversation.id);
     if (index != -1) {
-      conversationList[index] = editedConversation;
+      conversationList[index].isEdited = editedConversation.isEdited;
+      conversationList[index].lastUpdated = editedConversation.lastUpdated;
+      conversationList[index].answer = editedConversation.answer;
     }
     pagedListController.itemList = conversationList;
     rebuildConversationList.value = !rebuildConversationList.value;

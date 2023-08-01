@@ -111,7 +111,6 @@ class _PollBubbleState extends State<PollBubble> {
       },
       child: Container(
         width: 60.w,
-        padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(6),
@@ -150,8 +149,10 @@ class _PollBubbleState extends State<PollBubble> {
               isSubmitted: isSubmitted,
               selectedOptions: selectedOptions,
               onTap: (PollViewData selectedOption) {
-                isEditing = !isEditing;
-                setState(() {});
+                if (!isEditing && isSubmitted) {
+                  isEditing = true;
+                  setState(() {});
+                }
                 if (isPollEnded(DateTime.fromMillisecondsSinceEpoch(
                     pollConversation!.poll!.expiryTime!))) {
                   toast("Poll ended, Vote cannot be submitted now");
@@ -162,6 +163,10 @@ class _PollBubbleState extends State<PollBubble> {
                 }
                 if (selectedOptions.contains(selectedOption)) {
                   selectedOptions.remove(selectedOption);
+                  if (pollConversation!.poll!.multipleSelectState != null) {
+                    isEnabled = PollSubmitValidator.checkMultiSelectPoll(
+                        pollConversation!.poll!, selectedOptions);
+                  }
                 } else {
                   if (pollConversation!.poll!.multipleSelectNum != null &&
                       (pollConversation!.poll!.multipleSelectState == 0 ||
@@ -242,22 +247,23 @@ class _PollBubbleState extends State<PollBubble> {
             Align(
               alignment: Alignment.topLeft,
               child: TextButton(
-                onPressed: pollConversation!.poll!.toShowResult! &&
-                        pollConversation!.poll!.isAnonymous != true
+                onPressed: pollConversation!.poll!.toShowResult!
                     ? () {
                         router.push(pollResultRoute, extra: pollConversation!);
                       }
                     : () {
-                        showDialog(
-                            context: context,
-                            builder: (context) => LMCustomDialog(
-                                  title: "Anonymous poll",
-                                  showCancel: false,
-                                  content:
-                                      "This being an anonymous poll, the names of the voters can not be disclosed",
-                                  actionText: "Okay",
-                                  onActionPressed: () {},
-                                ));
+                        if (pollConversation!.poll!.isAnonymous != true) {
+                          showDialog(
+                              context: context,
+                              builder: (context) => LMCustomDialog(
+                                    title: "Anonymous poll",
+                                    showCancel: false,
+                                    content:
+                                        "This being an anonymous poll, the names of the voters can not be disclosed",
+                                    actionText: "Okay",
+                                    onActionPressed: () {},
+                                  ));
+                        }
                       },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all(EdgeInsets.zero),
@@ -275,23 +281,29 @@ class _PollBubbleState extends State<PollBubble> {
                     pollConversation!.poll!.multipleSelectState != null &&
                     !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
                         pollConversation!.poll!.expiryTime!))
-                ? getTextButton(
+                ? getSubmitButton(
                     text:
                         isSubmitted && !isEditing ? "Edit Vote" : "SUBMIT VOTE",
+                    textStyle: LMTheme.medium.copyWith(
+                        color: isEnabled ? LMTheme.buttonColor : kGrey2Color),
                     borderRadius: 16.0,
+                    enabledColor: isEnabled ? LMTheme.buttonColor : kGrey2Color,
                     border: Border.all(
                       color: isEnabled ? LMTheme.buttonColor : kGrey2Color,
-                      width: 1.2,
+                      width: 1.5,
                     ),
                     onTap: () async {
+                      if (!isEditing) {
+                        isEditing = true;
+                        setState(() {});
+                      }
                       if (isEnabled && (!isSubmitted || isEditing)) {
                         SubmitPollRequest request = (SubmitPollRequestBuilder()
                               ..conversationId(pollConversation!.id)
                               ..polls(selectedOptions))
                             .build();
                         pollBloc.add(SubmitPoll(submitPollRequest: request));
-                      } else {
-                        isEditing = !isEditing;
+                        isEditing = false;
                         setState(() {});
                       }
                     },
@@ -301,28 +313,6 @@ class _PollBubbleState extends State<PollBubble> {
                     ),
                   )
                 : const SizedBox(),
-            const SizedBox(height: 8),
-            ((pollConversation!.hasFiles == null ||
-                        !pollConversation!.hasFiles!) ||
-                    (pollConversation!.attachmentsUploaded != null &&
-                        pollConversation!.attachmentsUploaded!))
-                ? Align(
-                    alignment: Alignment.topRight,
-                    child: Text(
-                      "${pollConversation!.isEdited! ? 'Edited  ' : ''}${pollConversation!.createdAt}",
-                      style: LMTheme.regular.copyWith(
-                        fontSize: 8.sp,
-                        color: kGreyColor,
-                      ),
-                    ),
-                  )
-                : Align(
-                    alignment: Alignment.topRight,
-                    child: Icon(
-                      Icons.timer_outlined,
-                      size: 8.sp,
-                    ),
-                  ),
           ],
         ),
       ),

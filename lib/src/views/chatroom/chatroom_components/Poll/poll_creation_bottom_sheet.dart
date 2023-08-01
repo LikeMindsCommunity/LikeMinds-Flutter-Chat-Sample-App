@@ -11,6 +11,7 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/utils/poll_create_validator.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class PollCreationBottomSheet extends StatefulWidget {
   final int chatroomId;
@@ -83,6 +84,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
 
   setNumVotesAllowed(String updatedNumOfVotesAllowed) {
     setState(() {
+      votingType ??= usersCanVoteForList[0];
       numVotesAllowed = updatedNumOfVotesAllowed;
     });
   }
@@ -258,28 +260,37 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                     kVerticalPaddingLarge,
                     GestureDetector(
                       onTap: () async {
-                        DateTime currentTime = DateTime.now();
-                        currentTime = currentTime.add(const Duration(days: 1));
+                        DateTime currentDate = DateTime.now();
+
                         DateTime? pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: currentTime,
-                          firstDate: currentTime,
+                          initialDate: currentDate,
+                          firstDate: currentDate,
                           initialEntryMode: DatePickerEntryMode.calendarOnly,
-                          lastDate: currentTime.add(
+                          lastDate: currentDate.add(
                             const Duration(days: 365 * 4),
                           ),
                         );
                         TimeOfDay? pickedTime;
+                        TimeOfDay currentTime = TimeOfDay.now();
+                        TimeOfDay selectableTime = TimeOfDay(
+                            hour: currentTime.hour,
+                            minute: currentTime.minute + 5);
                         if (pickedDate != null) {
-                          TimeOfDay currentTime = TimeOfDay.now();
-
                           pickedTime = await showTimePicker(
                             context: context,
-                            initialTime: currentTime,
+                            initialTime: selectableTime,
                             initialEntryMode: TimePickerEntryMode.dialOnly,
                           );
                         }
                         if (pickedTime != null) {
+                          if (pickedTime!.hour < selectableTime.hour ||
+                              (pickedTime.hour == selectableTime.hour &&
+                                  pickedTime.minute < selectableTime.minute)) {
+                            toast(
+                                "Please select future date as poll expire time");
+                            return;
+                          }
                           setState(() {
                             formattedExpiryDate =
                                 "${formatDate(pickedDate!)} ${formatTime(pickedTime!)}";

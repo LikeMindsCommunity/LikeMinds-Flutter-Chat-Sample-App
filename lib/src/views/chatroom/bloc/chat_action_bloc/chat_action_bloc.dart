@@ -8,6 +8,7 @@ import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/service/media_service.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/widget/media_helper_widget.dart';
 
 part 'chat_action_event.dart';
@@ -42,16 +43,98 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         );
       },
     );
-    on<PostPollConversation>(
-      (event, emit) async {
+    on<PostPollConversation>((event, emit) async {
+      try {
+        User user = UserLocalPreference.instance.fetchUserData();
+        DateTime currentDate = DateTime.now();
+        Conversation conversation = Conversation(
+          answer: event.postPollConversationRequest.text,
+          allowAddOption: event.postPollConversationRequest.allowAddOption,
+          expiryTime: event.postPollConversationRequest.expiryTime,
+          isAnonymous: event.postPollConversationRequest.isAnonymous,
+          multipleSelectState:
+              event.postPollConversationRequest.multipleSelectNo,
+          pollAnswerText: event.postPollConversationRequest.text,
+          pollType: event.postPollConversationRequest.pollType,
+          pollTypeText: "",
+          submitTypeText: "",
+          chatroomId: event.postPollConversationRequest.chatroomId,
+          createdAt: "",
+          header: "",
+          date: "${currentDate.day} ${currentDate.month} ${currentDate.year}",
+          attachmentCount: 0,
+          hasFiles: false,
+          member: user,
+          state: 10,
+          temporaryId: event.postPollConversationRequest.temporaryId,
+          poll: PollInfoData(
+            allowAddOption: event.postPollConversationRequest.allowAddOption,
+            expiryTime: event.postPollConversationRequest.expiryTime,
+            isAnonymous: event.postPollConversationRequest.isAnonymous,
+            isPollSubmitted: false,
+            multipleSelectNum:
+                event.postPollConversationRequest.multipleSelectNo,
+            multipleSelectState:
+                event.postPollConversationRequest.multipleSelectNo,
+            pollAnswerText: "Be the first to vote",
+            pollType: event.postPollConversationRequest.pollType,
+            pollTypeText: event.postPollConversationRequest.pollType == 0
+                ? PollBubbleStringConstants.instantPoll
+                : PollBubbleStringConstants.deferredPoll,
+            submitTypeText: event.postPollConversationRequest.isAnonymous
+                ? PollBubbleStringConstants.isAnonymousPoll
+                : PollBubbleStringConstants.isNotAnonymousPoll,
+            toShowResult: false,
+            pollViewDataList: event.postPollConversationRequest.polls
+                .map(
+                  (e) => PollViewData(
+                    text: e.text,
+                    isSelected: false,
+                    chatroomId: event.postPollConversationRequest.chatroomId,
+                    count: 0,
+                    noVotes: 0,
+                    percentage: 0,
+                  ),
+                )
+                .toList(),
+          ),
+          id: 1,
+        );
+        emit(LocalConversation(conversation));
         LMResponse response = await locator<LikeMindsService>()
             .postPollConversation(event.postPollConversationRequest);
+
         if (response.success) {
-        } else if (response.errorMessage != null) {}
-      },
-    );
+          if (response.data!.success) {
+            emit(ConversationPosted(response.data!));
+          } else {
+            emit(
+              ChatActionError(
+                response.data!.errorMessage!,
+                event.postPollConversationRequest.temporaryId,
+              ),
+            );
+          }
+        } else {
+          emit(
+            ChatActionError(
+              response.errorMessage!,
+              event.postPollConversationRequest.temporaryId,
+            ),
+          );
+        }
+      } catch (e) {
+        emit(
+          ChatActionError(
+            "An error occurred",
+            event.postPollConversationRequest.temporaryId,
+          ),
+        );
+      }
+    });
     on<UpdatePollConversation>((event, emit) async {
       int maxTimestamp = DateTime.now().millisecondsSinceEpoch;
+
       final response = await locator<LikeMindsService>()
           .getConversation((GetConversationRequestBuilder()
                 ..chatroomId(event.chatroomId)
