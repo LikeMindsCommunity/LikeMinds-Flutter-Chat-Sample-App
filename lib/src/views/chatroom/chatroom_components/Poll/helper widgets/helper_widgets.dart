@@ -119,7 +119,7 @@ Widget getSubmitButton({
       alignment: alignment,
       width: width,
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: Colors.transparent,
         border: border,
         borderRadius:
             borderRadius == null ? null : BorderRadius.circular(borderRadius),
@@ -132,7 +132,7 @@ Widget getSubmitButton({
             color: enabledColor,
             size: 14.sp,
           ),
-          kHorizontalPaddingSmall,
+          kHorizontalPaddingMedium,
           Text(
             text,
             style: textStyle,

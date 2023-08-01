@@ -35,14 +35,18 @@ class _PollBubbleState extends State<PollBubble> {
   Conversation? pollConversation;
   bool isSubmitted = false;
   bool isEnabled = false;
-  bool isEditing = false;
   List<PollViewData> selectedOptions = [];
+  PollBloc? pollBloc;
+  ChatActionBloc? chatActionBloc;
+  ValueNotifier<bool> pollEnableNotifier = ValueNotifier(false);
 
   User user = UserLocalPreference.instance.fetchUserData();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    pollBloc = BlocProvider.of<PollBloc>(context);
+    chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     initialise();
   }
 
@@ -54,18 +58,22 @@ class _PollBubbleState extends State<PollBubble> {
 
   void initialise() {
     pollConversation = widget.pollConversation;
+    selectedOptions = [];
     for (int i = 0; i < pollConversation!.poll!.pollViewDataList!.length; i++) {
       if (pollConversation!.poll!.pollViewDataList![i].isSelected!) {
         isSubmitted = true;
         selectedOptions.add(pollConversation!.poll!.pollViewDataList![i]);
       }
     }
+    if (pollConversation!.poll!.multipleSelectState != null &&
+        pollConversation!.poll!.multipleSelectNum != null) {
+      isEnabled = PollSubmitValidator.checkMultiStatePollWithoutMessage(
+          pollConversation!.poll!, selectedOptions);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    PollBloc pollBloc = BlocProvider.of<PollBloc>(context);
-    ChatActionBloc chatActionBloc = BlocProvider.of<ChatActionBloc>(context);
     return BlocListener(
       bloc: pollBloc,
       listener: (context, state) {
@@ -76,19 +84,18 @@ class _PollBubbleState extends State<PollBubble> {
                   element.id == state.addPollOptionResponse.temporaryId);
           pollConversation!.poll!.pollViewDataList![index].id =
               state.addPollOptionResponse.pollViewData!.id;
-          setState(() {});
+          pollEnableNotifier.value = !pollEnableNotifier.value;
         }
         if (state is PollOptionError &&
             state.conversationId == pollConversation!.id) {
           toast(state.errorMessage);
           pollConversation!.poll!.pollViewDataList!.removeWhere((element) =>
               element.id == state.addPollOptionRequest.temporaryId);
-          setState(() {});
+          pollEnableNotifier.value = !pollEnableNotifier.value;
         }
         if (state is SubmittedPoll &&
             state.conversationId == pollConversation!.id) {
           isSubmitted = true;
-          isEditing = false;
           if (pollConversation!.poll!.pollType == 1) {
             showModalBottomSheet(
               context: context,
@@ -100,7 +107,7 @@ class _PollBubbleState extends State<PollBubble> {
               builder: (context) => const PollSubmissionBottomSheet(),
             );
           }
-          chatActionBloc.add(UpdatePollConversation(
+          chatActionBloc!.add(UpdatePollConversation(
               conversationId: pollConversation!.id,
               chatroomId: widget.chatroomId));
         }
@@ -144,55 +151,94 @@ class _PollBubbleState extends State<PollBubble> {
                   )
                 : const SizedBox(),
             kVerticalPaddingLarge,
-            PollOptionList(
-              pollConversation: pollConversation!,
-              isSubmitted: isSubmitted,
-              selectedOptions: selectedOptions,
-              onTap: (PollViewData selectedOption) {
-                if (!isEditing && isSubmitted) {
-                  isEditing = true;
-                  setState(() {});
-                }
-                if (isPollEnded(DateTime.fromMillisecondsSinceEpoch(
-                    pollConversation!.poll!.expiryTime!))) {
-                  toast("Poll ended, Vote cannot be submitted now");
-                  return;
-                }
-                if (isSubmitted && pollConversation!.poll!.pollType == 0) {
-                  return;
-                }
-                if (selectedOptions.contains(selectedOption)) {
-                  selectedOptions.remove(selectedOption);
-                  if (pollConversation!.poll!.multipleSelectState != null) {
-                    isEnabled = PollSubmitValidator.checkMultiSelectPoll(
-                        pollConversation!.poll!, selectedOptions);
-                  }
-                } else {
-                  if (pollConversation!.poll!.multipleSelectNum != null &&
-                      (pollConversation!.poll!.multipleSelectState == 0 ||
-                          pollConversation!.poll!.multipleSelectState == 1) &&
-                      selectedOptions.length ==
-                          pollConversation!.poll!.multipleSelectNum) {
-                    toast(
-                        "Please selected only ${pollConversation!.poll!.multipleSelectNum} options");
-                  } else {
-                    isEditing = true;
+            ValueListenableBuilder(
+                valueListenable: pollEnableNotifier,
+                builder: (context, _, __) {
+                  return PollOptionList(
+                    pollConversation: pollConversation!,
+                    isSubmitted: isSubmitted,
+                    selectedOptions: selectedOptions,
+                    onTap: (PollViewData selectedOption) {
+                      if (isPollEnded(DateTime.fromMillisecondsSinceEpoch(
+                          pollConversation!.poll!.expiryTime!))) {
+                        toast("Poll ended, Vote cannot be submitted now");
+                        return;
+                      }
+                      if (isSubmitted &&
+                          pollConversation!.poll!.pollType == 0) {
+                        return;
+                      } else {
+                        if (isSubmitted) {
+                          pollBloc!.add(EditPollSubmittion());
+                        }
+                        if (selectedOptions.contains(selectedOption)) {
+                          selectedOptions.remove(selectedOption);
+                          if (selectedOption.noVotes == null) {
+                            selectedOption.noVotes = 0;
+                          } else {
+                            selectedOption.noVotes =
+                                selectedOption.noVotes! - 1;
+                          }
+                          if (pollConversation!.poll!.multipleSelectState !=
+                              null) {
+                            isEnabled =
+                                PollSubmitValidator.checkMultiSelectPoll(
+                                    pollConversation!.poll!, selectedOptions);
+                          }
+                        } else {
+                          if (pollConversation!.poll!.multipleSelectState !=
+                                  null &&
+                              pollConversation!.poll!.multipleSelectNum !=
+                                  null) {
+                            if ((pollConversation!.poll!.multipleSelectState ==
+                                        0 ||
+                                    pollConversation!
+                                            .poll!.multipleSelectState ==
+                                        1) &&
+                                selectedOptions.length ==
+                                    pollConversation!.poll!.multipleSelectNum) {
+                              toast(
+                                  "Please selected only ${pollConversation!.poll!.multipleSelectNum} options");
 
-                    if (pollConversation!.poll!.multipleSelectState != null) {
-                      selectedOptions.add(selectedOption);
-                      isEnabled = PollSubmitValidator.checkMultiSelectPoll(
-                          pollConversation!.poll!, selectedOptions);
-                      setState(() {});
-                    } else {
-                      selectedOptions = [selectedOption];
-                      PollSubmitValidator.checkNonMultiStatePoll(
-                          context, pollConversation!.poll!, selectedOptions);
-                      setState(() {});
-                    }
-                  }
-                }
-              },
-            ),
+                              return;
+                            } else {
+                              if (selectedOption.noVotes == null) {
+                                selectedOption.noVotes = 1;
+                              } else {
+                                selectedOption.noVotes =
+                                    selectedOption.noVotes! + 1;
+                              }
+                              selectedOptions.add(selectedOption);
+
+                              isEnabled =
+                                  PollSubmitValidator.checkMultiSelectPoll(
+                                      pollConversation!.poll!, selectedOptions);
+                            }
+                          } else {
+                            if (selectedOptions.isNotEmpty) {
+                              if (selectedOptions.first.noVotes == null) {
+                                selectedOptions.first.noVotes = 0;
+                              } else {
+                                selectedOptions.first.noVotes =
+                                    selectedOptions.first.noVotes! - 1;
+                              }
+                            }
+                            if (selectedOption.noVotes == null) {
+                              selectedOption.noVotes = 1;
+                            } else {
+                              selectedOption.noVotes =
+                                  selectedOption.noVotes! + 1;
+                            }
+                            selectedOptions = [selectedOption];
+                            PollSubmitValidator.checkNonMultiStatePoll(context,
+                                pollConversation!.poll!, selectedOptions);
+                          }
+                        }
+                      }
+                      pollEnableNotifier.value = !pollEnableNotifier.value;
+                    },
+                  );
+                }),
             (!isSubmitted && pollConversation!.poll!.pollType == 0) &&
                     pollConversation!.poll!.allowAddOption! &&
                     !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
@@ -223,7 +269,7 @@ class _PollBubbleState extends State<PollBubble> {
                                     id: temporaryId,
                                     memberId: user.id,
                                   );
-                                  pollBloc.add(AddPollOption(
+                                  pollBloc!.add(AddPollOption(
                                       (AddPollOptionRequestBuilder()
                                             ..conversationId(
                                                 pollConversation!.id)
@@ -234,7 +280,8 @@ class _PollBubbleState extends State<PollBubble> {
                                   pollConversation!.poll!.pollViewDataList!.add(
                                     newPollOption,
                                   );
-                                  setState(() {});
+                                  pollEnableNotifier.value =
+                                      !pollEnableNotifier.value;
                                 },
                               ));
                     },
@@ -247,12 +294,13 @@ class _PollBubbleState extends State<PollBubble> {
             Align(
               alignment: Alignment.topLeft,
               child: TextButton(
-                onPressed: pollConversation!.poll!.toShowResult!
+                onPressed: pollConversation!.poll!.toShowResult! &&
+                        pollConversation!.poll!.isAnonymous != true
                     ? () {
                         router.push(pollResultRoute, extra: pollConversation!);
                       }
                     : () {
-                        if (pollConversation!.poll!.isAnonymous != true) {
+                        if (pollConversation!.poll!.isAnonymous == true) {
                           showDialog(
                               context: context,
                               builder: (context) => LMCustomDialog(
@@ -277,42 +325,70 @@ class _PollBubbleState extends State<PollBubble> {
                 ),
               ),
             ),
-            !(isSubmitted && pollConversation!.poll!.pollType == 0) &&
-                    pollConversation!.poll!.multipleSelectState != null &&
-                    !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
-                        pollConversation!.poll!.expiryTime!))
-                ? getSubmitButton(
-                    text:
-                        isSubmitted && !isEditing ? "Edit Vote" : "SUBMIT VOTE",
-                    textStyle: LMTheme.medium.copyWith(
-                        color: isEnabled ? LMTheme.buttonColor : kGrey2Color),
-                    borderRadius: 16.0,
-                    enabledColor: isEnabled ? LMTheme.buttonColor : kGrey2Color,
-                    border: Border.all(
-                      color: isEnabled ? LMTheme.buttonColor : kGrey2Color,
-                      width: 1.5,
-                    ),
-                    onTap: () async {
-                      if (!isEditing) {
-                        isEditing = true;
-                        setState(() {});
-                      }
-                      if (isEnabled && (!isSubmitted || isEditing)) {
-                        SubmitPollRequest request = (SubmitPollRequestBuilder()
-                              ..conversationId(pollConversation!.id)
-                              ..polls(selectedOptions))
-                            .build();
-                        pollBloc.add(SubmitPoll(submitPollRequest: request));
-                        isEditing = false;
-                        setState(() {});
-                      }
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
-                    ),
-                  )
-                : const SizedBox(),
+            ValueListenableBuilder(
+                valueListenable: pollEnableNotifier,
+                builder: (context, _, __) {
+                  return !(isSubmitted &&
+                              pollConversation!.poll!.pollType == 0) &&
+                          pollConversation!.poll!.multipleSelectState != null &&
+                          !isPollEnded(DateTime.fromMillisecondsSinceEpoch(
+                              pollConversation!.poll!.expiryTime!))
+                      ? Align(
+                          alignment: Alignment.topLeft,
+                          child: getSubmitButton(
+                            text: isSubmitted &&
+                                    pollBloc!.state is! EditingPollSubmission
+                                ? "EDIT VOTE"
+                                : "SUBMIT VOTE",
+                            textStyle: LMTheme.medium.copyWith(
+                              color: isEnabled
+                                  ? LMTheme.buttonColor
+                                  : kGreyBackgroundColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            borderRadius: 24.0,
+                            enabledColor: isEnabled
+                                ? LMTheme.buttonColor
+                                : kGreyBackgroundColor,
+                            border: Border.all(
+                              color: isEnabled
+                                  ? LMTheme.buttonColor
+                                  : kGreyBackgroundColor,
+                              width: 2.0,
+                            ),
+                            onTap: () async {
+                              if (pollBloc!.state is! EditingPollSubmission &&
+                                  isSubmitted) {
+                                pollBloc!.add(EditPollSubmittion());
+                                pollConversation!.poll!.toShowResult = false;
+                                isEnabled =
+                                    PollSubmitValidator.checkMultiSelectPoll(
+                                        pollConversation!.poll!,
+                                        selectedOptions);
+                                pollEnableNotifier.value =
+                                    !pollEnableNotifier.value;
+                              } else if (isEnabled &&
+                                  (pollBloc!.state is EditingPollSubmission ||
+                                      !isSubmitted)) {
+                                SubmitPollRequest request =
+                                    (SubmitPollRequestBuilder()
+                                          ..conversationId(pollConversation!.id)
+                                          ..polls(selectedOptions))
+                                        .build();
+                                pollBloc!.add(
+                                    SubmitPoll(submitPollRequest: request));
+                                pollEnableNotifier.value =
+                                    !pollEnableNotifier.value;
+                              }
+                            },
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                              vertical: 10.0,
+                            ),
+                          ),
+                        )
+                      : const SizedBox();
+                }),
           ],
         ),
       ),

@@ -50,3 +50,11 @@ class AddPollOption extends PollEvents {
         addPollOptionRequest,
       ];
 }
+
+class EditPollSubmittion extends PollEvents {
+  final int time = DateTime.now().millisecondsSinceEpoch;
+  EditPollSubmittion();
+
+  @override
+  List<Object?> get props => [time];
+}

@@ -371,6 +371,7 @@ class ChatActionBloc extends Bloc<ChatActionEvent, ChatActionState> {
         answer: event.postConversationRequest.text,
         chatroomId: event.postConversationRequest.chatroomId,
         createdAt: "",
+        state: 0,
         header: "",
         date: "${dateTime.day} ${dateTime.month} ${dateTime.year}",
         replyId: event.postConversationRequest.replyId,

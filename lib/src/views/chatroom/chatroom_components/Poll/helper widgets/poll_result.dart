@@ -96,6 +96,21 @@ class _PollResultState extends State<PollResult> {
   }
 
   @override
+  void didUpdateWidget(covariant PollResult oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    pollConversation = widget.pollConversation;
+    selectedPollId = pollConversation!.poll!.pollViewDataList![0].id!;
+    selectedIndex = 0;
+    noOfOptions = pollConversation!.poll!.pollViewDataList!.length;
+    pollBloc.add(GetPollUsers(
+        getPollUsersRequest: (GetPollUsersRequestBuilder()
+              ..conversationId(widget.pollConversation.id)
+              ..pollId(selectedPollId!))
+            .build()));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
@@ -146,6 +161,7 @@ class _PollResultState extends State<PollResult> {
                           onTap: () {
                             selectedPollId = pollConversation!
                                 .poll!.pollViewDataList![index].id!;
+                            setState(() {});
                             pollBloc.add(GetPollUsers(
                                 getPollUsersRequest:
                                     (GetPollUsersRequestBuilder()
@@ -153,7 +169,6 @@ class _PollResultState extends State<PollResult> {
                                               widget.pollConversation.id)
                                           ..pollId(selectedPollId!))
                                         .build()));
-                            setState(() {});
                           },
                           child: getPollResultTab(
                             pollConversation!.poll!.pollViewDataList![index],
@@ -171,23 +186,23 @@ class _PollResultState extends State<PollResult> {
                       selectedIndex = selectedIndex! - 1;
                       selectedPollId = pollConversation!
                           .poll!.pollViewDataList![selectedIndex!].id!;
+                      setState(() {});
                       pollBloc.add(GetPollUsers(
                           getPollUsersRequest: (GetPollUsersRequestBuilder()
                                 ..conversationId(widget.pollConversation.id)
                                 ..pollId(selectedPollId!))
                               .build()));
-                      setState(() {});
                     } else if (direction == SwipeDirection.endToStart &&
                         selectedIndex! < noOfOptions! - 1) {
                       selectedIndex = selectedIndex! + 1;
                       selectedPollId = pollConversation!
                           .poll!.pollViewDataList![selectedIndex!].id!;
+                      setState(() {});
                       pollBloc.add(GetPollUsers(
                           getPollUsersRequest: (GetPollUsersRequestBuilder()
                                 ..conversationId(widget.pollConversation.id)
                                 ..pollId(selectedPollId!))
                               .build()));
-                      setState(() {});
                     }
                   },
                   background: Container(color: Colors.transparent),

@@ -17,6 +17,35 @@ class PollSubmitValidator {
     pollBloc.add(SubmitPoll(submitPollRequest: request));
   }
 
+  static bool checkMultiStatePollWithoutMessage(
+      PollInfoData pollInfoData, List<PollViewData> selectedOptions) {
+    // multi select state = exactly
+    if (pollInfoData.multipleSelectState == 0) {
+      if (selectedOptions.length == pollInfoData.multipleSelectNum!) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    // multi select state = at max
+    else if (pollInfoData.multipleSelectState == 1) {
+      if (selectedOptions.length <= pollInfoData.multipleSelectNum!) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    // multi select state = at least
+    else if (pollInfoData.multipleSelectState == 2) {
+      if (selectedOptions.length >= pollInfoData.multipleSelectNum!) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
+
   static bool checkMultiSelectPoll(
       PollInfoData pollInfoData, List<PollViewData> selectedOptions) {
     // multi select state = exactly

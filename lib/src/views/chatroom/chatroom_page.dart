@@ -330,6 +330,18 @@ class _ChatroomPageState extends State<ChatroomPage> {
     }
   }
 
+  void updatePollConversation(Conversation pollConversation) {
+    List<Conversation> conversationList =
+        pagedListController.itemList ?? <Conversation>[];
+    int index = conversationList
+        .indexWhere((element) => element.id == pollConversation.id);
+    if (index != -1) {
+      conversationList[index] = pollConversation;
+    }
+    pagedListController.itemList = conversationList;
+    rebuildConversationList.value = !rebuildConversationList.value;
+  }
+
   void updateEditedConversation(Conversation editedConversation) {
     List<Conversation> conversationList =
         pagedListController.itemList ?? <Conversation>[];
@@ -353,6 +365,11 @@ class _ChatroomPageState extends State<ChatroomPage> {
       conversationList[index].deletedByUserId = currentUser.id;
     }
     pagedListController.itemList = conversationList;
+    scrollController.animateTo(
+      scrollController.position.pixels + 10,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    );
     rebuildConversationList.value = !rebuildConversationList.value;
   }
 
@@ -932,7 +949,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                               );
                             }
                             if (state is UpdatedPollConversation) {
-                              updateEditedConversation(state.response);
+                              updatePollConversation(state.response);
                             }
                             if (state is UpdateConversation) {
                               if (state.response.id != lastConversationId) {

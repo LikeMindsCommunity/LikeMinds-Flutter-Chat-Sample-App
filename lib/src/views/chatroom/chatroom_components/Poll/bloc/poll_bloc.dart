@@ -14,6 +14,7 @@ class PollBloc extends Bloc<PollEvents, PollState> {
     on<AddPollOption>(mapAddPollOption);
     on<GetPollUsers>(mapGetPollUsers);
     on<UpdatePoll>(mapUpdatePoll);
+    on<EditPollSubmittion>((event, emit) => emit(EditingPollSubmission()));
   }
 
   void mapUpdatePoll(UpdatePoll event, Emitter<PollState> emit) async {

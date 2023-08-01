@@ -63,12 +63,10 @@ class _PollOptionState extends State<PollOption> {
 
   @override
   Widget build(BuildContext context) {
-    widget.pollViewData;
     isSelected = widget.selectedOptions.contains(widget.pollViewData);
     return InkWell(
       onTap: () {
         widget.onTap(widget.pollViewData);
-        setState(() {});
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

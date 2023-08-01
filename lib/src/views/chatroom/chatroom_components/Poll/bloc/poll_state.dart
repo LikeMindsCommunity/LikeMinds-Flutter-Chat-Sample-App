@@ -134,3 +134,11 @@ class PollOptionError extends PollState {
         conversationId,
       ];
 }
+
+class EditingPollSubmission extends PollState {
+  final int time = DateTime.now().millisecondsSinceEpoch;
+  EditingPollSubmission();
+
+  @override
+  List<Object?> get props => [time];
+}
