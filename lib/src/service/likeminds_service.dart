@@ -44,6 +44,13 @@ abstract class ILikeMindsService {
   Future<LMResponse<GetExploreFeedResponse>> getExploreFeed(
       GetExploreFeedRequest request);
   Future<LMResponse<GetExploreTabCountResponse>> getExploreTabCount();
+  Future<LMResponse<GetPollUsersResponse>> getPollUsers(
+      GetPollUsersRequest request);
+  Future<LMResponse<AddPollOptionResponse>> addPollOption(
+      AddPollOptionRequest request);
+  Future<LMResponse<SubmitPollResponse>> submitPoll(SubmitPollRequest request);
+  Future<LMResponse<PostConversationResponse>> postPollConversation(
+      PostPollConversationRequest request);
 }
 
 class LikeMindsService implements ILikeMindsService {
@@ -195,5 +202,28 @@ class LikeMindsService implements ILikeMindsService {
   @override
   Future<LMResponse<GetExploreTabCountResponse>> getExploreTabCount() {
     return client.getExploreTabCount();
+  }
+
+  @override
+  Future<LMResponse<GetPollUsersResponse>> getPollUsers(
+      GetPollUsersRequest request) {
+    return client.getPollUsers(request);
+  }
+
+  @override
+  Future<LMResponse<AddPollOptionResponse>> addPollOption(
+      AddPollOptionRequest request) {
+    return client.addPollOption(request);
+  }
+
+  @override
+  Future<LMResponse<SubmitPollResponse>> submitPoll(SubmitPollRequest request) {
+    return client.submitPoll(request);
+  }
+
+  @override
+  Future<LMResponse<PostConversationResponse>> postPollConversation(
+      PostPollConversationRequest request) {
+    return client.postPollConversation(request);
   }
 }

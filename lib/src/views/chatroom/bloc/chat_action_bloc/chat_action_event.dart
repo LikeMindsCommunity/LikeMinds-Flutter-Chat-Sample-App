@@ -109,6 +109,22 @@ class UpdateConversationList extends ChatActionEvent {
       ];
 }
 
+class UpdatePollConversation extends ChatActionEvent {
+  final int conversationId;
+  final int chatroomId;
+
+  UpdatePollConversation({
+    required this.conversationId,
+    required this.chatroomId,
+  });
+
+  @override
+  List<Object> get props => [
+        conversationId,
+        chatroomId,
+      ];
+}
+
 class PutReaction extends ChatActionEvent {
   final PutReactionRequest putReactionRequest;
 
@@ -175,7 +191,15 @@ class ConversationToolBar extends ChatActionEvent {
 
 class RemoveConversationToolBar extends ChatActionEvent {
   // To remove the conversation tool bar from the chatroom
-  String timeChecker = DateTime.now().toString();
+  final String timeChecker = DateTime.now().toString();
   @override
   List<Object> get props => [timeChecker];
+}
+
+class PostPollConversation extends ChatActionEvent {
+  final PostPollConversationRequest postPollConversationRequest;
+
+  PostPollConversation(this.postPollConversationRequest);
+  @override
+  List<Object> get props => [postPollConversationRequest];
 }

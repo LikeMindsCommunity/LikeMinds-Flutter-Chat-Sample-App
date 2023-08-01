@@ -7,6 +7,7 @@ class LMCustomDialog extends StatelessWidget {
   final String content;
   final String actionText;
   final Function() onActionPressed;
+  final bool showCancel;
 
   const LMCustomDialog({
     Key? key,
@@ -14,6 +15,7 @@ class LMCustomDialog extends StatelessWidget {
     required this.content,
     required this.actionText,
     required this.onActionPressed,
+    this.showCancel = true,
   }) : super(key: key);
 
   @override
@@ -28,15 +30,17 @@ class LMCustomDialog extends StatelessWidget {
         style: LMTheme.medium,
       ),
       actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text(
-            "Cancel",
-            style: LMTheme.bold.copyWith(color: kGrey3Color),
-          ),
-        ),
+        showCancel
+            ? TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Cancel",
+                  style: LMTheme.bold.copyWith(color: kGrey3Color),
+                ),
+              )
+            : const SizedBox(),
         TextButton(
           onPressed: () async {
             Navigator.pop(context);

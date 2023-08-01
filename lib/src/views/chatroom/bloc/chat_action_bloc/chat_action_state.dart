@@ -57,6 +57,19 @@ class UpdateConversation extends ChatActionState {
       ];
 }
 
+class UpdatedPollConversation extends ChatActionState {
+  final Conversation response;
+
+  UpdatedPollConversation({
+    required this.response,
+  });
+
+  @override
+  List<Object> get props => [
+        response,
+      ];
+}
+
 class ConversationEdited extends ChatActionState {
   final EditConversationResponse editConversationResponse;
 
