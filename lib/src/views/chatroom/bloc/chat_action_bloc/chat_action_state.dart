@@ -57,6 +57,19 @@ class UpdateConversation extends ChatActionState {
       ];
 }
 
+class UpdatedPollConversation extends ChatActionState {
+  final Conversation response;
+
+  UpdatedPollConversation({
+    required this.response,
+  });
+
+  @override
+  List<Object> get props => [
+        response,
+      ];
+}
+
 class ConversationEdited extends ChatActionState {
   final EditConversationResponse editConversationResponse;
 
@@ -83,6 +96,17 @@ class ConversationDelete extends ChatActionState {
       ];
 }
 
+class ConversationDeleteError extends ChatActionState {
+  final String errorMessage;
+
+  ConversationDeleteError(this.errorMessage);
+
+  @override
+  List<Object> get props => [
+        errorMessage,
+      ];
+}
+
 class MultiMediaConversationLoading extends ChatActionState {
   final Conversation postConversation;
   final List<Media> mediaFiles;
@@ -100,7 +124,7 @@ class MultiMediaConversationLoading extends ChatActionState {
 
 class MultiMediaConversationPosted extends ChatActionState {
   final PostConversationResponse postConversationResponse;
-  final List<dynamic> putMediaResponse;
+  final List<Media> putMediaResponse;
 
   MultiMediaConversationPosted(
     this.postConversationResponse,
@@ -149,8 +173,9 @@ class ReplyConversationState extends ChatActionState {
 }
 
 class ReplyRemoveState extends ChatActionState {
+  final String stateTime = DateTime.now().toString();
   @override
-  List<Object> get props => [];
+  List<Object> get props => [stateTime];
 }
 
 class EditConversationState extends ChatActionState {
@@ -173,6 +198,69 @@ class EditConversationState extends ChatActionState {
 }
 
 class EditRemoveState extends ChatActionState {
+  final String stateTime = DateTime.now().toString();
   @override
-  List<Object> get props => [];
+  List<Object> get props => [stateTime];
+}
+
+class ConversationToolBarState extends ChatActionState {
+  final List<Conversation> selectedConversation;
+  final Conversation? replyConversation;
+  final bool showReactionKeyboard;
+  final bool showReactionBar;
+  final String stateTime = DateTime.now().toString();
+
+  ConversationToolBarState(
+      {required this.selectedConversation,
+      this.replyConversation,
+      this.showReactionBar = true,
+      required this.showReactionKeyboard});
+
+  @override
+  List<Object> get props =>
+      [selectedConversation, showReactionKeyboard, stateTime];
+}
+
+class PutReactionState extends ChatActionState {
+  final PutReactionRequest putReactionRequest;
+
+  PutReactionState(this.putReactionRequest);
+
+  @override
+  List<Object> get props => [putReactionRequest.toJson()];
+}
+
+class PutReactionError extends ChatActionState {
+  final String errorMessage;
+  final PutReactionRequest putReactionRequest;
+
+  PutReactionError(this.errorMessage, this.putReactionRequest);
+
+  @override
+  List<Object> get props => [errorMessage, putReactionRequest.toJson()];
+}
+
+class DeleteReactionState extends ChatActionState {
+  final DeleteReactionRequest deleteReactionRequest;
+
+  DeleteReactionState(this.deleteReactionRequest);
+
+  @override
+  List<Object> get props => [deleteReactionRequest.toJson()];
+}
+
+class DeleteReactionError extends ChatActionState {
+  final String errorMessage;
+  final DeleteReactionRequest deleteReactionRequest;
+
+  DeleteReactionError(this.errorMessage, this.deleteReactionRequest);
+
+  @override
+  List<Object> get props => [errorMessage, deleteReactionRequest.toJson()];
+}
+
+class RemoveConversationToolBarState extends ChatActionState {
+  final String stateTime = DateTime.now().toString();
+  @override
+  List<Object> get props => [stateTime];
 }

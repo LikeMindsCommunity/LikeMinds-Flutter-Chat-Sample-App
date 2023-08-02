@@ -1,7 +1,11 @@
+import 'package:flutter_svg/svg.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/explore/bloc/explore_bloc.dart';
-import 'package:likeminds_chat_mm_fl/src/views/explore/explore_page.dart';
 
 class ExploreSpacesBar extends StatelessWidget {
   const ExploreSpacesBar({
@@ -10,67 +14,85 @@ class ExploreSpacesBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 90,
-      width: 100.w,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: GestureDetector(
-          onTap: () {
-            Route route = MaterialPageRoute(
-              builder: (BuildContext context) => BlocProvider<ExploreBloc>(
-                create: (BuildContext context) =>
-                    ExploreBloc()..add(InitExploreEvent()),
-                child: const ExplorePage(),
-              ),
-            );
-            Navigator.push(context, route);
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Container(
-                height: 32,
-                width: 32,
-                decoration: BoxDecoration(
-                  color: LMBranding.instance.buttonColor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.navigation_outlined,
-                    color: Colors.white,
-                    size: 12.sp,
+    return GestureDetector(
+      onTap: () {
+        router.push(exploreRoute);
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          vertical: 2.w,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 4.w,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 42.sp,
+              width: 42.sp,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    kAssetExploreIcon,
+                    color: LMTheme.buttonColor,
+                    width: 8.w,
                   ),
-                ),
+                ],
               ),
-              // const SizedBox(width: 24),
-              Text(
-                "Explore Spaces",
-                style: LMBranding.instance.fonts.medium.copyWith(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 4.w,
               ),
-              Container(
-                height: 28,
-                width: 64,
-                decoration: BoxDecoration(
-                  color: LMBranding.instance.buttonColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    "3 NEW",
-                    style: LMBranding.instance.fonts.regular.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+              child: Text(
+                'Explore',
+                style: LMTheme.medium.copyWith(fontSize: 12.sp),
               ),
-            ],
-          ),
+            ),
+            const Spacer(),
+            FutureBuilder(
+                future: locator<LikeMindsService>().getExploreTabCount(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container();
+                  }
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.hasData) {
+                    if (snapshot.data!.success) {
+                      GetExploreTabCountResponse response =
+                          snapshot.data!.data!;
+
+                      return Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 4.w,
+                          vertical: 1.w,
+                        ),
+                        decoration: BoxDecoration(
+                            color: LMTheme.buttonColor,
+                            borderRadius: BorderRadius.circular(4.w),
+                            shape: BoxShape.rectangle),
+                        child: Text(
+                          response.unseenChannelCount == null ||
+                                  response.unseenChannelCount == 0
+                              ? '${response.totalChannelCount} Chatrooms'
+                              : '${response.unseenChannelCount} New',
+                          style: LMTheme.medium.copyWith(
+                            color: kWhiteColor,
+                            fontSize: 8.sp,
+                          ),
+                        ),
+                      );
+                    } else {
+                      const SizedBox();
+                    }
+                  }
+                  return const SizedBox();
+                })
+          ],
         ),
       ),
     );

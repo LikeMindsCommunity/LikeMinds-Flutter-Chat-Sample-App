@@ -1,4 +1,8 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/service/likeminds_service.dart';
+import 'package:likeminds_chat_mm_fl/src/service/service_locator.dart';
 import 'package:likeminds_chat_mm_fl/src/views/explore/models/space_model.dart';
 
 part 'explore_event.dart';
@@ -9,19 +13,23 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
     on<ExploreEvent>((event, emit) async {
       if (event is InitExploreEvent) {
         emit(ExploreLoading());
-        await Future.delayed(const Duration(seconds: 2), () {
-          emit(ExploreLoaded(getData()));
-        });
-      } else if (event is RefreshExploreEvent) {
+      } else if (event is GetExplore) {
         emit(ExploreLoading());
-        await Future.delayed(const Duration(seconds: 2), () {
-          emit(ExploreLoaded(getData()));
-        });
+        LMResponse response = await locator<LikeMindsService>()
+            .getExploreFeed(event.getExploreFeedRequest);
+        if (response.success) {
+          GetExploreFeedResponse getExploreFeedResponse =
+              response.data as GetExploreFeedResponse;
+          if (getExploreFeedResponse.success) {
+            emit(ExploreLoaded(getExploreFeedResponse));
+          } else {
+            emit(ExploreError(getExploreFeedResponse.errorMessage!));
+          }
+        } else {
+          emit(ExploreError(response.errorMessage!));
+        }
       } else if (event is PinSpaceEvent) {
         emit(ExploreLoading());
-        await Future.delayed(const Duration(seconds: 2), () {
-          emit(ExploreLoaded(getData()));
-        });
       }
     });
   }

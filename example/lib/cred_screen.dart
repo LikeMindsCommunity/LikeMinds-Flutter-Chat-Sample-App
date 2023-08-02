@@ -23,13 +23,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     loadFonts();
     return Sizer(
-      builder: (context, orientation, deviceType) => OverlaySupport.global(
-        child: MaterialApp(
-          title: 'Chat App for UI + SDK package',
-          debugShowCheckedModeBanner: isDebug,
-          scaffoldMessengerKey: rootScaffoldMessengerKey,
-          home: const CredScreen(),
-        ),
+      builder: (context, orientation, deviceType) => MaterialApp(
+        title: 'Chat App for UI + SDK package',
+        debugShowCheckedModeBanner: isDebug,
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
+        home: const CredScreen(),
       ),
     );
   }

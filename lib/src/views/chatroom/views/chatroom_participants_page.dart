@@ -65,19 +65,21 @@ class _ChatroomParticipantsPageState extends State<ChatroomParticipantsPage> {
   int _page = 1;
 
   _addPaginationListener() {
-    _pagingController.addPageRequestListener((pageKey) {
-      participantsBloc!.add(
-        GetParticipants(
-          getParticipantsRequest: (GetParticipantsRequestBuilder()
-                ..chatroomId(widget.chatroom.id)
-                ..page(pageKey)
-                ..pageSize(10)
-                ..search(searchTerm)
-                ..isSecret(widget.chatroom.isSecret ?? false))
-              .build(),
-        ),
-      );
-    });
+    _pagingController.addPageRequestListener(
+      (pageKey) {
+        participantsBloc!.add(
+          GetParticipants(
+            getParticipantsRequest: (GetParticipantsRequestBuilder()
+                  ..chatroomId(widget.chatroom.id)
+                  ..page(pageKey)
+                  ..pageSize(10)
+                  ..search(searchTerm)
+                  ..isSecret(widget.chatroom.isSecret ?? false))
+                .build(),
+          ),
+        );
+      },
+    );
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 
 class PageSkeleton extends StatelessWidget {
   final List<Widget> appBarChildren;
@@ -18,34 +19,38 @@ class PageSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor ?? Colors.white,
-      body: Padding(
-        padding: isListView
-            ? EdgeInsets.zero
-            : const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 72),
-            Padding(
-              padding: isListView
-                  ? const EdgeInsets.symmetric(horizontal: 24)
-                  : EdgeInsets.zero,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: appBarChildren,
+      body: SafeArea(
+        child: Padding(
+          padding: isListView
+              ? EdgeInsets.zero
+              : const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              kVerticalPaddingLarge,
+              Padding(
+                padding: isListView
+                    ? const EdgeInsets.symmetric(horizontal: 24)
+                    : EdgeInsets.zero,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: appBarChildren,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            isListView
-                ? Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: bodyChildren,
+              const SizedBox(height: 16),
+              isListView
+                  ? Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: bodyChildren,
+                      ),
+                    )
+                  : Expanded(
+                      child: Column(
+                        children: bodyChildren,
+                      ),
                     ),
-                  )
-                : Expanded(
-                    child: Column(children: bodyChildren),
-                  ),
-          ],
+            ],
+          ),
         ),
       ),
     );

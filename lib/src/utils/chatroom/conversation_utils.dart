@@ -1,6 +1,36 @@
 import 'dart:collection';
 
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+
+Offset getPositionOfChatBubble(GlobalKey widgetKey) {
+  RenderBox? renderBox =
+      widgetKey.currentContext?.findRenderObject() as RenderBox?;
+  if (renderBox == null) {
+    return const Offset(0, 0);
+  }
+
+  final Offset offset = renderBox.localToGlobal(Offset.zero);
+  return offset;
+}
+
+double? getHeightOfWidget(GlobalKey widgetKey) {
+  RenderBox? renderBox =
+      widgetKey.currentContext?.findRenderObject() as RenderBox?;
+  if (renderBox == null) {
+    return null;
+  }
+  return renderBox.size.height;
+}
+
+double? getWidthOfWidget(GlobalKey widgetKey) {
+  RenderBox? renderBox =
+      widgetKey.currentContext?.findRenderObject() as RenderBox?;
+  if (renderBox == null) {
+    return null;
+  }
+  return renderBox.size.width;
+}
 
 List<Conversation>? addTimeStampInConversationList(
     List<Conversation>? conversationList, int communityId) {

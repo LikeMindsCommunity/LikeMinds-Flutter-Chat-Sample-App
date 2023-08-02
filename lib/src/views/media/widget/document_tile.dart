@@ -36,14 +36,15 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
 
   Future loadFile() async {
     url = widget.media.mediaUrl;
-    if (url != null) {
+    if (widget.media.mediaFile != null) {
+      file = widget.media.mediaFile;
+      _fileName = basenameWithoutExtension(file!.path);
+    } else {
       final String url = widget.media.mediaUrl!;
       _fileName = basenameWithoutExtension(url);
       file = await DefaultCacheManager().getSingleFile(url);
-    } else {
-      file = widget.media.mediaFile;
-      _fileName = basenameWithoutExtension(file!.path);
     }
+
     _fileSize = getFileSizeString(bytes: widget.media.size!);
     documentFile = PdfDocumentLoader.openFile(
       file!.path,
@@ -54,13 +55,8 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
           width: 55.w,
           clipBehavior: Clip.hardEdge,
           decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(
-                kBorderRadiusMedium,
-              ),
-              topRight: Radius.circular(
-                kBorderRadiusMedium,
-              ),
+            borderRadius: BorderRadius.all(
+              Radius.circular(kBorderRadiusMedium),
             ),
           ),
           child: FittedBox(
@@ -109,7 +105,7 @@ class _DocumentThumbnailFileState extends State<DocumentThumbnailFile> {
                   bottom: 0,
                   child: Container(
                     height: 70,
-                    width: 54.w,
+                    width: 55.w,
                     decoration: BoxDecoration(
                       color: kWhiteColor,
                       border: Border.all(color: kGreyWebBGColor, width: 1),
@@ -243,13 +239,12 @@ class _DocumentTileState extends State<DocumentTile> {
 
   Future loadFile() async {
     File file;
-    if (widget.media.mediaUrl != null) {
+    if (widget.media.mediaFile != null) {
+      file = widget.media.mediaFile!;
+    } else {
       final String url = widget.media.mediaUrl!;
       file = File(url);
-    } else {
-      file = widget.media.mediaFile!;
     }
-
     _fileSize = getFileSizeString(bytes: widget.media.size!);
     _fileName = basenameWithoutExtension(file.path);
     return file;
@@ -270,12 +265,12 @@ class _DocumentTileState extends State<DocumentTile> {
               snapshot.hasData) {
             return InkWell(
               onTap: () async {
-                if (widget.media.mediaUrl != null) {
+                if (widget.media.mediaFile != null) {
+                  OpenFilex.open(widget.media.mediaFile!.path);
+                } else {
                   debugPrint(widget.media.mediaUrl);
                   Uri fileUrl = Uri.parse(widget.media.mediaUrl!);
                   launchUrl(fileUrl, mode: LaunchMode.externalApplication);
-                } else {
-                  OpenFilex.open(widget.media.mediaFile!.path);
                 }
               },
               child: Padding(
@@ -315,13 +310,17 @@ class _DocumentTileState extends State<DocumentTile> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
                                         children: <Widget>[
-                                          kHorizontalPaddingXSmall,
-                                          Text(
-                                            "${widget.media.pageCount!} ${widget.media.pageCount! > 1 ? "Pages" : "Page"}",
-                                            style: TextStyle(
-                                                fontSize: 8.sp,
-                                                color: kGrey3Color),
-                                          ),
+                                          widget.media.pageCount == null
+                                              ? const SizedBox()
+                                              : kHorizontalPaddingXSmall,
+                                          widget.media.pageCount == null
+                                              ? const SizedBox()
+                                              : Text(
+                                                  "${widget.media.pageCount!} ${widget.media.pageCount! > 1 ? "Pages" : "Page"}",
+                                                  style: TextStyle(
+                                                      fontSize: 8.sp,
+                                                      color: kGrey3Color),
+                                                ),
                                           kHorizontalPaddingXSmall,
                                           Text(
                                             '·',
