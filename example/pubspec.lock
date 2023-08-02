@@ -827,10 +827,10 @@ packages:
     dependency: transitive
     description:
       name: likeminds_chat_fl
-      sha256: "17d32584cbcb9456a417001de87a4a82237edab57cec2bc442337414b9ceeccc"
+      sha256: d91bcac497df63adb95c3383ddfaecba97f26a404c840635695a00f1827ea8fd
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.0"
+    version: "1.4.0"
   likeminds_chat_mm_fl:
     dependency: "direct main"
     description:

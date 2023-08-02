@@ -47,16 +47,6 @@ class PictureOrInitial extends StatelessWidget {
                   ),
                 ),
               ),
-              // placeholder: (context, url) => Container(
-              //   height: size ?? 42.sp,
-              //   width: size ?? 42.sp,
-              //   decoration: BoxDecoration(
-              //     color: kGreyColor,
-              //     borderRadius: BorderRadius.circular(
-              //       size ?? 42.sp,
-              //     ),
-              //   ),
-              // ),
               progressIndicatorBuilder: (context, url, progress) =>
                   mediaShimmer(
                 isPP: true,

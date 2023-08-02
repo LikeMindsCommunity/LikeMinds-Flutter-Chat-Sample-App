@@ -17,6 +17,7 @@ import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart
 import 'package:likeminds_chat_mm_fl/src/utils/notifications/notification_handler.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/realtime/realtime.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/bloc/chat_action_bloc/chat_action_bloc.dart';
+import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/bloc/poll_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/home/bloc/home_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/views/media/bloc/media_bloc.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/spinner.dart';
@@ -174,6 +175,7 @@ class LMChat extends StatelessWidget {
                       debugShowCheckedModeBanner: false,
                     );
                   }
+
                   return MaterialApp.router(
                     routerConfig: router,
                     debugShowCheckedModeBanner: false,
