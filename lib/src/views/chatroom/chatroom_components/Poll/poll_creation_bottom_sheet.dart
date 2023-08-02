@@ -64,8 +64,8 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
     super.initState();
     backgroundColor = widget.backgroundColor ?? kGreyBackgroundColor;
     inputBoxColor = widget.inputBoxColor ?? kWhiteColor;
-    headerStyle =
-        widget.headerStyle ?? LMTheme.bold.copyWith(color: LMTheme.buttonColor);
+    headerStyle = widget.headerStyle ??
+        LMTheme.bold.copyWith(color: LMTheme.buttonColor, fontSize: 10.sp);
     subHeaderStyle =
         widget.subHeaderStyle ?? LMTheme.medium.copyWith(color: kBlackColor);
     pollQuestionController.addListener(() {
@@ -130,7 +130,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                             child: Text(
                               'Cancel',
                               style: subHeaderStyle?.copyWith(
-                                  color: LMTheme.buttonColor),
+                                  color: LMTheme.buttonColor, fontSize: 9.sp),
                             ),
                           ),
                         ),
@@ -406,7 +406,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                           Text(
                             'ADVANCED',
                             style: LMTheme.medium.copyWith(
-                              color: kGrey3Color,
+                              color: kGreyColor,
                             ),
                           ),
                           kHorizontalPaddingSmall,
@@ -414,7 +414,7 @@ class _PollCreationBottomSheetState extends State<PollCreationBottomSheet> {
                             _showAdvancedOptions
                                 ? CupertinoIcons.chevron_up
                                 : CupertinoIcons.chevron_down,
-                            color: kGrey3Color,
+                            color: kGreyColor,
                           ),
                         ],
                       ),

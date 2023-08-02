@@ -2,6 +2,7 @@ import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
+import 'package:likeminds_chat_mm_fl/src/widgets/custom_dialog.dart';
 
 class PollOptionList extends StatefulWidget {
   final Conversation pollConversation;
@@ -108,9 +109,9 @@ class _PollOptionState extends State<PollOption> {
                       width: 40.w,
                       child: Text(
                         widget.pollViewData.text,
-                        style: LMTheme.medium.copyWith(
+                        style: LMTheme.regular.copyWith(
                           color: kGreyColor,
-                          fontSize: 8.sp,
+                          fontSize: 9.sp,
                         ),
                       ),
                     ),
@@ -131,13 +132,26 @@ class _PollOptionState extends State<PollOption> {
           widget.pollConversation!.poll!.toShowResult!
               ? GestureDetector(
                   onTap: () {
-                    router.push(pollResultRoute,
-                        extra: widget.pollConversation!);
+                    if (!widget.pollConversation!.poll!.isAnonymous!) {
+                      router.push(pollResultRoute,
+                          extra: widget.pollConversation!);
+                    } else {
+                      showDialog(
+                          context: context,
+                          builder: (context) => LMCustomDialog(
+                                title: "Anonymous poll",
+                                showCancel: false,
+                                content:
+                                    "This being an anonymous poll, the names of the voters can not be disclosed",
+                                actionText: "Okay",
+                                onActionPressed: () {},
+                              ));
+                    }
                   },
                   child: Text(
                     "${widget.pollViewData.noVotes!} ${widget.pollViewData.noVotes! > 1 ? "votes" : "vote"}",
                     style: LMTheme.medium.copyWith(
-                      color: kGreyColor,
+                      color: isSelected ? LMTheme.buttonColor : kGreyColor,
                       fontSize: 8.sp,
                     ),
                   ),

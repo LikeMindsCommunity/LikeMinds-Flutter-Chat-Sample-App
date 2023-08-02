@@ -23,11 +23,11 @@ class LMCustomDialog extends StatelessWidget {
     return AlertDialog(
       title: Text(
         title,
-        style: LMTheme.bold,
+        style: LMTheme.bold.copyWith(fontSize: 10.sp),
       ),
       content: Text(
         content,
-        style: LMTheme.medium,
+        style: LMTheme.regular.copyWith(fontSize: 9.sp),
       ),
       actions: [
         showCancel

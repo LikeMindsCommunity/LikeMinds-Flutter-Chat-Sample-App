@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 import 'package:likeminds_chat_mm_fl/packages/expandable_text/expandable_text.dart';
 import 'package:likeminds_chat_mm_fl/src/navigation/router.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/branding/theme.dart';
+import 'package:likeminds_chat_mm_fl/src/utils/constants/asset_constants.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/local_preference/local_prefs.dart';
 import 'package:likeminds_chat_mm_fl/src/utils/utils.dart';
@@ -104,7 +106,12 @@ class _PollBubbleState extends State<PollBubble> {
               enableDrag: true,
               useSafeArea: true,
               isScrollControlled: true,
-              builder: (context) => const PollSubmissionBottomSheet(),
+              builder: (context) => PollSubmissionBottomSheet(
+                expiryTime: formatStringFromDateTime(
+                  DateTime.fromMillisecondsSinceEpoch(
+                      pollConversation!.expiryTime!),
+                ),
+              ),
             );
           }
           chatActionBloc!.add(UpdatePollConversation(
@@ -136,17 +143,18 @@ class _PollBubbleState extends State<PollBubble> {
                 pollConversation!.answer,
                 expandText: "",
                 textAlign: TextAlign.left,
+                style: LMTheme.regular.copyWith(fontSize: 9.sp),
               ),
             ),
             pollConversation!.poll!.multipleSelectNum != null &&
                     pollConversation!.multipleSelectState != null
                 ? Container(
                     alignment: Alignment.topLeft,
-                    margin: const EdgeInsets.only(top: kPaddingXSmall),
+                    margin: const EdgeInsets.only(top: kPaddingSmall),
                     child: Text(
                       "*Select ${toStringMultiSelectState(pollConversation!.multipleSelectState!)} ${toStringNoOfVotes(pollConversation!.poll!.multipleSelectNum!)}",
                       style: LMTheme.regular
-                          .copyWith(fontSize: 8.sp, color: kGreyColor),
+                          .copyWith(fontSize: 9.sp, color: kGreyColor),
                     ),
                   )
                 : const SizedBox(),
@@ -314,7 +322,9 @@ class _PollBubbleState extends State<PollBubble> {
                         }
                       },
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  padding:
+                      MaterialStateProperty.all(const EdgeInsets.only(left: 3)),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
                   pollConversation!.poll!.pollAnswerText!,
@@ -336,16 +346,26 @@ class _PollBubbleState extends State<PollBubble> {
                       ? Align(
                           alignment: Alignment.topLeft,
                           child: getSubmitButton(
+                            iconWidget: SvgPicture.asset(
+                              isSubmitted &&
+                                      pollBloc!.state is! EditingPollSubmission
+                                  ? kAssetPollEditIcon
+                                  : kAssetPollSubmitIcon,
+                              color: isEnabled
+                                  ? LMTheme.buttonColor
+                                  : kGreyBackgroundColor,
+                              height: 12.sp,
+                            ),
                             text: isSubmitted &&
                                     pollBloc!.state is! EditingPollSubmission
                                 ? "EDIT VOTE"
                                 : "SUBMIT VOTE",
                             textStyle: LMTheme.medium.copyWith(
-                              color: isEnabled
-                                  ? LMTheme.buttonColor
-                                  : kGreyBackgroundColor,
-                              fontWeight: FontWeight.w600,
-                            ),
+                                color: isEnabled
+                                    ? LMTheme.buttonColor
+                                    : kGreyBackgroundColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 9.sp),
                             borderRadius: 24.0,
                             enabledColor: isEnabled
                                 ? LMTheme.buttonColor

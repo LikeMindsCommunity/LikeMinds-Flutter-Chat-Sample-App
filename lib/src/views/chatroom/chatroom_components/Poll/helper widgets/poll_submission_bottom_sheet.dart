@@ -4,13 +4,14 @@ import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/helper%20widgets/helper_widgets.dart';
 
 class PollSubmissionBottomSheet extends StatelessWidget {
-  const PollSubmissionBottomSheet({Key? key}) : super(key: key);
+  final String expiryTime;
+  const PollSubmissionBottomSheet({Key? key, required this.expiryTime})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 100.w,
-      height: 50.h,
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       decoration: const BoxDecoration(
         color: kWhiteColor,
@@ -33,13 +34,13 @@ class PollSubmissionBottomSheet extends StatelessWidget {
             kVerticalPaddingLarge,
             Text(
               PollBubbleStringConstants.voteSubmissionSuccess,
-              style: LMTheme.bold.copyWith(fontSize: 11.sp),
+              style: LMTheme.medium.copyWith(fontSize: 10.sp),
             ),
             kVerticalPaddingLarge,
             Text(
               PollBubbleStringConstants.voteSubmissionSuccessDescription,
               textAlign: TextAlign.center,
-              style: LMTheme.medium.copyWith(
+              style: LMTheme.regular.copyWith(
                 color: kGrey3Color,
                 fontSize: 10.sp,
               ),
@@ -47,6 +48,14 @@ class PollSubmissionBottomSheet extends StatelessWidget {
             kVerticalPaddingLarge,
             Text(
               PollBubbleStringConstants.resultWillBeAnnounced,
+              textAlign: TextAlign.center,
+              style: LMTheme.medium.copyWith(
+                color: LMTheme.buttonColor,
+                fontSize: 10.sp,
+              ),
+            ),
+            Text(
+              expiryTime,
               textAlign: TextAlign.center,
               style: LMTheme.medium.copyWith(
                 color: LMTheme.buttonColor,
@@ -70,6 +79,7 @@ class PollSubmissionBottomSheet extends StatelessWidget {
                 color: kWhiteColor,
               ),
             ),
+            kVerticalPaddingLarge,
             kVerticalPaddingLarge,
             kVerticalPaddingLarge,
           ],

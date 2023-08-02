@@ -10,7 +10,8 @@ class PollHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 60.w,
-      child: Row(children: <Widget>[
+      child:
+          Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
         Text(
           poll.pollTypeText ?? '',
           style: LMTheme.medium.copyWith(

@@ -7,15 +7,27 @@ import 'package:likeminds_chat_mm_fl/src/utils/imports.dart';
 import 'package:likeminds_chat_mm_fl/src/views/chatroom/chatroom_components/Poll/constants/string_constant.dart';
 import 'package:likeminds_chat_mm_fl/src/widgets/picture_or_initial.dart';
 
-Widget getDropDownText(String text) {
+Widget getDropDownText(String text, MainAxisAlignment mainAxisAlignment) {
   return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: <Widget>[
-      Text(text, style: LMTheme.medium),
-      kHorizontalPaddingMedium,
-      const Icon(
-        Icons.arrow_drop_down,
-        color: kGreyColor,
+    mainAxisAlignment: mainAxisAlignment,
+    children: [
+      Container(
+        decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: kGrey3Color, width: 1.5))),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: LMTheme.medium),
+            kHorizontalPaddingLarge,
+            const Icon(
+              Icons.arrow_drop_down,
+              color: kBlackColor,
+            ),
+          ],
+        ),
       ),
     ],
   );
@@ -24,17 +36,19 @@ Widget getDropDownText(String text) {
 // This function is used to get a text field with a label
 Widget getOptionsTile(TextEditingController textEditingController,
     TextStyle? subHeaderStyle, String hintText,
-    {bool enabled = true}) {
-  return TextFormField(
-    controller: textEditingController,
-    decoration: InputDecoration(
-      enabled: enabled,
-      contentPadding: const EdgeInsets.only(top: 10),
-      hintStyle: subHeaderStyle?.copyWith(
-        color: kGreyColor,
+    {bool enabled = true, Color? textColor}) {
+  return AbsorbPointer(
+    absorbing: !enabled,
+    child: TextFormField(
+      controller: textEditingController,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.only(top: 10),
+        hintStyle: subHeaderStyle?.copyWith(
+          color: kGreyColor,
+        ),
+        hintText: hintText,
+        border: InputBorder.none,
       ),
-      hintText: hintText,
-      border: InputBorder.none,
     ),
   );
 }
@@ -109,6 +123,7 @@ Widget getSubmitButton({
   double? borderRadius,
   BoxBorder? border,
   Function()? onTap,
+  required Widget iconWidget,
   Alignment? alignment,
   TextAlign textAlign = TextAlign.left,
 }) {
@@ -127,11 +142,7 @@ Widget getSubmitButton({
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            CupertinoIcons.pencil,
-            color: enabledColor,
-            size: 14.sp,
-          ),
+          iconWidget,
           kHorizontalPaddingMedium,
           Text(
             text,
@@ -162,35 +173,39 @@ Widget getVotingType(int optionsCount, Function onTypeSelect,
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            PopupMenuButton(
-              onSelected: (value) => onTypeSelect(value),
-              itemBuilder: (context) => usersCanVoteForList
-                  .map(
-                    (e) => PopupMenuItem(
-                      value: e,
-                      child: ListTile(
-                        title: Text(e),
+            Expanded(
+              child: PopupMenuButton(
+                onSelected: (value) => onTypeSelect(value),
+                itemBuilder: (context) => usersCanVoteForList
+                    .map(
+                      (e) => PopupMenuItem(
+                        value: e,
+                        child: ListTile(
+                          title: Text(e),
+                        ),
                       ),
-                    ),
-                  )
-                  .toList(),
-              child: getDropDownText(votingType ?? usersCanVoteForList[0]),
+                    )
+                    .toList(),
+                child: getDropDownText(votingType ?? usersCanVoteForList[0],
+                    MainAxisAlignment.start),
+              ),
             ),
             const Text("="),
-            PopupMenuButton(
-              onSelected: (value) => onNumVotesSelect(value),
-              itemBuilder: (context) => noOfSelectableVotes
-                  .map(
-                    (e) => PopupMenuItem(
-                      value: e,
-                      child: ListTile(
-                        title: Text(e),
+            Expanded(
+              child: PopupMenuButton(
+                onSelected: (value) => onNumVotesSelect(value),
+                itemBuilder: (context) => noOfSelectableVotes
+                    .map(
+                      (e) => PopupMenuItem(
+                        value: e,
+                        child: ListTile(
+                          title: Text(e),
+                        ),
                       ),
-                    ),
-                  )
-                  .toList(),
-              child: getDropDownText(
-                numVotes ?? numOfVotes[0],
+                    )
+                    .toList(),
+                child: getDropDownText(
+                    numVotes ?? numOfVotes[0], MainAxisAlignment.end),
               ),
             ),
           ],
@@ -202,7 +217,42 @@ Widget getVotingType(int optionsCount, Function onTypeSelect,
 
 // This function is used to convert DateTime object into string in the format dd-MM-yy
 String formatDate(DateTime dateTime) {
-  return DateFormat("dd-MM-yy").format(dateTime);
+  return DateFormat("dd-MM-yyyy").format(dateTime);
+}
+
+String getMonthFromInt(int month) {
+  switch (month) {
+    case 1:
+      return "Jan";
+    case 2:
+      return "Feb";
+    case 3:
+      return "Mar";
+    case 4:
+      return "Apr";
+    case 5:
+      return "May";
+    case 6:
+      return "Jun";
+    case 7:
+      return "Jul";
+    case 8:
+      return "Aug";
+    case 9:
+      return "Sep";
+    case 10:
+      return "Oct";
+    case 11:
+      return "Nov";
+    case 12:
+      return "Dec";
+    default:
+      return "";
+  }
+}
+
+String formatStringFromDateTime(DateTime dateTime) {
+  return "${dateTime.day} ${getMonthFromInt(dateTime.month)} ${dateTime.year} at ${DateFormat("hh:mm").format(dateTime)}";
 }
 
 // This function is used to convert TimeOfDay object into string in the format HH:mm

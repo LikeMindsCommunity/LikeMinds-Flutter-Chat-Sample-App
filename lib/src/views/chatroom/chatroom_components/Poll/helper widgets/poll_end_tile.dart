@@ -25,7 +25,7 @@ class PollEndTile extends StatelessWidget {
         children: <Widget>[
           Container(
             alignment: Alignment.center,
-            padding: const EdgeInsets.all(6.0),
+            padding: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(
               color: LMTheme.buttonColor,
               shape: BoxShape.circle,
@@ -33,22 +33,24 @@ class PollEndTile extends StatelessWidget {
             child: Icon(
               Icons.bar_chart_rounded,
               color: kWhiteColor,
-              size: 9.sp,
+              size: 8.sp,
             ),
           ),
           getTextButton(
-              text: isPollEnded(endTime)
-                  ? PollBubbleStringConstants.pollEnded
-                  : "Ends in ${getExpiryTimeString(endTime)}",
-              textStyle: LMTheme.medium.copyWith(
-                color: kWhiteColor,
-                fontSize: 8.sp,
-              ),
-              backgroundColor:
-                  isPollEnded(endTime) ? Colors.red : LMTheme.buttonColor,
-              borderRadius: 10.0,
-              padding: const EdgeInsets.all(8.0),
-              onTap: null),
+            text: isPollEnded(endTime)
+                ? PollBubbleStringConstants.pollEnded
+                : "Ends in ${getExpiryTimeString(endTime)}",
+            textStyle: LMTheme.medium.copyWith(
+              color: kWhiteColor,
+              fontSize: 8.sp,
+            ),
+            backgroundColor:
+                isPollEnded(endTime) ? Colors.red : LMTheme.buttonColor,
+            borderRadius: 10.w,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            onTap: null,
+          ),
         ],
       ),
     );
