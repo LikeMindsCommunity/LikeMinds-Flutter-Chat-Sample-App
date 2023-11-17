@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 // ignore: depend_on_referenced_packages
 import 'package:likeminds_chat_fl/likeminds_chat_fl.dart';
 
-class ExampleCallback extends LMSdkCallback {
+class ExampleCallback extends LMSDKCallback {
   @override
   void eventFiredCallback(String eventKey, Map<String, dynamic> propertiesMap) {
     debugPrint("EXAMPLE: eventFiredCallback: $eventKey, $propertiesMap");
