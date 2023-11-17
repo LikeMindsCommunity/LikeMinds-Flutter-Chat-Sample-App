@@ -55,7 +55,7 @@ abstract class ILikeMindsService {
 
 class LikeMindsService implements ILikeMindsService {
   final String apiKey;
-  final LMSdkCallback lmCallBack;
+  final LMSDKCallback lmCallBack;
   late final LMChatClient client;
 
   LikeMindsService({

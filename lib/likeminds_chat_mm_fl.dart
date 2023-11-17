@@ -64,7 +64,7 @@ class LMChat extends StatelessWidget {
 
   static void setupLMChat({
     required String apiKey,
-    required LMSdkCallback lmCallBack,
+    required LMSDKCallback lmCallBack,
   }) {
     setupChat(
       apiKey: apiKey,
